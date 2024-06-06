@@ -35,7 +35,7 @@ func TestSort(t *testing.T) {
 		},
 	}
 
-	net, err := New([]*Node{&sprinkler, &grassWet, &rain})
+	net, err := New(&sprinkler, &grassWet, &rain)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "Rain", net.nodes[0].Name)
@@ -45,6 +45,36 @@ func TestSort(t *testing.T) {
 	assert.Equal(t, []int{}, net.nodes[0].Parents)
 	assert.Equal(t, []int{0}, net.nodes[1].Parents)
 	assert.Equal(t, []int{0, 1}, net.nodes[2].Parents)
+
+	assert.Equal(t, []int(nil), net.nodes[0].Stride)
+	assert.Equal(t, []int{1}, net.nodes[1].Stride)
+	assert.Equal(t, []int{2, 1}, net.nodes[2].Stride)
+}
+
+func TestStride(t *testing.T) {
+	a := Node{
+		Name:   "A",
+		States: []string{"a", "b", "c", "d"},
+	}
+
+	b := Node{
+		Name:    "B",
+		States:  []string{"a", "b", "c"},
+		Parents: []string{"A"},
+	}
+
+	c := Node{
+		Name:    "C",
+		Parents: []string{"A", "B"},
+		States:  []string{"a", "b"},
+	}
+
+	net, err := New(&a, &b, &c)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []int(nil), net.nodes[0].Stride)
+	assert.Equal(t, []int{1}, net.nodes[1].Stride)
+	assert.Equal(t, []int{3, 1}, net.nodes[2].Stride)
 }
 
 func TestSortCycles(t *testing.T) {
@@ -63,7 +93,7 @@ func TestSortCycles(t *testing.T) {
 		Parents: []string{"B"},
 	}
 
-	_, err := New([]*Node{&c, &a, &b})
+	_, err := New(&c, &a, &b)
 	assert.NotNil(t, err)
 	assert.Equal(t, "graph has cycles", err.Error())
 }
