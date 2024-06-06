@@ -1,0 +1,6 @@
+*.exe
+*.wasm
+*.csv
+*.png
+*.svg
+/out/
