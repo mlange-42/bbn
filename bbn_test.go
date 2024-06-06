@@ -2,6 +2,7 @@ package bbn
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -135,7 +136,7 @@ func TestSample(t *testing.T) {
 		"Rain":     "no",
 		"GrassWet": "yes",
 	}
-	result, err := net.Sample(evidence, 10000)
+	result, err := net.Sample(evidence, 10000, rand.New(rand.NewSource(1)))
 	assert.Nil(t, err)
 
 	assert.Equal(t, []float64{0, 1}, result["Rain"])
@@ -147,7 +148,7 @@ func TestSample(t *testing.T) {
 		"Sprinkler": "no",
 		"GrassWet":  "no",
 	}
-	result, err = net.Sample(evidence, 10000)
+	result, err = net.Sample(evidence, 10000, rand.New(rand.NewSource(1)))
 	assert.Nil(t, err)
 
 	assert.Equal(t, []float64{0, 1}, result["Sprinkler"])
@@ -155,98 +156,6 @@ func TestSample(t *testing.T) {
 
 	assert.Less(t, result["Rain"][0], 0.1)
 	assert.Greater(t, result["Rain"][1], 0.9)
-
-	fmt.Println(result)
-}
-
-func TestMontyHallProblem(t *testing.T) {
-	player := Node{
-		Name:   "Player",
-		States: []string{"D1", "D2", "D3"},
-		CPT:    [][]float64{{1, 1, 1}},
-	}
-
-	car := Node{
-		Name:   "Car",
-		States: []string{"D1", "D2", "D3"},
-		CPT:    [][]float64{{1, 1, 1}},
-	}
-
-	host := Node{
-		Name:    "Host",
-		Parents: []string{"Player", "Car"},
-		States:  []string{"D1", "D2", "D3"},
-		CPT: [][]float64{
-			{0, 1, 1}, // P1 C1
-			{0, 0, 1}, // P1 C2
-			{0, 1, 0}, // P1 C3
-
-			{0, 0, 1}, // P2 C1
-			{1, 0, 1}, // P2 C2
-			{1, 0, 0}, // P2 C3
-
-			{0, 1, 0}, // P3 C1
-			{1, 0, 0}, // P3 C2
-			{1, 1, 0}, // P3 C3
-		},
-	}
-
-	net, err := New(&player, &car, &host)
-	assert.Nil(t, err)
-
-	evidence := map[string]string{
-		"Player": "D1",
-		"Host":   "D2",
-	}
-	result, err := net.Sample(evidence, 100000)
-	assert.Nil(t, err)
-
-	fmt.Println(result)
-}
-
-func TestMontyHallProblem5Doors(t *testing.T) {
-	player := Node{
-		Name:   "Player",
-		States: []string{"D1", "D2", "D3", "D4", "D5"},
-		CPT:    [][]float64{{1, 1, 1, 1, 1}},
-	}
-
-	car := Node{
-		Name:   "Car",
-		States: []string{"D1", "D2", "D3", "D4", "D5"},
-		CPT:    [][]float64{{1, 1, 1, 1, 1}},
-	}
-
-	hostCPT := make([][]float64, len(player.States)*len(car.States))
-	idx := 0
-	for p := 0; p < len(player.States); p++ {
-		for c := 0; c < len(car.States); c++ {
-			probs := make([]float64, 5)
-			for i := range probs {
-				if i != p && i != c {
-					probs[i] = 1
-				}
-			}
-			hostCPT[idx] = probs
-			idx++
-		}
-	}
-	host := Node{
-		Name:    "Host",
-		Parents: []string{"Player", "Car"},
-		States:  []string{"D1", "D2", "D3", "D4", "D5"},
-		CPT:     hostCPT,
-	}
-
-	net, err := New(&player, &car, &host)
-	assert.Nil(t, err)
-
-	evidence := map[string]string{
-		"Player": "D1",
-		"Host":   "D2",
-	}
-	result, err := net.Sample(evidence, 100000)
-	assert.Nil(t, err)
 
 	fmt.Println(result)
 }

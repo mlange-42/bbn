@@ -2,6 +2,7 @@ package bbn
 
 import (
 	"fmt"
+	"math/rand"
 	"slices"
 )
 
@@ -94,7 +95,7 @@ func New(nodes ...*Node) (*Network, error) {
 	}, nil
 }
 
-func (n *Network) Sample(evidence map[string]string, count int) (map[string][]float64, error) {
+func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) (map[string][]float64, error) {
 	ev := make([]int, len(n.nodes))
 	for i := range ev {
 		ev[i] = -1
@@ -127,7 +128,7 @@ func (n *Network) Sample(evidence map[string]string, count int) (map[string][]fl
 				parSample := samples[parIdx]
 				idx += parSample * node.Stride[j]
 			}
-			samples[i] = sample(node.CPTCum[idx])
+			samples[i] = sample(node.CPTCum[idx], rng)
 		}
 		match := true
 		if anyEvidence {

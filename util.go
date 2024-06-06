@@ -61,9 +61,9 @@ func sortTopologicalRecursive(nodes []*node, index int, start int, visited []boo
 }
 
 // sample from cumulative (relative) probabilities.
-func sample(cum []float64) int {
+func sample(cum []float64, rng *rand.Rand) int {
 	ln := len(cum)
-	r := rand.Float64() * cum[ln-1]
+	r := rng.Float64() * cum[ln-1]
 
 	for i, v := range cum {
 		if v >= r {
