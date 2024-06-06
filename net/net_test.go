@@ -131,11 +131,30 @@ func TestSample(t *testing.T) {
 	net, err := New(&sprinkler, &grassWet, &rain)
 	assert.Nil(t, err)
 
-	result, err := net.Sample(map[string]string{
+	evidence := map[string]string{
 		"Rain":     "no",
 		"GrassWet": "yes",
-	})
+	}
+	result, err := net.Sample(evidence, 10000)
 	assert.Nil(t, err)
+
+	assert.Equal(t, []float64{0, 1}, result["Rain"])
+	assert.Equal(t, []float64{1, 0}, result["GrassWet"])
+
+	assert.Equal(t, []float64{1, 0}, result["Sprinkler"])
+
+	evidence = map[string]string{
+		"Sprinkler": "no",
+		"GrassWet":  "no",
+	}
+	result, err = net.Sample(evidence, 10000)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []float64{0, 1}, result["Sprinkler"])
+	assert.Equal(t, []float64{0, 1}, result["GrassWet"])
+
+	assert.Less(t, result["Rain"][0], 0.1)
+	assert.Greater(t, result["Rain"][1], 0.9)
 
 	fmt.Println(result)
 }

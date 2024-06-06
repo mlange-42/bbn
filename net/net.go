@@ -94,11 +94,12 @@ func New(nodes ...*Node) (*Network, error) {
 	}, nil
 }
 
-func (n *Network) Sample(evidence map[string]string) (map[string][]float64, error) {
+func (n *Network) Sample(evidence map[string]string, count int) (map[string][]float64, error) {
 	ev := make([]int, len(n.nodes))
 	for i := range ev {
 		ev[i] = -1
 	}
+
 	for k, v := range evidence {
 		idx, ok := n.byName[k]
 		if !ok {
@@ -110,6 +111,7 @@ func (n *Network) Sample(evidence map[string]string) (map[string][]float64, erro
 		}
 		ev[idx] = vIdx
 	}
+	anyEvidence := len(evidence) > 0
 
 	counts := make([][]int, len(n.nodes))
 	for i := range counts {
@@ -117,9 +119,8 @@ func (n *Network) Sample(evidence map[string]string) (map[string][]float64, erro
 	}
 
 	samples := make([]int, len(n.nodes))
-	runs := 100000
-
-	for r := 0; r < runs; r++ {
+	matches := 0
+	for r := 0; r < count; r++ {
 		for i, node := range n.nodes {
 			idx := 0
 			for j, parIdx := range node.Parents {
@@ -128,8 +129,20 @@ func (n *Network) Sample(evidence map[string]string) (map[string][]float64, erro
 			}
 			samples[i] = sample(node.CPTCum[idx])
 		}
-		for i, s := range samples {
-			counts[i][s]++
+		match := true
+		if anyEvidence {
+			for j, e := range ev {
+				if e >= 0 && e != samples[j] {
+					match = false
+					break
+				}
+			}
+		}
+		if match {
+			for i, s := range samples {
+				counts[i][s]++
+			}
+			matches++
 		}
 	}
 
@@ -137,7 +150,7 @@ func (n *Network) Sample(evidence map[string]string) (map[string][]float64, erro
 	for i, node := range n.nodes {
 		probs := make([]float64, len(counts[i]))
 		for j, cnt := range counts[i] {
-			probs[j] = float64(cnt) / float64(runs)
+			probs[j] = float64(cnt) / float64(matches)
 		}
 		result[node.Name] = probs
 	}
