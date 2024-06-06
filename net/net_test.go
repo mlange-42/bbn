@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNode(t *testing.T) {
+func TestSort(t *testing.T) {
 	rain := Node{
 		Name:   "Rain",
 		States: []string{"yes", "no"},
@@ -45,4 +45,25 @@ func TestNode(t *testing.T) {
 	assert.Equal(t, []int{}, net.nodes[0].Parents)
 	assert.Equal(t, []int{0}, net.nodes[1].Parents)
 	assert.Equal(t, []int{0, 1}, net.nodes[2].Parents)
+}
+
+func TestSortCycles(t *testing.T) {
+	a := Node{
+		Name:    "A",
+		Parents: []string{"C"},
+	}
+
+	b := Node{
+		Name:    "B",
+		Parents: []string{"A"},
+	}
+
+	c := Node{
+		Name:    "C",
+		Parents: []string{"B"},
+	}
+
+	_, err := New([]*Node{&c, &a, &b})
+	assert.NotNil(t, err)
+	assert.Equal(t, "graph has cycles", err.Error())
 }

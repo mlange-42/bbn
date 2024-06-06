@@ -1,11 +1,17 @@
 package net
 
+import "fmt"
+
 func sortTopological(nodes []*node) ([]*node, error) {
 	visited := make([]bool, len(nodes))
 	stack := []int{}
 
 	for i := range nodes {
-		stack = sortTopologicalDFS(nodes, i, visited, stack)
+		var err error
+		stack, err = sortTopologicalDFS(nodes, i, i, visited, stack)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	newIndex := make([]int, len(nodes))
@@ -25,19 +31,26 @@ func sortTopological(nodes []*node) ([]*node, error) {
 	return result, nil
 }
 
-func sortTopologicalDFS(nodes []*node, index int, visited []bool, stack []int) []int {
+func sortTopologicalDFS(nodes []*node, index int, start int, visited []bool, stack []int) ([]int, error) {
 	if visited[index] {
-		return stack
+		return stack, nil
 	}
 
 	visited[index] = true
 	n := nodes[index]
 
 	for _, parent := range n.Parents {
-		stack = sortTopologicalDFS(nodes, parent, visited, stack)
+		if parent == start {
+			return nil, fmt.Errorf("graph has cycles")
+		}
+		var err error
+		stack, err = sortTopologicalDFS(nodes, parent, start, visited, stack)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	stack = append(stack, index)
 
-	return stack
+	return stack, nil
 }
