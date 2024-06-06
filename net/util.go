@@ -1,6 +1,9 @@
 package net
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 func sortTopological(nodes []*node) ([]*node, error) {
 	visited := make([]bool, len(nodes))
@@ -53,4 +56,16 @@ func sortTopologicalDFS(nodes []*node, index int, start int, visited []bool, sta
 	stack = append(stack, index)
 
 	return stack, nil
+}
+
+func sample(cum []float64) int {
+	ln := len(cum)
+	r := rand.Float64() * cum[ln-1]
+
+	for i, v := range cum {
+		if v >= r {
+			return i
+		}
+	}
+	return -1
 }

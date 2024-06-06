@@ -1,6 +1,7 @@
 package net
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -96,4 +97,45 @@ func TestSortCycles(t *testing.T) {
 	_, err := New(&c, &a, &b)
 	assert.NotNil(t, err)
 	assert.Equal(t, "graph has cycles", err.Error())
+}
+
+func TestSample(t *testing.T) {
+	rain := Node{
+		Name:   "Rain",
+		States: []string{"yes", "no"},
+		CPT:    [][]float64{{0.2, 0.8}},
+	}
+
+	sprinkler := Node{
+		Name:    "Sprinkler",
+		Parents: []string{"Rain"},
+		States:  []string{"yes", "no"},
+		CPT: [][]float64{
+			{0.01, 0.99}, // rain yes
+			{0.2, 0.8},   // rain no
+		},
+	}
+
+	grassWet := Node{
+		Name:    "GrassWet",
+		Parents: []string{"Rain", "Sprinkler"},
+		States:  []string{"yes", "no"},
+		CPT: [][]float64{
+			{0.99, 0.01}, // rain yes, sprikler yes
+			{0.8, 0.2},   // rain yes, sprikler no
+			{0.9, 0.1},   // rain no, sprikler yes
+			{0.0, 1.0},   // rain no, sprikler no
+		},
+	}
+
+	net, err := New(&sprinkler, &grassWet, &rain)
+	assert.Nil(t, err)
+
+	result, err := net.Sample(map[string]string{
+		"Rain":     "no",
+		"GrassWet": "yes",
+	})
+	assert.Nil(t, err)
+
+	fmt.Println(result)
 }

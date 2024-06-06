@@ -1,6 +1,9 @@
 package net
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+)
 
 // Node definition.
 type Node struct {
@@ -91,7 +94,7 @@ func New(nodes ...*Node) (*Network, error) {
 	}, nil
 }
 
-func (n *Network) Sample(evidence map[string]int) error {
+func (n *Network) Sample(evidence map[string]string) (map[string][]float64, error) {
 	ev := make([]int, len(n.nodes))
 	for i := range ev {
 		ev[i] = -1
@@ -99,17 +102,45 @@ func (n *Network) Sample(evidence map[string]int) error {
 	for k, v := range evidence {
 		idx, ok := n.byName[k]
 		if !ok {
-			return fmt.Errorf("node '%s' not found", k)
+			return nil, fmt.Errorf("node '%s' not found", k)
 		}
-		ev[idx] = v
+		vIdx := slices.Index(n.nodes[idx].States, v)
+		if vIdx < 0 {
+			return nil, fmt.Errorf("value '%s' not found for node '%s' (has %s)", v, n.nodes[idx].Name, n.nodes[idx].States)
+		}
+		ev[idx] = vIdx
 	}
 
-	//sample := make([]int, len(n.nodes))
 	counts := make([][]int, len(n.nodes))
-
 	for i := range counts {
 		counts[i] = make([]int, len(n.nodes[i].States))
 	}
 
-	return nil
+	samples := make([]int, len(n.nodes))
+	runs := 100000
+
+	for r := 0; r < runs; r++ {
+		for i, node := range n.nodes {
+			idx := 0
+			for j, parIdx := range node.Parents {
+				parSample := samples[parIdx]
+				idx += parSample * node.Stride[j]
+			}
+			samples[i] = sample(node.CPTCum[idx])
+		}
+		for i, s := range samples {
+			counts[i][s]++
+		}
+	}
+
+	result := map[string][]float64{}
+	for i, node := range n.nodes {
+		probs := make([]float64, len(counts[i]))
+		for j, cnt := range counts[i] {
+			probs[j] = float64(cnt) / float64(runs)
+		}
+		result[node.Name] = probs
+	}
+
+	return result, nil
 }
