@@ -5,13 +5,14 @@ import (
 	"math/rand"
 )
 
+// sortTopological sorts nodes in topological order.
 func sortTopological(nodes []*node) ([]*node, error) {
 	visited := make([]bool, len(nodes))
 	stack := []int{}
 
 	for i := range nodes {
 		var err error
-		stack, err = sortTopologicalDFS(nodes, i, i, visited, stack)
+		stack, err = sortTopologicalRecursive(nodes, i, i, visited, stack)
 		if err != nil {
 			return nil, err
 		}
@@ -34,7 +35,8 @@ func sortTopological(nodes []*node) ([]*node, error) {
 	return result, nil
 }
 
-func sortTopologicalDFS(nodes []*node, index int, start int, visited []bool, stack []int) ([]int, error) {
+// sortTopologicalRecursive performs the recursion used in sortTopological.
+func sortTopologicalRecursive(nodes []*node, index int, start int, visited []bool, stack []int) ([]int, error) {
 	if visited[index] {
 		return stack, nil
 	}
@@ -47,7 +49,7 @@ func sortTopologicalDFS(nodes []*node, index int, start int, visited []bool, sta
 			return nil, fmt.Errorf("graph has cycles")
 		}
 		var err error
-		stack, err = sortTopologicalDFS(nodes, parent, start, visited, stack)
+		stack, err = sortTopologicalRecursive(nodes, parent, start, visited, stack)
 		if err != nil {
 			return nil, err
 		}
@@ -58,6 +60,7 @@ func sortTopologicalDFS(nodes []*node, index int, start int, visited []bool, sta
 	return stack, nil
 }
 
+// sample from cumulative (relative) probabilities.
 func sample(cum []float64) int {
 	ln := len(cum)
 	r := rand.Float64() * cum[ln-1]
