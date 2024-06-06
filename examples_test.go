@@ -45,6 +45,7 @@ func Example_sprinkler() {
 		"Rain":     "no",
 		"GrassWet": "yes",
 	}
+
 	result, err := net.Sample(evidence, 10000, rand.New(rand.NewSource(1)))
 	if err != nil {
 		panic(err)
@@ -96,6 +97,7 @@ func Example_montyHall() {
 		"Player": "D1",
 		"Host":   "D2",
 	}
+
 	result, err := net.Sample(evidence, 100000, rand.New(rand.NewSource(1)))
 	if err != nil {
 		panic(err)

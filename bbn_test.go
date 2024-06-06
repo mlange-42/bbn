@@ -1,7 +1,6 @@
 package bbn
 
 import (
-	"fmt"
 	"math/rand"
 	"testing"
 
@@ -156,6 +155,4 @@ func TestSample(t *testing.T) {
 
 	assert.Less(t, result["Rain"][0], 0.1)
 	assert.Greater(t, result["Rain"][1], 0.9)
-
-	fmt.Println(result)
 }
