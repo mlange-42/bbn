@@ -96,21 +96,9 @@ func New(nodes ...*Node) (*Network, error) {
 }
 
 func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) (map[string][]float64, error) {
-	ev := make([]int, len(n.nodes))
-	for i := range ev {
-		ev[i] = -1
-	}
-
-	for k, v := range evidence {
-		idx, ok := n.byName[k]
-		if !ok {
-			return nil, fmt.Errorf("node '%s' not found", k)
-		}
-		vIdx := slices.Index(n.nodes[idx].States, v)
-		if vIdx < 0 {
-			return nil, fmt.Errorf("value '%s' not found for node '%s' (has %s)", v, n.nodes[idx].Name, n.nodes[idx].States)
-		}
-		ev[idx] = vIdx
+	ev, err := n.prepareEvidence(evidence)
+	if err != nil {
+		return nil, err
 	}
 	anyEvidence := len(evidence) > 0
 
@@ -157,4 +145,24 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 	}
 
 	return result, nil
+}
+
+func (n *Network) prepareEvidence(evidence map[string]string) ([]int, error) {
+	ev := make([]int, len(n.nodes))
+	for i := range ev {
+		ev[i] = -1
+	}
+
+	for k, v := range evidence {
+		idx, ok := n.byName[k]
+		if !ok {
+			return nil, fmt.Errorf("node '%s' not found", k)
+		}
+		vIdx := slices.Index(n.nodes[idx].States, v)
+		if vIdx < 0 {
+			return nil, fmt.Errorf("value '%s' not found for node '%s' (has %s)", v, n.nodes[idx].Name, n.nodes[idx].States)
+		}
+		ev[idx] = vIdx
+	}
+	return ev, nil
 }
