@@ -18,6 +18,7 @@ type Node struct {
 	Parents []string    // Names of parent nodes.
 	States  []string    // Names of the node's possible states.
 	CPT     [][]float64 // Conditional probability table.
+	Coords  [2]int      // Coordinates for visualization, optional.
 }
 
 // node is the [Network]s internal node type.
