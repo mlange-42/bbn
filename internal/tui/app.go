@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 
@@ -112,16 +113,21 @@ func (a *App) createWidgets() {
 
 func (a *App) createMainPanel() tview.Primitive {
 	grid := tview.NewGrid().
-		SetRows(0, 1).
-		SetColumns(-1).
+		SetRows(1, len(a.canvas)+2, 1).
+		SetColumns(len(a.canvas[0])+3, 0).
 		SetBorders(false)
 
-	grid.AddItem(a.graph, 0, 0, 1, 1, 0, 0, true)
+	header := tview.NewTextView().
+		SetWrap(false).
+		SetText(fmt.Sprintf("BBNi - %s", a.file))
+	grid.AddItem(header, 0, 0, 1, 2, 0, 0, false)
+
+	grid.AddItem(a.graph, 1, 0, 1, 1, 0, 0, true)
 
 	help := tview.NewTextView().
 		SetWrap(false).
 		SetText("Exit: ESC  Scroll: ←→↕  Nodes: Tab  States: Space/Numbers  Toggle: Enter")
-	grid.AddItem(help, 1, 0, 1, 1, 0, 0, false)
+	grid.AddItem(help, 2, 0, 1, 2, 0, 0, false)
 
 	return grid
 }
