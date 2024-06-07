@@ -1,13 +1,13 @@
 package tui
 
-const (
-	BorderNone = ' '
-	BorderH    = '═'
-	BorderV    = '║'
-	BorderNE   = '╗'
-	BorderNW   = '╔'
-	BorderSE   = '╝'
-	BorderSW   = '╚'
+var (
+	BorderNone = []rune{' ', ' '}
+	BorderH    = []rune{'─', '═'}
+	BorderV    = []rune{'│', '║'}
+	BorderNE   = []rune{'┐', '╗'}
+	BorderNW   = []rune{'┌', '╔'}
+	BorderSE   = []rune{'┘', '╝'}
+	BorderSW   = []rune{'└', '╚'}
 )
 
 const (

@@ -32,7 +32,7 @@ func rootCommand() *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			a := tui.New(args[0])
+			a := tui.New(args[0], samples, seed)
 			return a.Run()
 		},
 	}

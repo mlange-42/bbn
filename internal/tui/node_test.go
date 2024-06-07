@@ -18,7 +18,7 @@ func TestNodeRender(t *testing.T) {
 
 	uiNode := tui.NewNode(node)
 
-	runes, _ := uiNode.Render([]float64{0.1, 0.2, 0.7})
+	runes, _ := uiNode.Render([]float64{0.1, 0.2, 0.7}, true)
 
 	lines := make([]string, len(runes))
 	for i, line := range runes {

@@ -14,7 +14,7 @@ const maxBars = 10
 type Node interface {
 	Node() *bbn.Node
 	Bounds() Bounds
-	Render(probs []float64) ([][]rune, [][]Color)
+	Render(probs []float64, selected bool) ([][]rune, [][]Color)
 }
 
 type node struct {
@@ -49,7 +49,7 @@ func NewNode(n *bbn.Node) Node {
 		runes[i] = make([]rune, bounds.W)
 		colors[i] = make([]Color, bounds.W)
 		for j := range runes[i] {
-			runes[i][j] = BorderNone
+			runes[i][j] = BorderNone[0]
 		}
 	}
 
@@ -61,7 +61,7 @@ func NewNode(n *bbn.Node) Node {
 		barsX:  maxStateLen + 3,
 	}
 
-	node.drawBorder()
+	node.drawBorder(false)
 	node.drawTitle()
 	node.drawStateLabels()
 
@@ -78,23 +78,29 @@ func (n *node) Bounds() Bounds {
 	return n.bounds
 }
 
-func (n *node) Render(probs []float64) ([][]rune, [][]Color) {
+func (n *node) Render(probs []float64, selected bool) ([][]rune, [][]Color) {
+	n.drawBorder(selected)
 	n.drawBars(probs)
 	return n.runes, n.colors
 }
 
-func (n *node) drawBorder() {
-	n.runes[0][0] = BorderNW
-	n.runes[0][n.bounds.W-1] = BorderNE
-	n.runes[n.bounds.H-1][0] = BorderSW
-	n.runes[n.bounds.H-1][n.bounds.W-1] = BorderSE
+func (n *node) drawBorder(selected bool) {
+	style := 0
+	if selected {
+		style = 1
+	}
+
+	n.runes[0][0] = BorderNW[style]
+	n.runes[0][n.bounds.W-1] = BorderNE[style]
+	n.runes[n.bounds.H-1][0] = BorderSW[style]
+	n.runes[n.bounds.H-1][n.bounds.W-1] = BorderSE[style]
 	for i := 1; i < n.bounds.W-1; i++ {
-		n.runes[0][i] = BorderH
-		n.runes[n.bounds.H-1][i] = BorderH
+		n.runes[0][i] = BorderH[style]
+		n.runes[n.bounds.H-1][i] = BorderH[style]
 	}
 	for i := 1; i < n.bounds.H-1; i++ {
-		n.runes[i][0] = BorderV
-		n.runes[i][n.bounds.W-1] = BorderV
+		n.runes[i][0] = BorderV[style]
+		n.runes[i][n.bounds.W-1] = BorderV[style]
 	}
 }
 

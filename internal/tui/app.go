@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"math/rand"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -9,15 +10,25 @@ import (
 )
 
 type App struct {
-	file   string
-	nodes  []Node
-	graph  *tview.TextView
-	canvas [][]rune
+	file    string
+	nodes   []Node
+	graph   *tview.TextView
+	canvas  [][]rune
+	network *bbn.Network
+	rng     *rand.Rand
+	samples int
+
+	evidence     map[string]string
+	marginals    map[string][]float64
+	selectedNode int
 }
 
-func New(path string) *App {
+func New(path string, samples int, seed int64) *App {
 	return &App{
-		file: path,
+		file:     path,
+		samples:  samples,
+		rng:      rand.New(rand.NewSource(seed)),
+		evidence: map[string]string{},
 	}
 }
 
@@ -31,6 +42,15 @@ func (a *App) Run() error {
 		a.nodes[i] = NewNode(n)
 	}
 
+	a.network, err = bbn.New(nodes...)
+	if err != nil {
+		return err
+	}
+	a.marginals, err = a.network.Sample(a.evidence, a.samples, a.rng)
+	if err != nil {
+		return err
+	}
+
 	a.createCanvas()
 	a.createWidgets()
 	a.draw()
@@ -42,6 +62,9 @@ func (a *App) Run() error {
 		if event.Key() == tcell.KeyEsc {
 			app.Stop()
 			return nil
+		} else if event.Key() == tcell.KeyTAB {
+			a.selectedNode = (a.selectedNode + 1) % len(a.nodes)
+			a.draw()
 		}
 		return event
 	})
@@ -60,14 +83,15 @@ func (a *App) createCanvas() {
 	for i := range a.canvas {
 		a.canvas[i] = make([]rune, bounds.W)
 		for j := range a.canvas[i] {
-			a.canvas[i][j] = BorderNone
+			a.canvas[i][j] = BorderNone[0]
 		}
 	}
 }
 
 func (a *App) draw() {
-	for _, node := range a.nodes {
-		runes, _ := node.Render(make([]float64, len(node.Node().States)))
+	for i, node := range a.nodes {
+		data := a.marginals[node.Node().Name]
+		runes, _ := node.Render(data, i == a.selectedNode)
 		b := node.Bounds()
 		for i, line := range runes {
 			copy(a.canvas[b.Y+i][b.X:], line)
@@ -102,7 +126,7 @@ func (a *App) createMainPanel() tview.Primitive {
 
 	help := tview.NewTextView().
 		SetWrap(false).
-		SetText("Exit: ESC  Scroll: ←→↕")
+		SetText("Exit: ESC  Scroll: ←→↕  Cycle nodes: TAB")
 	grid.AddItem(help, 1, 0, 1, 1, 0, 0, false)
 
 	return grid
