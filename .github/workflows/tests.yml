@@ -41,6 +41,7 @@ jobs:
           go get ./...
           go install honnef.co/go/tools/cmd/staticcheck@latest
           go install github.com/gordonklaus/ineffassign@latest
+          go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
       - name: Check format
         run: |
           if gofmt -e -l . >&1 | grep '^'; then
@@ -52,3 +53,5 @@ jobs:
         run: staticcheck ./...
       - name: Lint with ineffassign
         run: ineffassign ./...
+      - name: Lint with gocyclo
+        run: gocyclo -over 15 .
