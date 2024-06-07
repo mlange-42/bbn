@@ -1,9 +1,38 @@
 package bbn
 
 import (
+	"bytes"
 	"fmt"
 	"math/rand"
+	"os"
+
+	"gopkg.in/yaml.v3"
 )
+
+type ConflictingEvidenceError struct{}
+
+func (m *ConflictingEvidenceError) Error() string {
+	return "conflicting evidence / all samples rejected"
+}
+
+func NodesFromYAML(path string) ([]*Node, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	reader := bytes.NewReader(content)
+	decoder := yaml.NewDecoder(reader)
+	decoder.KnownFields(true)
+
+	nodes := []*Node{}
+	err = decoder.Decode(&nodes)
+	if err != nil {
+		return nil, err
+	}
+
+	return nodes, nil
+}
 
 // toInternalNodes transforms nodes to their internal representation.
 func toInternalNodes(nodes []*Node) ([]*node, error) {

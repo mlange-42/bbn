@@ -1,16 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"math/rand"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/mlange-42/bbn"
+	"github.com/mlange-42/bbn/internal/tui"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 func main() {
@@ -73,7 +71,7 @@ func rootCommand() *cobra.Command {
 }
 
 func run(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, map[string]string, map[string][]float64, error) {
-	nodes, err := readNodes(path)
+	nodes, err := bbn.NodesFromYAML(path)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -83,13 +81,9 @@ func run(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, 
 		return nil, nil, nil, err
 	}
 
-	ev := map[string]string{}
-	for _, entry := range evidence {
-		parts := strings.Split(entry, "=")
-		if len(parts) != 2 {
-			return nil, nil, nil, fmt.Errorf("syntax error in evidence")
-		}
-		ev[parts[0]] = parts[1]
+	ev, err := tui.ParseEvidence(evidence)
+	if err != nil {
+		return nil, nil, nil, err
 	}
 
 	if seed <= 0 {
@@ -102,23 +96,4 @@ func run(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, 
 	}
 
 	return nodes, ev, result, nil
-}
-
-func readNodes(path string) ([]*bbn.Node, error) {
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	reader := bytes.NewReader(content)
-	decoder := yaml.NewDecoder(reader)
-	decoder.KnownFields(true)
-
-	nodes := []*bbn.Node{}
-	err = decoder.Decode(&nodes)
-	if err != nil {
-		return nil, err
-	}
-
-	return nodes, nil
 }
