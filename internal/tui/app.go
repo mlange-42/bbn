@@ -100,6 +100,12 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 	} else if event.Key() == tcell.KeyEnter {
 		node := a.nodes[a.selectedNode]
 		value := node.Node().States[a.selectedState]
+
+		oldEvidence := make(map[string]string, len(a.evidence))
+		for k, v := range a.evidence {
+			oldEvidence[k] = v
+		}
+
 		if oldValue, ok := a.evidence[node.Node().Name]; ok {
 			if oldValue == value {
 				delete(a.evidence, node.Node().Name)
@@ -110,10 +116,17 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 			a.evidence[node.Node().Name] = value
 		}
 
+		oldMarginals := a.marginals
 		var err error
 		a.marginals, err = a.network.Sample(a.evidence, a.samples, a.rng)
 		if err != nil {
-			panic(err)
+			if _, ok := err.(*bbn.ConflictingEvidenceError); ok {
+				// TODO: show alert!
+				a.evidence = oldEvidence
+				a.marginals = oldMarginals
+			} else {
+				panic(err)
+			}
 		}
 		a.draw()
 		return nil

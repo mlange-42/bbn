@@ -102,6 +102,10 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 		}
 	}
 
+	if matches == 0 {
+		return nil, &ConflictingEvidenceError{}
+	}
+
 	result := map[string][]float64{}
 	for i, node := range n.nodes {
 		probs := make([]float64, len(counts[i]))

@@ -9,6 +9,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type ConflictingEvidenceError struct{}
+
+func (m *ConflictingEvidenceError) Error() string {
+	return "conflicting evidence / all samples rejected"
+}
+
 func NodesFromYAML(path string) ([]*Node, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
