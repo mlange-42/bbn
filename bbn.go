@@ -39,12 +39,7 @@ func New(nodes ...*Node) (*Network, error) {
 
 		cum := make([][]float64, len(n.CPT))
 		for j, probs := range n.CPT {
-			c := make([]float64, len(probs))
-			c[0] = probs[0]
-			for k := 1; k < len(probs); k++ {
-				c[k] = c[k-1] + probs[k]
-			}
-			cum[j] = c
+			cum[j] = cumulate(probs)
 		}
 
 		nodeList[i] = &node{
@@ -100,7 +95,6 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 	if err != nil {
 		return nil, err
 	}
-	anyEvidence := len(evidence) > 0
 
 	counts := make([][]int, len(n.nodes))
 	for i := range counts {
@@ -110,22 +104,20 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 	samples := make([]int, len(n.nodes))
 	matches := 0
 	for r := 0; r < count; r++ {
+		match := true
 		for i, node := range n.nodes {
 			idx := 0
 			for j, parIdx := range node.Parents {
 				parSample := samples[parIdx]
 				idx += parSample * node.Stride[j]
 			}
-			samples[i] = sample(node.CPTCum[idx], rng)
-		}
-		match := true
-		if anyEvidence {
-			for j, e := range ev {
-				if e >= 0 && e != samples[j] {
-					match = false
-					break
-				}
+			s := sample(node.CPTCum[idx], rng)
+			e := ev[i]
+			if e >= 0 && e != s {
+				match = false
+				break
 			}
+			samples[i] = s
 		}
 		if match {
 			for i, s := range samples {

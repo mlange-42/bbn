@@ -60,6 +60,15 @@ func sortTopologicalRecursive(nodes []*node, index int, start int, visited []boo
 	return stack, nil
 }
 
+func cumulate(values []float64) []float64 {
+	c := make([]float64, len(values))
+	c[0] = values[0]
+	for k := 1; k < len(values); k++ {
+		c[k] = c[k-1] + values[k]
+	}
+	return c
+}
+
 // sample from cumulative (relative) probabilities.
 func sample(cum []float64, rng *rand.Rand) int {
 	ln := len(cum)
