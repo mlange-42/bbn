@@ -2,11 +2,8 @@ package tui
 
 import (
 	"math/rand"
-	"strconv"
 	"strings"
-	"unicode"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/mlange-42/bbn"
 	"github.com/rivo/tview"
 )
@@ -82,75 +79,6 @@ func (a *App) createCanvas() {
 			a.canvas[i][j] = Empty
 		}
 	}
-}
-
-func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
-	if event.Key() == tcell.KeyEsc {
-		a.app.Stop()
-		return nil
-	} else if event.Key() == tcell.KeyTAB {
-		a.selectedNode = (a.selectedNode + 1) % len(a.nodes)
-		a.selectedState = 0
-		a.draw()
-		return nil
-	} else if event.Key() == tcell.KeyBacktab {
-		a.selectedNode--
-		if a.selectedNode < 0 {
-			a.selectedNode = len(a.nodes) - 1
-		}
-		a.selectedState = 0
-		a.draw()
-		return nil
-	} else if event.Rune() == ' ' {
-		a.selectedState = (a.selectedState + 1) % len(a.nodes[a.selectedNode].Node().States)
-		a.draw()
-		return nil
-	} else if event.Key() == tcell.KeyEnter {
-		node := a.nodes[a.selectedNode]
-		value := node.Node().States[a.selectedState]
-
-		oldEvidence := make(map[string]string, len(a.evidence))
-		for k, v := range a.evidence {
-			oldEvidence[k] = v
-		}
-
-		if oldValue, ok := a.evidence[node.Node().Name]; ok {
-			if oldValue == value {
-				delete(a.evidence, node.Node().Name)
-			} else {
-				a.evidence[node.Node().Name] = value
-			}
-		} else {
-			a.evidence[node.Node().Name] = value
-		}
-
-		oldMarginals := a.marginals
-		var err error
-		a.marginals, err = a.network.Sample(a.evidence, a.samples, a.rng)
-		if err != nil {
-			if _, ok := err.(*bbn.ConflictingEvidenceError); ok {
-				// TODO: show alert!
-				a.evidence = oldEvidence
-				a.marginals = oldMarginals
-			} else {
-				panic(err)
-			}
-		}
-		a.draw()
-		return nil
-	} else if unicode.IsDigit(event.Rune()) {
-		idx, err := strconv.Atoi(string(event.Rune()))
-		if err != nil {
-			panic(err)
-		}
-		idx -= 1
-		if idx >= 0 && idx < len(a.nodes[a.selectedNode].Node().States) {
-			a.selectedState = idx
-			a.draw()
-		}
-		return nil
-	}
-	return event
 }
 
 func (a *App) draw() {
