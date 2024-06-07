@@ -156,3 +156,50 @@ func TestSample(t *testing.T) {
 	assert.Less(t, result["Rain"][0], 0.1)
 	assert.Greater(t, result["Rain"][1], 0.9)
 }
+
+func BenchmarkSampleRain_1000(b *testing.B) {
+	b.StopTimer()
+
+	rain := Node{
+		Name:   "Rain",
+		States: []string{"yes", "no"},
+		CPT:    [][]float64{{0.2, 0.8}},
+	}
+
+	sprinkler := Node{
+		Name:    "Sprinkler",
+		Parents: []string{"Rain"},
+		States:  []string{"yes", "no"},
+		CPT: [][]float64{
+			{0.01, 0.99}, // rain yes
+			{0.2, 0.8},   // rain no
+		},
+	}
+
+	grassWet := Node{
+		Name:    "GrassWet",
+		Parents: []string{"Rain", "Sprinkler"},
+		States:  []string{"yes", "no"},
+		CPT: [][]float64{
+			{0.99, 0.01}, // rain yes, sprikler yes
+			{0.8, 0.2},   // rain yes, sprikler no
+			{0.9, 0.1},   // rain no, sprikler yes
+			{0.0, 1.0},   // rain no, sprikler no
+		},
+	}
+
+	net, err := New(&sprinkler, &grassWet, &rain)
+	assert.Nil(b, err)
+
+	rng := rand.New(rand.NewSource(1))
+	var result map[string][]float64
+
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		result, err = net.Sample(nil, 1000, rng)
+	}
+	b.StopTimer()
+
+	assert.Nil(b, err)
+	_ = result
+}
