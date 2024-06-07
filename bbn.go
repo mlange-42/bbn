@@ -7,13 +7,20 @@ import (
 )
 
 // Node definition.
+//
+// CPT is the conditional probability table.
+// Each row represents the probabilities of the node's states for a certain
+// combination of states of the nodes parents.
+// Values in each row are relative, i.e. they do not necessarily sum up to 1.0.
+// See the package examples.
 type Node struct {
-	Name    string
-	Parents []string
-	States  []string
-	CPT     [][]float64
+	Name    string      // Name of the node.
+	Parents []string    // Names of parent nodes.
+	States  []string    // Names of the node's possible states.
+	CPT     [][]float64 // Conditional probability table.
 }
 
+// node is the [Network]s internal node type.
 type node struct {
 	Name    string
 	ID      int
@@ -30,44 +37,14 @@ type Network struct {
 	byName map[string]int
 }
 
-// New creates a new network by sorting nodes topologically.
+// New creates a new network. Sorts nodes topologically.
 func New(nodes ...*Node) (*Network, error) {
-	nodeMap := map[string]int{}
-	nodeList := make([]*node, len(nodes))
-	for i, n := range nodes {
-		nodeMap[n.Name] = i
-
-		cum := make([][]float64, len(n.CPT))
-		for j, probs := range n.CPT {
-			c := make([]float64, len(probs))
-			c[0] = probs[0]
-			for k := 1; k < len(probs); k++ {
-				c[k] = c[k-1] + probs[k]
-			}
-			cum[j] = c
-		}
-
-		nodeList[i] = &node{
-			Name:   n.Name,
-			ID:     i,
-			States: n.States,
-			CPT:    n.CPT,
-			CPTCum: cum,
-		}
-	}
-	for i, n := range nodes {
-		nn := nodeList[i]
-		nn.Parents = make([]int, len(n.Parents))
-		for j, p := range n.Parents {
-			par, ok := nodeMap[p]
-			if !ok {
-				return nil, fmt.Errorf("parent node '%s' not found", p)
-			}
-			nn.Parents[j] = par
-		}
+	nodeList, err := toInternalNodes(nodes)
+	if err != nil {
+		return nil, err
 	}
 
-	nodeList, err := sortTopological(nodeList)
+	nodeList, err = sortTopological(nodeList)
 	if err != nil {
 		return nil, err
 	}
@@ -78,15 +55,6 @@ func New(nodes ...*Node) (*Network, error) {
 		if len(n.Parents) == 0 {
 			continue
 		}
-
-		stride := make([]int, len(n.Parents))
-		stride[len(stride)-1] = 1
-		for j := len(stride) - 2; j >= 0; j-- {
-			parIdx := n.Parents[j+1]
-			stride[j] = stride[j+1] * len(nodeList[parIdx].States)
-		}
-
-		n.Stride = stride
 	}
 
 	return &Network{
@@ -95,12 +63,12 @@ func New(nodes ...*Node) (*Network, error) {
 	}, nil
 }
 
+// Sample performs rejection sampling to calculate marginal probabilities of the network.
 func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) (map[string][]float64, error) {
 	ev, err := n.prepareEvidence(evidence)
 	if err != nil {
 		return nil, err
 	}
-	anyEvidence := len(evidence) > 0
 
 	counts := make([][]int, len(n.nodes))
 	for i := range counts {
@@ -110,22 +78,20 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 	samples := make([]int, len(n.nodes))
 	matches := 0
 	for r := 0; r < count; r++ {
+		match := true
 		for i, node := range n.nodes {
 			idx := 0
 			for j, parIdx := range node.Parents {
 				parSample := samples[parIdx]
 				idx += parSample * node.Stride[j]
 			}
-			samples[i] = sample(node.CPTCum[idx], rng)
-		}
-		match := true
-		if anyEvidence {
-			for j, e := range ev {
-				if e >= 0 && e != samples[j] {
-					match = false
-					break
-				}
+			s := sample(node.CPTCum[idx], rng)
+			e := ev[i]
+			if e >= 0 && e != s {
+				match = false
+				break
 			}
+			samples[i] = s
 		}
 		if match {
 			for i, s := range samples {
@@ -147,6 +113,8 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 	return result, nil
 }
 
+// transforms the evidence map into an array with one entry per node.
+// Missing evidence is indicated by -1.
 func (n *Network) prepareEvidence(evidence map[string]string) ([]int, error) {
 	ev := make([]int, len(n.nodes))
 	for i := range ev {
