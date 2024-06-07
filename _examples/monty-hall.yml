@@ -1,0 +1,28 @@
+- name: Player
+  coords: [2, 1]
+  states: [Door1, Door2, Door3]
+  cpt: 
+  - [1, 1, 1]
+
+- name: Car
+  coords: [32, 1]
+  states: [Door1, Door2, Door3]
+  cpt: 
+  - [1, 1, 1]
+
+- name: Host
+  coords: [16, 8]
+  parents: [Player, Car]
+  states: [Door1, Door2, Door3]
+  cpt: 
+  - [0, 1, 1] # P1 C1
+  - [0, 0, 1] # P1 C2
+  - [0, 1, 0] # P1 C3
+
+  - [0, 0, 1] # P2 C1
+  - [1, 0, 1] # P2 C2
+  - [1, 0, 0] # P2 C3
+
+  - [0, 1, 0] # P3 C1
+  - [1, 0, 0] # P3 C2
+  - [1, 1, 0] # P3 C3
