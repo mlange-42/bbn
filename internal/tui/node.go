@@ -117,10 +117,16 @@ func (n *node) drawStateLabels() {
 
 func (n *node) drawBars(probs []float64, selected bool, state int, evidence bool) {
 	for i, p := range probs {
-		full, _ := math.Modf(p * 10)
+		full, frac := math.Modf(p * 10)
 		for j := 0; j < int(full); j++ {
 			n.runes[i+2][n.barsX+j] = Full
 		}
+		fracIdx := int(frac * float64(len(Partial)))
+		if fracIdx > 0 {
+			n.runes[i+2][n.barsX+int(full)] = Partial[fracIdx]
+			full++
+		}
+
 		for j := int(full); j < maxBars; j++ {
 			n.runes[i+2][n.barsX+j] = Shade
 		}
