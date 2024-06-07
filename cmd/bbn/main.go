@@ -44,30 +44,7 @@ func rootCommand() (*cobra.Command, error) {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			nodes, err := readNodes(args[0])
-			if err != nil {
-				return err
-			}
-
-			net, err := bbn.New(nodes...)
-			if err != nil {
-				return err
-			}
-
-			ev := map[string]string{}
-			for _, entry := range evidence {
-				parts := strings.Split(entry, "=")
-				if len(parts) != 2 {
-					return fmt.Errorf("syntax error in evidence")
-				}
-				ev[parts[0]] = parts[1]
-			}
-
-			if seed <= 0 {
-				seed = time.Now().UnixNano()
-			}
-			rng := rand.New(rand.NewSource(int64(seed)))
-			result, err := net.Sample(ev, samples, rng)
+			nodes, ev, result, err := run(args[0], evidence, samples, seed)
 			if err != nil {
 				return err
 			}
@@ -99,6 +76,38 @@ func rootCommand() (*cobra.Command, error) {
 	root.Flags().SortFlags = false
 
 	return &root, nil
+}
+
+func run(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, map[string]string, map[string][]float64, error) {
+	nodes, err := readNodes(path)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	net, err := bbn.New(nodes...)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	ev := map[string]string{}
+	for _, entry := range evidence {
+		parts := strings.Split(entry, "=")
+		if len(parts) != 2 {
+			return nil, nil, nil, fmt.Errorf("syntax error in evidence")
+		}
+		ev[parts[0]] = parts[1]
+	}
+
+	if seed <= 0 {
+		seed = time.Now().UnixNano()
+	}
+	rng := rand.New(rand.NewSource(int64(seed)))
+	result, err := net.Sample(ev, samples, rng)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return nodes, ev, result, nil
 }
 
 func readNodes(path string) ([]*bbn.Node, error) {
