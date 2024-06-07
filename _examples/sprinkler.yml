@@ -1,5 +1,6 @@
 - name: Rain
   states: [yes, no]
+  coords: [20, 1]
   cpt:
   #  yes   no
   - [0.2, 0.8]
@@ -7,6 +8,7 @@
 - name: Sprinkler
   parents: [Rain]
   states: [yes, no]
+  coords: [2, 10]
   cpt:
   #   yes   no
   - [0.01, 0.99] # rain yes
@@ -15,6 +17,7 @@
 - name: GrassWet
   parents: [Rain, Sprinkler]
   states: [yes, no]
+  coords: [36, 10]
   cpt:
   #   yes   no
   - [0.99, 0.01] # rain yes, sprikler yes

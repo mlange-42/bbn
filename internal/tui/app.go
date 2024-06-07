@@ -1,14 +1,18 @@
 package tui
 
 import (
+	"strings"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/mlange-42/bbn"
 	"github.com/rivo/tview"
 )
 
 type App struct {
-	file  string
-	graph *tview.TextView
+	file   string
+	nodes  []Node
+	graph  *tview.TextView
+	canvas [][]rune
 }
 
 func New(path string) *App {
@@ -22,9 +26,14 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
-	_ = nodes
+	a.nodes = make([]Node, len(nodes))
+	for i, n := range nodes {
+		a.nodes[i] = NewNode(n)
+	}
 
+	a.createCanvas()
 	a.createWidgets()
+	a.draw()
 
 	app := tview.NewApplication()
 	grid := a.createMainPanel()
@@ -40,6 +49,39 @@ func (a *App) Run() error {
 		return err
 	}
 	return nil
+}
+
+func (a *App) createCanvas() {
+	bounds := NewBounds(0, 0, 1, 1)
+	for _, n := range a.nodes {
+		bounds.Extend(n.Bounds())
+	}
+	a.canvas = make([][]rune, bounds.H)
+	for i := range a.canvas {
+		a.canvas[i] = make([]rune, bounds.W)
+		for j := range a.canvas[i] {
+			a.canvas[i][j] = BorderNone
+		}
+	}
+}
+
+func (a *App) draw() {
+	for _, node := range a.nodes {
+		runes, _ := node.Render(make([]float64, len(node.Node().States)))
+		b := node.Bounds()
+		for i, line := range runes {
+			copy(a.canvas[b.Y+i][b.X:], line)
+		}
+	}
+
+	b := strings.Builder{}
+	for i, line := range a.canvas {
+		b.WriteString(string(line))
+		if i < len(a.canvas)-1 {
+			b.WriteRune('\n')
+		}
+	}
+	a.graph.SetText(b.String())
 }
 
 func (a *App) createWidgets() {

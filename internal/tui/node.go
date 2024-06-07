@@ -11,14 +11,8 @@ import (
 const maxStateLabelWidth = 6
 const maxBars = 10
 
-type Bounds struct {
-	X int
-	Y int
-	W int
-	H int
-}
-
 type Node interface {
+	Node() *bbn.Node
 	Bounds() Bounds
 	Render(probs []float64) ([][]rune, [][]Color)
 }
@@ -74,6 +68,10 @@ func NewNode(n *bbn.Node) Node {
 	node.drawBars(make([]float64, len(n.States)))
 
 	return &node
+}
+
+func (n *node) Node() *bbn.Node {
+	return n.node
 }
 
 func (n *node) Bounds() Bounds {
