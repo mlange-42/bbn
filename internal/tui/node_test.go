@@ -18,7 +18,7 @@ func TestNodeRender(t *testing.T) {
 
 	uiNode := tui.NewNode(node)
 
-	runes, _ := uiNode.Render([]float64{0.1, 0.2, 0.7}, true)
+	runes, _ := uiNode.Render([]float64{0.1, 0.2, 0.7}, true, 1, false)
 
 	lines := make([]string, len(runes))
 	for i, line := range runes {
@@ -30,7 +30,7 @@ func TestNodeRender(t *testing.T) {
 		`╔══════════════════════════╗
 ║ TestNode with a very lon ║
 ║ yes   █░░░░░░░░░  10.000 ║
-║ no    ██░░░░░░░░  20.000 ║
+║[no    ██░░░░░░░░  20.000]║
 ║ maybe ███████░░░  70.000 ║
 ╚══════════════════════════╝`, text)
 }

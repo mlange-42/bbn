@@ -1,18 +1,22 @@
 package tui
 
 var (
-	BorderNone = []rune{' ', ' '}
-	BorderH    = []rune{'─', '═'}
-	BorderV    = []rune{'│', '║'}
-	BorderNE   = []rune{'┐', '╗'}
-	BorderNW   = []rune{'┌', '╔'}
-	BorderSE   = []rune{'┘', '╝'}
-	BorderSW   = []rune{'└', '╚'}
+	BorderH  = []rune{'─', '═'}
+	BorderV  = []rune{'│', '║'}
+	BorderNE = []rune{'┐', '╗'}
+	BorderNW = []rune{'┌', '╔'}
+	BorderSE = []rune{'┘', '╝'}
+	BorderSW = []rune{'└', '╚'}
 )
 
 const (
-	Shade = '░'
-	Full  = '█'
+	Empty          = ' '
+	Shade          = '░'
+	Full           = '█'
+	SelectionStart = '['
+	SelectionEnd   = ']'
+	EvidenceStart  = '+'
+	EvidenceEnd    = '+'
 )
 
 var Partial = []rune{

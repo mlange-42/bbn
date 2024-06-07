@@ -2,7 +2,9 @@ package tui
 
 import (
 	"math/rand"
+	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/mlange-42/bbn"
@@ -10,6 +12,7 @@ import (
 )
 
 type App struct {
+	app     *tview.Application
 	file    string
 	nodes   []Node
 	graph   *tview.TextView
@@ -18,9 +21,10 @@ type App struct {
 	rng     *rand.Rand
 	samples int
 
-	evidence     map[string]string
-	marginals    map[string][]float64
-	selectedNode int
+	evidence      map[string]string
+	marginals     map[string][]float64
+	selectedNode  int
+	selectedState int
 }
 
 func New(path string, samples int, seed int64) *App {
@@ -55,20 +59,12 @@ func (a *App) Run() error {
 	a.createWidgets()
 	a.draw()
 
-	app := tview.NewApplication()
+	a.app = tview.NewApplication()
 	grid := a.createMainPanel()
 
-	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyEsc {
-			app.Stop()
-			return nil
-		} else if event.Key() == tcell.KeyTAB {
-			a.selectedNode = (a.selectedNode + 1) % len(a.nodes)
-			a.draw()
-		}
-		return event
-	})
-	if err := app.SetRoot(grid, true).Run(); err != nil {
+	a.app.SetInputCapture(a.input)
+
+	if err := a.app.SetRoot(grid, true).Run(); err != nil {
 		return err
 	}
 	return nil
@@ -83,15 +79,64 @@ func (a *App) createCanvas() {
 	for i := range a.canvas {
 		a.canvas[i] = make([]rune, bounds.W)
 		for j := range a.canvas[i] {
-			a.canvas[i][j] = BorderNone[0]
+			a.canvas[i][j] = Empty
 		}
 	}
+}
+
+func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
+	if event.Key() == tcell.KeyEsc {
+		a.app.Stop()
+		return nil
+	} else if event.Key() == tcell.KeyTAB {
+		a.selectedNode = (a.selectedNode + 1) % len(a.nodes)
+		a.selectedState = 0
+		a.draw()
+		return nil
+	} else if event.Rune() == ' ' {
+		a.selectedState = (a.selectedState + 1) % len(a.nodes[a.selectedNode].Node().States)
+		a.draw()
+		return nil
+	} else if event.Key() == tcell.KeyEnter {
+		node := a.nodes[a.selectedNode]
+		value := node.Node().States[a.selectedState]
+		if oldValue, ok := a.evidence[node.Node().Name]; ok {
+			if oldValue == value {
+				delete(a.evidence, node.Node().Name)
+			} else {
+				a.evidence[node.Node().Name] = value
+			}
+		} else {
+			a.evidence[node.Node().Name] = value
+		}
+
+		var err error
+		a.marginals, err = a.network.Sample(a.evidence, a.samples, a.rng)
+		if err != nil {
+			panic(err)
+		}
+		a.draw()
+		return nil
+	} else if unicode.IsDigit(event.Rune()) {
+		idx, err := strconv.Atoi(string(event.Rune()))
+		if err != nil {
+			panic(err)
+		}
+		idx -= 1
+		if idx >= 0 && idx < len(a.nodes[a.selectedNode].Node().States) {
+			a.selectedState = idx
+			a.draw()
+		}
+		return nil
+	}
+	return event
 }
 
 func (a *App) draw() {
 	for i, node := range a.nodes {
 		data := a.marginals[node.Node().Name]
-		runes, _ := node.Render(data, i == a.selectedNode)
+		_, hasEvidence := a.evidence[node.Node().Name]
+		runes, _ := node.Render(data, i == a.selectedNode, a.selectedState, hasEvidence)
 		b := node.Bounds()
 		for i, line := range runes {
 			copy(a.canvas[b.Y+i][b.X:], line)
@@ -118,7 +163,7 @@ func (a *App) createWidgets() {
 
 func (a *App) createMainPanel() tview.Primitive {
 	grid := tview.NewGrid().
-		SetRows(0, 1).
+		SetRows(0, 2).
 		SetColumns(-1).
 		SetBorders(false)
 
@@ -126,7 +171,7 @@ func (a *App) createMainPanel() tview.Primitive {
 
 	help := tview.NewTextView().
 		SetWrap(false).
-		SetText("Exit: ESC  Scroll: ←→↕  Cycle nodes: TAB")
+		SetText("Exit: ESC  Scroll: ←→↕  Cycle nodes: TAB  Cycle states: SPACE/numbers\nToggle state: ENTER")
 	grid.AddItem(help, 1, 0, 1, 1, 0, 0, false)
 
 	return grid

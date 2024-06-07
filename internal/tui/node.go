@@ -14,7 +14,7 @@ const maxBars = 10
 type Node interface {
 	Node() *bbn.Node
 	Bounds() Bounds
-	Render(probs []float64, selected bool) ([][]rune, [][]Color)
+	Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color)
 }
 
 type node struct {
@@ -49,7 +49,7 @@ func NewNode(n *bbn.Node) Node {
 		runes[i] = make([]rune, bounds.W)
 		colors[i] = make([]Color, bounds.W)
 		for j := range runes[i] {
-			runes[i][j] = BorderNone[0]
+			runes[i][j] = Empty
 		}
 	}
 
@@ -65,7 +65,7 @@ func NewNode(n *bbn.Node) Node {
 	node.drawTitle()
 	node.drawStateLabels()
 
-	node.drawBars(make([]float64, len(n.States)))
+	node.drawBars(make([]float64, len(n.States)), false, 0, false)
 
 	return &node
 }
@@ -78,9 +78,9 @@ func (n *node) Bounds() Bounds {
 	return n.bounds
 }
 
-func (n *node) Render(probs []float64, selected bool) ([][]rune, [][]Color) {
+func (n *node) Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color) {
 	n.drawBorder(selected)
-	n.drawBars(probs)
+	n.drawBars(probs, selected, state, evidence)
 	return n.runes, n.colors
 }
 
@@ -115,7 +115,7 @@ func (n *node) drawStateLabels() {
 	}
 }
 
-func (n *node) drawBars(probs []float64) {
+func (n *node) drawBars(probs []float64, selected bool, state int, evidence bool) {
 	for i, p := range probs {
 		full, _ := math.Modf(p * 10)
 		for j := 0; j < int(full); j++ {
@@ -126,5 +126,16 @@ func (n *node) drawBars(probs []float64) {
 		}
 		text := []rune(fmt.Sprintf("%7.3f", p*100))
 		copy(n.runes[i+2][n.barsX+maxBars+1:], text)
+
+		if selected && state == i {
+			n.runes[i+2][1] = SelectionStart
+			n.runes[i+2][n.bounds.W-2] = SelectionEnd
+		} else if evidence {
+			n.runes[i+2][1] = EvidenceStart
+			n.runes[i+2][n.bounds.W-2] = EvidenceEnd
+		} else {
+			n.runes[i+2][1] = Empty
+			n.runes[i+2][n.bounds.W-2] = Empty
+		}
 	}
 }
