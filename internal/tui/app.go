@@ -93,6 +93,14 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 		a.selectedState = 0
 		a.draw()
 		return nil
+	} else if event.Key() == tcell.KeyBacktab {
+		a.selectedNode--
+		if a.selectedNode < 0 {
+			a.selectedNode = len(a.nodes) - 1
+		}
+		a.selectedState = 0
+		a.draw()
+		return nil
 	} else if event.Rune() == ' ' {
 		a.selectedState = (a.selectedState + 1) % len(a.nodes[a.selectedNode].Node().States)
 		a.draw()
