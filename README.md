@@ -7,6 +7,8 @@
 
 Bayesian Belief Network library and CLI/TUI tool for [Go](https://go.dev).
 
+![screenshot](https://github.com/mlange-42/bbn/assets/44003176/fcddc31a-1831-46e7-87a6-658f3d5df698)
+
 ## Installation
 
 ### Command line tools
