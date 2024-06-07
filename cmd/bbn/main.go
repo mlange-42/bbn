@@ -14,13 +14,7 @@ import (
 )
 
 func main() {
-	cmd, err := rootCommand()
-	if err != nil {
-		fmt.Printf("ERROR: %s\n", err.Error())
-		fmt.Print("\nRun `bbn -h` for help!\n\n")
-		os.Exit(1)
-	}
-	if err := cmd.Execute(); err != nil {
+	if err := rootCommand().Execute(); err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		fmt.Print("\nRun `bbn -h` for help!\n\n")
 		os.Exit(1)
@@ -28,7 +22,7 @@ func main() {
 }
 
 // rootCommand sets up the CLI
-func rootCommand() (*cobra.Command, error) {
+func rootCommand() *cobra.Command {
 	evidence := []string{}
 	var seed int64
 	var samples int
@@ -75,7 +69,7 @@ func rootCommand() (*cobra.Command, error) {
 
 	root.Flags().SortFlags = false
 
-	return &root, nil
+	return &root
 }
 
 func run(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, map[string]string, map[string][]float64, error) {
