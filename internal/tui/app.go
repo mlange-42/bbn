@@ -184,7 +184,7 @@ func (a *App) createWidgets() {
 
 func (a *App) createMainPanel() tview.Primitive {
 	grid := tview.NewGrid().
-		SetRows(0, 2).
+		SetRows(0, 1).
 		SetColumns(-1).
 		SetBorders(false)
 
@@ -192,7 +192,7 @@ func (a *App) createMainPanel() tview.Primitive {
 
 	help := tview.NewTextView().
 		SetWrap(false).
-		SetText("Exit: ESC  Scroll: ←→↕  Cycle nodes: TAB  Cycle states: SPACE/numbers\nToggle state: ENTER")
+		SetText("Exit: ESC  Scroll: ←→↕  Nodes: Tab  States: Space/Numbers  Toggle: Enter")
 	grid.AddItem(help, 1, 0, 1, 1, 0, 0, false)
 
 	return grid
