@@ -5,6 +5,57 @@ import (
 	"math/rand"
 )
 
+// toInternalNodes transforms nodes to their internal representation.
+func toInternalNodes(nodes []*Node) ([]*node, error) {
+	nodeMap := map[string]int{}
+	for i, n := range nodes {
+		nodeMap[n.Name] = i
+	}
+
+	nodeList := make([]*node, len(nodes))
+	for i, n := range nodes {
+		nodeMap[n.Name] = i
+
+		cum := make([][]float64, len(n.CPT))
+		for j, probs := range n.CPT {
+			cum[j] = cumulate(probs)
+		}
+
+		parents := make([]int, len(n.Parents))
+		for j, p := range n.Parents {
+			par, ok := nodeMap[p]
+			if !ok {
+				return nil, fmt.Errorf("parent node '%s' not found", p)
+			}
+			parents[j] = par
+		}
+
+		var stride []int
+		if len(parents) > 0 {
+			stride = make([]int, len(n.Parents))
+			stride[len(stride)-1] = 1
+			for j := len(stride) - 2; j >= 0; j-- {
+				parIdx := parents[j+1]
+				stride[j] = stride[j+1] * len(nodeList[parIdx].States)
+			}
+		}
+
+		nd := node{
+			Name:    n.Name,
+			ID:      i,
+			Parents: parents,
+			Stride:  stride,
+			States:  n.States,
+			CPT:     n.CPT,
+			CPTCum:  cum,
+		}
+
+		nodeList[i] = &nd
+	}
+
+	return nodeList, nil
+}
+
 // sortTopological sorts nodes in topological order.
 func sortTopological(nodes []*node) ([]*node, error) {
 	visited := make([]bool, len(nodes))
