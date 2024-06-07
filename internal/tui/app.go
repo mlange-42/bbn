@@ -116,7 +116,7 @@ func (a *App) createWidgets() {
 
 func (a *App) createMainPanel() tview.Primitive {
 	grid := tview.NewGrid().
-		SetRows(1, len(a.canvas)+2, 1).
+		SetRows(1, 0, 1).
 		SetColumns(len(a.canvas[0])+3, 0).
 		SetBorders(false)
 
@@ -125,7 +125,7 @@ func (a *App) createMainPanel() tview.Primitive {
 		SetText(fmt.Sprintf("BBNi - %s", a.file))
 	grid.AddItem(header, 0, 0, 1, 2, 0, 0, false)
 
-	grid.AddItem(a.graph, 1, 0, 1, 1, 0, 0, true)
+	grid.AddItem(a.graph, 1, 0, 1, 2, 0, 0, true)
 
 	help := tview.NewTextView().
 		SetWrap(false).
