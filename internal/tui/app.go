@@ -25,12 +25,15 @@ type App struct {
 	selectedState int
 }
 
-func New(path string, samples int, seed int64) *App {
+func New(path string, evidence map[string]string, samples int, seed int64) *App {
+	if evidence == nil {
+		evidence = map[string]string{}
+	}
 	return &App{
 		file:     path,
 		samples:  samples,
 		rng:      rand.New(rand.NewSource(seed)),
-		evidence: map[string]string{},
+		evidence: evidence,
 	}
 }
 

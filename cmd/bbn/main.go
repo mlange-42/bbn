@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/mlange-42/bbn"
+	"github.com/mlange-42/bbn/internal/tui"
 	"github.com/spf13/cobra"
 )
 
@@ -81,13 +81,9 @@ func run(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, 
 		return nil, nil, nil, err
 	}
 
-	ev := map[string]string{}
-	for _, entry := range evidence {
-		parts := strings.Split(entry, "=")
-		if len(parts) != 2 {
-			return nil, nil, nil, fmt.Errorf("syntax error in evidence")
-		}
-		ev[parts[0]] = parts[1]
+	ev, err := tui.ParseEvidence(evidence)
+	if err != nil {
+		return nil, nil, nil, err
 	}
 
 	if seed <= 0 {
