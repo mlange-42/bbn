@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"math/rand"
 	"os"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/mlange-42/bbn"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 func main() {
@@ -73,7 +71,7 @@ func rootCommand() *cobra.Command {
 }
 
 func run(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, map[string]string, map[string][]float64, error) {
-	nodes, err := readNodes(path)
+	nodes, err := bbn.NodesFromYAML(path)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -102,23 +100,4 @@ func run(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, 
 	}
 
 	return nodes, ev, result, nil
-}
-
-func readNodes(path string) ([]*bbn.Node, error) {
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	reader := bytes.NewReader(content)
-	decoder := yaml.NewDecoder(reader)
-	decoder.KnownFields(true)
-
-	nodes := []*bbn.Node{}
-	err = decoder.Decode(&nodes)
-	if err != nil {
-		return nil, err
-	}
-
-	return nodes, nil
 }
