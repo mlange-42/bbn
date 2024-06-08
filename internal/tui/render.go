@@ -35,8 +35,8 @@ func (a *App) renderEdge(from, to int) {
 	n1, n2 := a.nodes[from], a.nodes[to]
 	b1, b2 := n1.Bounds(), n2.Bounds()
 
-	hOverlap := b1.X+b1.W >= b2.X && b1.X <= b2.X+b2.W
-	vOverlap := b1.Y+b1.H >= b2.Y && b1.Y <= b2.Y+b2.H
+	hOverlap := b1.X+b1.W > b2.X && b1.X < b2.X+b2.W
+	vOverlap := b1.Y+b1.H > b2.Y && b1.Y < b2.Y+b2.H
 	if hOverlap {
 		if !vOverlap {
 			a.renderEdgeVertical(b1, b2)
