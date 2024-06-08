@@ -43,6 +43,7 @@ func NewNode(n *bbn.Node) Node {
 		W: maxStateLen + maxBars + 7 + 6,
 		H: len(n.States) + 3,
 	}
+	fmt.Println(n.Name, bounds)
 	runes := make([][]rune, bounds.H)
 	colors := make([][]Color, bounds.H)
 	for i := range runes {
