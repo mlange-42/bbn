@@ -23,6 +23,14 @@ func TestBoundsContains(t *testing.T) {
 	assert.False(t, b.Contains(11, 51))
 }
 
+func TestBoundsCentroid(t *testing.T) {
+	b := tui.NewBounds(10, 20, 20, 30)
+
+	cx, cy := b.Centroid()
+	assert.Equal(t, 20, cx)
+	assert.Equal(t, 35, cy)
+}
+
 func TestBoundsExtend(t *testing.T) {
 	a := tui.NewBounds(3, 4, 5, 6)
 	b := tui.NewBounds(1, 2, 12, 13)

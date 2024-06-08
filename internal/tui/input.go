@@ -17,7 +17,7 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 		// Tab through nodes.
 		a.selectedNode = (a.selectedNode + 1) % len(a.nodes)
 		a.selectedState = 0
-		a.draw()
+		a.render()
 		return nil
 	} else if event.Key() == tcell.KeyBacktab {
 		// Tab through nodes, backwards.
@@ -26,12 +26,12 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 			a.selectedNode = len(a.nodes) - 1
 		}
 		a.selectedState = 0
-		a.draw()
+		a.render()
 		return nil
 	} else if event.Rune() == ' ' {
 		// Cycle through states.
 		a.selectedState = (a.selectedState + 1) % len(a.nodes[a.selectedNode].Node().States)
-		a.draw()
+		a.render()
 		return nil
 	} else if unicode.IsDigit(event.Rune()) {
 		// Select states by index/number keys.
@@ -42,7 +42,7 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 		idx -= 1
 		if idx >= 0 && idx < len(a.nodes[a.selectedNode].Node().States) {
 			a.selectedState = idx
-			a.draw()
+			a.render()
 		}
 		return nil
 	} else if event.Key() == tcell.KeyEnter {
@@ -50,7 +50,7 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 		if err := a.inputEnter(); err != nil {
 			panic(err)
 		}
-		a.draw()
+		a.render()
 		return nil
 	}
 	return event
