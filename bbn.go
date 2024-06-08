@@ -32,6 +32,29 @@ type node struct {
 	CPTCum  [][]float64
 }
 
+func (n *node) Index(samples []int) int {
+	idx := 0
+	switch len(n.Parents) {
+	case 0:
+		// Root nodes use the evidence is available.
+		return 0
+	case 1:
+		// Optimized index calculation for one parent.
+		idx = samples[n.Parents[0]]
+	case 2:
+		// Optimized index calculation for two parents.
+		idx = samples[n.Parents[0]]*n.Stride[0] +
+			samples[n.Parents[1]]*n.Stride[1]
+	default:
+		// Default for more than 2 parents.
+		for j, parIdx := range n.Parents {
+			parSample := samples[parIdx]
+			idx += parSample * n.Stride[j]
+		}
+	}
+	return idx
+}
+
 // Network definition.
 type Network struct {
 	nodes  []*node
@@ -72,6 +95,30 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 		return nil, err
 	}
 
+	// Do the actual sampling.
+	counts, matches := n.sample(ev, count, rng)
+
+	// Error on zero matches.
+	if matches == 0 {
+		return nil, &ConflictingEvidenceError{}
+	}
+
+	// Normalize result and return it as map.
+	result := map[string][]float64{}
+	for i, node := range n.nodes {
+		probs := make([]float64, len(counts[i]))
+		for j, cnt := range counts[i] {
+			probs[j] = float64(cnt) / float64(matches)
+		}
+		result[node.Name] = probs
+	}
+
+	return result, nil
+}
+
+// sample performs rejection sampling to calculate marginal probabilities of the network.
+// Internal method working on prepared evidence and returning raw results.
+func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 	// Prepare slices for counting.
 	counts := make([][]int, len(n.nodes))
 	for i := range counts {
@@ -85,36 +132,29 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 		// Sample nodes.
 		match := true
 		for i, node := range n.nodes {
+			idx := node.Index(samples)
+
 			e := ev[i]
-			idx := 0
-			switch len(node.Parents) {
-			case 0:
-				// Root nodes use the evidence is available.
-				if e >= 0 {
-					samples[i] = e
-					continue
-				}
-			case 1:
-				// Optimized index calculation for one parent.
-				idx = samples[node.Parents[0]]
-			case 2:
-				// Optimized index calculation for two parents.
-				idx = samples[node.Parents[0]]*node.Stride[0] +
-					samples[node.Parents[1]]*node.Stride[1]
-			default:
-				for j, parIdx := range node.Parents {
-					parSample := samples[parIdx]
-					idx += parSample * node.Stride[j]
-				}
+			// Don't sample for root nodes with given evidence
+			if len(node.Parents) == 0 && e >= 0 {
+				samples[i] = e
+				continue
 			}
 
+			// Sample from cumulative probabilities.
 			s := sample(node.CPTCum[idx], rng)
+
+			// Reject if sample is not equal to evidence
 			if e >= 0 && e != s {
 				match = false
 				break
 			}
+
+			// Otherwise, fill in the sample.
 			samples[i] = s
 		}
+
+		// Count matching samples
 		if match {
 			for i, s := range samples {
 				counts[i][s]++
@@ -123,20 +163,7 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 		}
 	}
 
-	if matches == 0 {
-		return nil, &ConflictingEvidenceError{}
-	}
-
-	result := map[string][]float64{}
-	for i, node := range n.nodes {
-		probs := make([]float64, len(counts[i]))
-		for j, cnt := range counts[i] {
-			probs[j] = float64(cnt) / float64(matches)
-		}
-		result[node.Name] = probs
-	}
-
-	return result, nil
+	return counts, matches
 }
 
 // transforms the evidence map into an array with one entry per node.
