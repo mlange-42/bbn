@@ -66,27 +66,39 @@ func New(nodes ...*Node) (*Network, error) {
 
 // Sample performs rejection sampling to calculate marginal probabilities of the network.
 func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) (map[string][]float64, error) {
+	// Evidence map to int slice.
 	ev, err := n.prepareEvidence(evidence)
 	if err != nil {
 		return nil, err
 	}
 
+	// Prepare slices for counting.
 	counts := make([][]int, len(n.nodes))
 	for i := range counts {
 		counts[i] = make([]int, len(n.nodes[i].States))
 	}
 
+	// Sampling.
 	samples := make([]int, len(n.nodes))
 	matches := 0
 	for r := 0; r < count; r++ {
+		// Sample nodes.
 		match := true
 		for i, node := range n.nodes {
+			e := ev[i]
 			idx := 0
 			switch len(node.Parents) {
 			case 0:
+				// Root nodes use the evidence is available.
+				if e >= 0 {
+					samples[i] = e
+					continue
+				}
 			case 1:
+				// Optimized index calculation for one parent.
 				idx = samples[node.Parents[0]]
 			case 2:
+				// Optimized index calculation for two parents.
 				idx = samples[node.Parents[0]]*node.Stride[0] +
 					samples[node.Parents[1]]*node.Stride[1]
 			default:
@@ -97,7 +109,6 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 			}
 
 			s := sample(node.CPTCum[idx], rng)
-			e := ev[i]
 			if e >= 0 && e != s {
 				match = false
 				break
