@@ -82,10 +82,20 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 		match := true
 		for i, node := range n.nodes {
 			idx := 0
-			for j, parIdx := range node.Parents {
-				parSample := samples[parIdx]
-				idx += parSample * node.Stride[j]
+			switch len(node.Parents) {
+			case 0:
+			case 1:
+				idx = samples[node.Parents[0]]
+			case 2:
+				idx = samples[node.Parents[0]]*node.Stride[0] +
+					samples[node.Parents[1]]*node.Stride[1]
+			default:
+				for j, parIdx := range node.Parents {
+					parSample := samples[parIdx]
+					idx += parSample * node.Stride[j]
+				}
 			}
+
 			s := sample(node.CPTCum[idx], rng)
 			e := ev[i]
 			if e >= 0 && e != s {
