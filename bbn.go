@@ -20,21 +20,23 @@ type networkDef struct {
 // See the package examples.
 type Node struct {
 	Variable string      // Name of the node.
-	Given    []string    // Names of parent nodes.
-	Outcomes []string    // Names of the node's possible states.
-	Table    [][]float64 // Conditional probability table.
-	Position [2]int      // Coordinates for visualization, optional.
+	Given    []string    `yaml:",flow"` // Names of parent nodes.
+	Outcomes []string    `yaml:",flow"` // Names of the node's possible states.
+	Table    [][]float64 `yaml:",flow"` // Conditional probability table.
+	Position [2]int      `yaml:",flow"` // Coordinates for visualization, optional.
 }
 
 // node is the [Network]s internal node type.
 type node struct {
-	Variable string
-	ID       int
-	Given    []int
-	Stride   []int
-	Outcomes []string
-	Table    [][]float64
-	TableCum [][]float64
+	Variable   string
+	ID         int
+	GivenNames []string
+	Given      []int
+	Stride     []int
+	Outcomes   []string
+	Table      [][]float64
+	TableCum   [][]float64
+	Position   [2]int
 }
 
 func (n *node) Index(samples []int) int {

@@ -38,7 +38,7 @@ func New(path string, evidence map[string]string, samples int, seed int64) *App 
 }
 
 func (a *App) Run() error {
-	net, nodes, err := bbn.FromYAML(a.file)
+	net, nodes, err := bbn.FromYAMLFile(a.file)
 	if err != nil {
 		return err
 	}

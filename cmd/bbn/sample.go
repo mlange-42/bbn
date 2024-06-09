@@ -17,7 +17,7 @@ func sampleCommand() *cobra.Command {
 	var samples int
 
 	root := cobra.Command{
-		Use:           "sample [file]",
+		Use:           "sample file",
 		Short:         "Performs rejection sampling.",
 		Long:          `Performs rejection sampling.`,
 		SilenceUsage:  true,
@@ -62,7 +62,7 @@ func sampleCommand() *cobra.Command {
 }
 
 func runSampleCommand(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, map[string]string, map[string][]float64, error) {
-	net, nodes, err := bbn.FromYAML(path)
+	net, nodes, err := bbn.FromYAMLFile(path)
 	if err != nil {
 		return nil, nil, nil, err
 	}
