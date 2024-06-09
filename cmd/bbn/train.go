@@ -27,22 +27,33 @@ func trainCommand() *cobra.Command {
 			netFile := args[0]
 			datafile := args[1]
 
-			return runTrainCommand(netFile, datafile)
+			net, err := runTrainCommand(netFile, datafile)
+			if err != nil {
+				return err
+			}
+
+			yml, err := bbn.ToYAML(net)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(string(yml))
+			return nil
 		},
 	}
 
 	return &root
 }
 
-func runTrainCommand(networkFile, dataFile string) error {
+func runTrainCommand(networkFile, dataFile string) (*bbn.Network, error) {
 	net, nodes, err := bbn.FromYAMLFile(networkFile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	file, err := os.Open(dataFile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	r := csv.NewReader(file)
@@ -50,14 +61,14 @@ func runTrainCommand(networkFile, dataFile string) error {
 
 	header, err := r.Read()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	indices := make([]int, len(nodes))
 	outcomes := make([]map[string]int, len(nodes))
 	for i, node := range nodes {
 		idx := slices.Index(header, node.Variable)
 		if idx < 0 {
-			return fmt.Errorf("no column '%s' in file '%s'", node.Variable, dataFile)
+			return nil, fmt.Errorf("no column '%s' in file '%s'", node.Variable, dataFile)
 		}
 		indices[i] = idx
 
@@ -68,7 +79,7 @@ func runTrainCommand(networkFile, dataFile string) error {
 	}
 
 	train := bbn.NewTrainer(net)
-	samples := make([]int, len(nodes))
+	sample := make([]int, len(nodes))
 
 	for {
 		record, err := r.Read()
@@ -76,29 +87,18 @@ func runTrainCommand(networkFile, dataFile string) error {
 			break
 		}
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		for i, idx := range indices {
 			var ok bool
-			samples[i], ok = outcomes[i][record[idx]]
+			sample[i], ok = outcomes[i][record[idx]]
 			if !ok {
-				return fmt.Errorf("outcome '%s' not available in node '%s'", record[idx], nodes[i].Variable)
+				return nil, fmt.Errorf("outcome '%s' not available in node '%s'", record[idx], nodes[i].Variable)
 			}
-			train.AddSample(samples)
 		}
+		train.AddSample(sample)
 	}
 
-	net, err = train.UpdateNetwork()
-	if err != nil {
-		return err
-	}
-	yml, err := bbn.ToYAML(net)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(yml))
-
-	return nil
+	return train.UpdateNetwork()
 }

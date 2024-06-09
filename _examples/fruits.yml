@@ -1,0 +1,28 @@
+# An untrained network.
+# Train with:
+# bbn train _examples/fruits.yml _examples/fruits.csv
+
+name: Fruits
+variables:
+
+- variable: Fruit
+  position: [1, 0]
+  outcomes: [apple, banana]
+  table: 
+  - [1, 1]
+
+- variable: Size
+  position: [32, 0]
+  outcomes: [small, large]
+  table: 
+  - [1, 1]
+
+- variable: Tasty
+  position: [16, 8]
+  given: [Fruit, Size]
+  outcomes: [yes, no]
+  table: 
+  - [1, 1]
+  - [1, 1]
+  - [1, 1]
+  - [1, 1]
