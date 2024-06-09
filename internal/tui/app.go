@@ -3,21 +3,21 @@ package tui
 import (
 	"fmt"
 	"math/rand"
-	"strings"
 
 	"github.com/mlange-42/bbn"
 	"github.com/rivo/tview"
 )
 
 type App struct {
-	app     *tview.Application
-	file    string
-	nodes   []Node
-	graph   *tview.TextView
-	canvas  [][]rune
-	network *bbn.Network
-	rng     *rand.Rand
-	samples int
+	app         *tview.Application
+	file        string
+	nodes       []Node
+	nodesByName map[string]int
+	graph       *tview.TextView
+	canvas      [][]rune
+	network     *bbn.Network
+	rng         *rand.Rand
+	samples     int
 
 	evidence      map[string]string
 	marginals     map[string][]float64
@@ -42,9 +42,12 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
+
 	a.nodes = make([]Node, len(nodes))
+	a.nodesByName = make(map[string]int, len(nodes))
 	for i, n := range nodes {
 		a.nodes[i] = NewNode(n)
+		a.nodesByName[n.Name] = i
 	}
 
 	a.network, err = bbn.New(nodes...)
@@ -58,7 +61,7 @@ func (a *App) Run() error {
 
 	a.createCanvas()
 	a.createWidgets()
-	a.draw()
+	a.render(false)
 
 	a.app = tview.NewApplication()
 	grid := a.createMainPanel()
@@ -83,27 +86,6 @@ func (a *App) createCanvas() {
 			a.canvas[i][j] = Empty
 		}
 	}
-}
-
-func (a *App) draw() {
-	for i, node := range a.nodes {
-		data := a.marginals[node.Node().Name]
-		_, hasEvidence := a.evidence[node.Node().Name]
-		runes, _ := node.Render(data, i == a.selectedNode, a.selectedState, hasEvidence)
-		b := node.Bounds()
-		for i, line := range runes {
-			copy(a.canvas[b.Y+i][b.X:], line)
-		}
-	}
-
-	b := strings.Builder{}
-	for i, line := range a.canvas {
-		b.WriteString(string(line))
-		if i < len(a.canvas)-1 {
-			b.WriteRune('\n')
-		}
-	}
-	a.graph.SetText(b.String())
 }
 
 func (a *App) createWidgets() {

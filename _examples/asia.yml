@@ -11,7 +11,7 @@
   - [50, 50]
 
 - name: Has Tuberculosis
-  coords: [1, 6]
+  coords: [1, 7]
   parents: [Visit to Asia]
   states: [yes, no]
   cpt:
@@ -19,7 +19,7 @@
   - [1, 99]
 
 - name: Has Lung Cancer
-  coords: [35, 6]
+  coords: [35, 7]
   parents: [Smoker]
   states: [yes, no]
   cpt:
@@ -27,7 +27,7 @@
   - [ 1, 99]
 
 - name: Has Bronchitis
-  coords: [65, 6]
+  coords: [65, 7]
   parents: [Smoker]
   states: [yes, no]
   cpt:
@@ -35,7 +35,7 @@
   - [30, 70]
 
 - name: Tuberculosis or Cancer
-  coords: [18, 12]
+  coords: [18, 14]
   parents: [Has Tuberculosis, Has Lung Cancer]
   states: [yes, no]
   cpt:
@@ -45,7 +45,7 @@
   - [0, 1]
 
 - name: XRay Result
-  coords: [1, 18]
+  coords: [1, 21]
   parents: [Tuberculosis or Cancer]
   states: [abnormal, normal]
   cpt:
@@ -53,7 +53,7 @@
   - [ 5, 95]
 
 - name: Dyspnea
-  coords: [49, 18]
+  coords: [49, 21]
   parents: [Tuberculosis or Cancer, Has Bronchitis]
   states: [yes, no]
   cpt:

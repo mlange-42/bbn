@@ -17,6 +17,10 @@ const (
 	SelectionEnd   = ']'
 	EvidenceStart  = '+'
 	EvidenceEnd    = '+'
+	ArrowUp        = '^'
+	ArrowDown      = 'v'
+	ArrowLeft      = '<'
+	ArrowRight     = '>'
 )
 
 var Partial = []rune{
