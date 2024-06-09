@@ -47,7 +47,7 @@ func (a *App) Run() error {
 	a.nodesByName = make(map[string]int, len(nodes))
 	for i, n := range nodes {
 		a.nodes[i] = NewNode(n)
-		a.nodesByName[n.Name] = i
+		a.nodesByName[n.Variable] = i
 	}
 
 	a.network, err = bbn.New(nodes...)

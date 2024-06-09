@@ -1,20 +1,20 @@
-- name: Player
-  coords: [1, 0]
-  states: [Door1, Door2, Door3]
-  cpt: 
+- variable: Player
+  position: [1, 0]
+  outcomes: [Door1, Door2, Door3]
+  table: 
   - [1, 1, 1]
 
-- name: Car
-  coords: [32, 0]
-  states: [Door1, Door2, Door3]
-  cpt: 
+- variable: Car
+  position: [32, 0]
+  outcomes: [Door1, Door2, Door3]
+  table: 
   - [1, 1, 1]
 
-- name: Host
-  coords: [16, 8]
-  parents: [Player, Car]
-  states: [Door1, Door2, Door3]
-  cpt: 
+- variable: Host
+  position: [16, 8]
+  given: [Player, Car]
+  outcomes: [Door1, Door2, Door3]
+  table: 
   - [0, 1, 1] # P1 C1
   - [0, 0, 1] # P1 C2
   - [0, 1, 0] # P1 C3

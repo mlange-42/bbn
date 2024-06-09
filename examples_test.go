@@ -9,26 +9,26 @@ import (
 
 func Example_sprinkler() {
 	rain := bbn.Node{
-		Name:   "Rain",
-		States: []string{"yes", "no"},
-		CPT:    [][]float64{{0.2, 0.8}},
+		Variable: "Rain",
+		Outcomes: []string{"yes", "no"},
+		Table:    [][]float64{{0.2, 0.8}},
 	}
 
 	sprinkler := bbn.Node{
-		Name:    "Sprinkler",
-		Parents: []string{"Rain"},
-		States:  []string{"yes", "no"},
-		CPT: [][]float64{
+		Variable: "Sprinkler",
+		Given:    []string{"Rain"},
+		Outcomes: []string{"yes", "no"},
+		Table: [][]float64{
 			{0.01, 0.99}, // rain yes
 			{0.2, 0.8},   // rain no
 		},
 	}
 
 	grassWet := bbn.Node{
-		Name:    "GrassWet",
-		Parents: []string{"Rain", "Sprinkler"},
-		States:  []string{"yes", "no"},
-		CPT: [][]float64{
+		Variable: "GrassWet",
+		Given:    []string{"Rain", "Sprinkler"},
+		Outcomes: []string{"yes", "no"},
+		Table: [][]float64{
 			{0.99, 0.01}, // rain yes, sprikler yes
 			{0.8, 0.2},   // rain yes, sprikler no
 			{0.9, 0.1},   // rain no, sprikler yes
@@ -58,22 +58,22 @@ func Example_sprinkler() {
 
 func Example_montyHall() {
 	player := bbn.Node{
-		Name:   "Player",
-		States: []string{"D1", "D2", "D3"},
-		CPT:    [][]float64{{1, 1, 1}},
+		Variable: "Player",
+		Outcomes: []string{"D1", "D2", "D3"},
+		Table:    [][]float64{{1, 1, 1}},
 	}
 
 	car := bbn.Node{
-		Name:   "Car",
-		States: []string{"D1", "D2", "D3"},
-		CPT:    [][]float64{{1, 1, 1}},
+		Variable: "Car",
+		Outcomes: []string{"D1", "D2", "D3"},
+		Table:    [][]float64{{1, 1, 1}},
 	}
 
 	host := bbn.Node{
-		Name:    "Host",
-		Parents: []string{"Player", "Car"},
-		States:  []string{"D1", "D2", "D3"},
-		CPT: [][]float64{
+		Variable: "Host",
+		Given:    []string{"Player", "Car"},
+		Outcomes: []string{"D1", "D2", "D3"},
+		Table: [][]float64{
 			{0, 1, 1}, // P1 C1
 			{0, 0, 1}, // P1 C2
 			{0, 1, 0}, // P1 C3

@@ -1,62 +1,62 @@
-- name: Visit to Asia
-  coords: [1, 0]
-  states: [yes, no]
-  cpt:
+- variable: Visit to Asia
+  position: [1, 0]
+  outcomes: [yes, no]
+  table:
   - [1, 99]
 
-- name: Smoker
-  coords: [49, 0]
-  states: [yes, no]
-  cpt:
+- variable: Smoker
+  position: [49, 0]
+  outcomes: [yes, no]
+  table:
   - [50, 50]
 
-- name: Has Tuberculosis
-  coords: [1, 7]
-  parents: [Visit to Asia]
-  states: [yes, no]
-  cpt:
+- variable: Has Tuberculosis
+  position: [1, 7]
+  given: [Visit to Asia]
+  outcomes: [yes, no]
+  table:
   - [5, 95]
   - [1, 99]
 
-- name: Has Lung Cancer
-  coords: [35, 7]
-  parents: [Smoker]
-  states: [yes, no]
-  cpt:
+- variable: Has Lung Cancer
+  position: [35, 7]
+  given: [Smoker]
+  outcomes: [yes, no]
+  table:
   - [10, 90]
   - [ 1, 99]
 
-- name: Has Bronchitis
-  coords: [65, 7]
-  parents: [Smoker]
-  states: [yes, no]
-  cpt:
+- variable: Has Bronchitis
+  position: [65, 7]
+  given: [Smoker]
+  outcomes: [yes, no]
+  table:
   - [60, 40]
   - [30, 70]
 
-- name: Tuberculosis or Cancer
-  coords: [18, 14]
-  parents: [Has Tuberculosis, Has Lung Cancer]
-  states: [yes, no]
-  cpt:
+- variable: Tuberculosis or Cancer
+  position: [18, 14]
+  given: [Has Tuberculosis, Has Lung Cancer]
+  outcomes: [yes, no]
+  table:
   - [1, 0]
   - [1, 0]
   - [1, 0]
   - [0, 1]
 
-- name: XRay Result
-  coords: [1, 21]
-  parents: [Tuberculosis or Cancer]
-  states: [abnormal, normal]
-  cpt:
+- variable: XRay Result
+  position: [1, 21]
+  given: [Tuberculosis or Cancer]
+  outcomes: [abnormal, normal]
+  table:
   - [98,  2]
   - [ 5, 95]
 
-- name: Dyspnea
-  coords: [49, 21]
-  parents: [Tuberculosis or Cancer, Has Bronchitis]
-  states: [yes, no]
-  cpt:
+- variable: Dyspnea
+  position: [49, 21]
+  given: [Tuberculosis or Cancer, Has Bronchitis]
+  outcomes: [yes, no]
+  table:
   - [90, 10]
   - [70, 30]
   - [80, 20]

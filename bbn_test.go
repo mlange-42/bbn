@@ -9,26 +9,26 @@ import (
 
 func TestSort(t *testing.T) {
 	rain := Node{
-		Name:   "Rain",
-		States: []string{"yes", "no"},
-		CPT:    [][]float64{{0.2, 0.8}},
+		Variable: "Rain",
+		Outcomes: []string{"yes", "no"},
+		Table:    [][]float64{{0.2, 0.8}},
 	}
 
 	sprinkler := Node{
-		Name:    "Sprinkler",
-		Parents: []string{"Rain"},
-		States:  []string{"yes", "no"},
-		CPT: [][]float64{
+		Variable: "Sprinkler",
+		Given:    []string{"Rain"},
+		Outcomes: []string{"yes", "no"},
+		Table: [][]float64{
 			{0.01, 0.99}, // rain yes
 			{0.2, 0.8},   // rain no
 		},
 	}
 
 	grassWet := Node{
-		Name:    "GrassWet",
-		Parents: []string{"Rain", "Sprinkler"},
-		States:  []string{"yes", "no"},
-		CPT: [][]float64{
+		Variable: "GrassWet",
+		Given:    []string{"Rain", "Sprinkler"},
+		Outcomes: []string{"yes", "no"},
+		Table: [][]float64{
 			{0.99, 0.01}, // rain yes, sprikler yes
 			{0.8, 0.2},   // rain yes, sprikler no
 			{0.9, 0.1},   // rain no, sprikler yes
@@ -39,13 +39,13 @@ func TestSort(t *testing.T) {
 	net, err := New(&sprinkler, &grassWet, &rain)
 	assert.Nil(t, err)
 
-	assert.Equal(t, "Rain", net.nodes[0].Name)
-	assert.Equal(t, "Sprinkler", net.nodes[1].Name)
-	assert.Equal(t, "GrassWet", net.nodes[2].Name)
+	assert.Equal(t, "Rain", net.nodes[0].Variable)
+	assert.Equal(t, "Sprinkler", net.nodes[1].Variable)
+	assert.Equal(t, "GrassWet", net.nodes[2].Variable)
 
-	assert.Equal(t, []int{}, net.nodes[0].Parents)
-	assert.Equal(t, []int{0}, net.nodes[1].Parents)
-	assert.Equal(t, []int{0, 1}, net.nodes[2].Parents)
+	assert.Equal(t, []int{}, net.nodes[0].Given)
+	assert.Equal(t, []int{0}, net.nodes[1].Given)
+	assert.Equal(t, []int{0, 1}, net.nodes[2].Given)
 
 	assert.Equal(t, []int(nil), net.nodes[0].Stride)
 	assert.Equal(t, []int{1}, net.nodes[1].Stride)
@@ -54,20 +54,20 @@ func TestSort(t *testing.T) {
 
 func TestStride(t *testing.T) {
 	a := Node{
-		Name:   "A",
-		States: []string{"a", "b", "c", "d"},
+		Variable: "A",
+		Outcomes: []string{"a", "b", "c", "d"},
 	}
 
 	b := Node{
-		Name:    "B",
-		States:  []string{"a", "b", "c"},
-		Parents: []string{"A"},
+		Variable: "B",
+		Outcomes: []string{"a", "b", "c"},
+		Given:    []string{"A"},
 	}
 
 	c := Node{
-		Name:    "C",
-		Parents: []string{"A", "B"},
-		States:  []string{"a", "b"},
+		Variable: "C",
+		Given:    []string{"A", "B"},
+		Outcomes: []string{"a", "b"},
 	}
 
 	net, err := New(&a, &b, &c)
@@ -80,18 +80,18 @@ func TestStride(t *testing.T) {
 
 func TestSortCycles(t *testing.T) {
 	a := Node{
-		Name:    "A",
-		Parents: []string{"C"},
+		Variable: "A",
+		Given:    []string{"C"},
 	}
 
 	b := Node{
-		Name:    "B",
-		Parents: []string{"A"},
+		Variable: "B",
+		Given:    []string{"A"},
 	}
 
 	c := Node{
-		Name:    "C",
-		Parents: []string{"B"},
+		Variable: "C",
+		Given:    []string{"B"},
 	}
 
 	_, err := New(&c, &a, &b)
@@ -101,26 +101,26 @@ func TestSortCycles(t *testing.T) {
 
 func TestSample(t *testing.T) {
 	rain := Node{
-		Name:   "Rain",
-		States: []string{"yes", "no"},
-		CPT:    [][]float64{{0.2, 0.8}},
+		Variable: "Rain",
+		Outcomes: []string{"yes", "no"},
+		Table:    [][]float64{{0.2, 0.8}},
 	}
 
 	sprinkler := Node{
-		Name:    "Sprinkler",
-		Parents: []string{"Rain"},
-		States:  []string{"yes", "no"},
-		CPT: [][]float64{
+		Variable: "Sprinkler",
+		Given:    []string{"Rain"},
+		Outcomes: []string{"yes", "no"},
+		Table: [][]float64{
 			{0.01, 0.99}, // rain yes
 			{0.2, 0.8},   // rain no
 		},
 	}
 
 	grassWet := Node{
-		Name:    "GrassWet",
-		Parents: []string{"Rain", "Sprinkler"},
-		States:  []string{"yes", "no"},
-		CPT: [][]float64{
+		Variable: "GrassWet",
+		Given:    []string{"Rain", "Sprinkler"},
+		Outcomes: []string{"yes", "no"},
+		Table: [][]float64{
 			{0.99, 0.01}, // rain yes, sprikler yes
 			{0.8, 0.2},   // rain yes, sprikler no
 			{0.9, 0.1},   // rain no, sprikler yes
@@ -161,26 +161,26 @@ func BenchmarkSampleRain_1000(b *testing.B) {
 	b.StopTimer()
 
 	rain := Node{
-		Name:   "Rain",
-		States: []string{"yes", "no"},
-		CPT:    [][]float64{{0.2, 0.8}},
+		Variable: "Rain",
+		Outcomes: []string{"yes", "no"},
+		Table:    [][]float64{{0.2, 0.8}},
 	}
 
 	sprinkler := Node{
-		Name:    "Sprinkler",
-		Parents: []string{"Rain"},
-		States:  []string{"yes", "no"},
-		CPT: [][]float64{
+		Variable: "Sprinkler",
+		Given:    []string{"Rain"},
+		Outcomes: []string{"yes", "no"},
+		Table: [][]float64{
 			{0.01, 0.99}, // rain yes
 			{0.2, 0.8},   // rain no
 		},
 	}
 
 	grassWet := Node{
-		Name:    "GrassWet",
-		Parents: []string{"Rain", "Sprinkler"},
-		States:  []string{"yes", "no"},
-		CPT: [][]float64{
+		Variable: "GrassWet",
+		Given:    []string{"Rain", "Sprinkler"},
+		Outcomes: []string{"yes", "no"},
+		Table: [][]float64{
 			{0.99, 0.01}, // rain yes, sprikler yes
 			{0.8, 0.2},   // rain yes, sprikler no
 			{0.9, 0.1},   // rain no, sprikler yes
