@@ -36,7 +36,7 @@ func Example_sprinkler() {
 		},
 	}
 
-	net, err := bbn.New(&sprinkler, &grassWet, &rain)
+	net, err := bbn.New("Sprinkler", &sprinkler, &grassWet, &rain)
 	if err != nil {
 		panic(err)
 	}
@@ -88,7 +88,7 @@ func Example_montyHall() {
 		},
 	}
 
-	net, err := bbn.New(&player, &car, &host)
+	net, err := bbn.New("Monty-Hall", &player, &car, &host)
 	if err != nil {
 		panic(err)
 	}

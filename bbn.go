@@ -6,6 +6,11 @@ import (
 	"slices"
 )
 
+type networkDef struct {
+	Name      string
+	Variables []*Node
+}
+
 // Node definition.
 //
 // CPT is the conditional probability table.
@@ -57,12 +62,13 @@ func (n *node) Index(samples []int) int {
 
 // Network definition.
 type Network struct {
+	name   string
 	nodes  []*node
 	byName map[string]int
 }
 
 // New creates a new network. Sorts nodes topologically.
-func New(nodes ...*Node) (*Network, error) {
+func New(name string, nodes ...*Node) (*Network, error) {
 	nodeList, err := toInternalNodes(nodes)
 	if err != nil {
 		return nil, err
@@ -82,6 +88,7 @@ func New(nodes ...*Node) (*Network, error) {
 	}
 
 	return &Network{
+		name:   name,
 		nodes:  nodeList,
 		byName: byName,
 	}, nil

@@ -38,10 +38,11 @@ func New(path string, evidence map[string]string, samples int, seed int64) *App 
 }
 
 func (a *App) Run() error {
-	nodes, err := bbn.NodesFromYAML(a.file)
+	net, nodes, err := bbn.FromYAML(a.file)
 	if err != nil {
 		return err
 	}
+	a.network = net
 
 	a.nodes = make([]Node, len(nodes))
 	a.nodesByName = make(map[string]int, len(nodes))
@@ -50,10 +51,6 @@ func (a *App) Run() error {
 		a.nodesByName[n.Variable] = i
 	}
 
-	a.network, err = bbn.New(nodes...)
-	if err != nil {
-		return err
-	}
 	a.marginals, err = a.network.Sample(a.evidence, a.samples, a.rng)
 	if err != nil {
 		return err

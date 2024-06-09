@@ -71,12 +71,7 @@ func rootCommand() *cobra.Command {
 }
 
 func run(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, map[string]string, map[string][]float64, error) {
-	nodes, err := bbn.NodesFromYAML(path)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	net, err := bbn.New(nodes...)
+	net, nodes, err := bbn.FromYAML(path)
 	if err != nil {
 		return nil, nil, nil, err
 	}
