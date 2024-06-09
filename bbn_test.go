@@ -56,18 +56,39 @@ func TestStride(t *testing.T) {
 	a := Node{
 		Variable: "A",
 		Outcomes: []string{"a", "b", "c", "d"},
+		Table:    [][]float64{{0.25, 0.25, 0.25, 0.25}},
 	}
 
 	b := Node{
 		Variable: "B",
 		Outcomes: []string{"a", "b", "c"},
 		Given:    []string{"A"},
+		Table: [][]float64{
+			{0.333, 0.333, 0.333},
+			{0.333, 0.333, 0.333},
+			{0.333, 0.333, 0.333},
+			{0.333, 0.333, 0.333},
+		},
 	}
 
 	c := Node{
 		Variable: "C",
 		Given:    []string{"A", "B"},
 		Outcomes: []string{"a", "b"},
+		Table: [][]float64{
+			{0.5, 0.5},
+			{0.5, 0.5},
+			{0.5, 0.5},
+			{0.5, 0.5},
+			{0.5, 0.5},
+			{0.5, 0.5},
+			{0.5, 0.5},
+			{0.5, 0.5},
+			{0.5, 0.5},
+			{0.5, 0.5},
+			{0.5, 0.5},
+			{0.5, 0.5},
+		},
 	}
 
 	net, err := New(&a, &b, &c)
@@ -82,16 +103,31 @@ func TestSortCycles(t *testing.T) {
 	a := Node{
 		Variable: "A",
 		Given:    []string{"C"},
+		Outcomes: []string{"a", "b"},
+		Table: [][]float64{
+			{0.5, 0.5},
+			{0.5, 0.5},
+		},
 	}
 
 	b := Node{
 		Variable: "B",
 		Given:    []string{"A"},
+		Outcomes: []string{"a", "b"},
+		Table: [][]float64{
+			{0.5, 0.5},
+			{0.5, 0.5},
+		},
 	}
 
 	c := Node{
 		Variable: "C",
 		Given:    []string{"B"},
+		Outcomes: []string{"a", "b"},
+		Table: [][]float64{
+			{0.5, 0.5},
+			{0.5, 0.5},
+		},
 	}
 
 	_, err := New(&c, &a, &b)
@@ -157,7 +193,7 @@ func TestSample(t *testing.T) {
 	assert.Greater(t, result["Rain"][1], 0.9)
 }
 
-func BenchmarkSampleRain_1000(b *testing.B) {
+func BenchmarkSampleSprinkler_1000(b *testing.B) {
 	b.StopTimer()
 
 	rain := Node{
