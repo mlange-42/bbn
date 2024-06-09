@@ -45,11 +45,6 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 	for i, n := range nodes {
 		nodeMap[n.Variable] = i
 
-		cum := make([][]float64, len(n.Table))
-		for j, probs := range n.Table {
-			cum[j] = cumulate(probs)
-		}
-
 		parents := make([]int, len(n.Given))
 		for j, p := range n.Given {
 			par, ok := nodeMap[p]
@@ -60,13 +55,32 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 		}
 
 		var stride []int
+		tableRows := 1
 		if len(parents) > 0 {
 			stride = make([]int, len(n.Given))
 			stride[len(stride)-1] = 1
 			for j := len(stride) - 2; j >= 0; j-- {
 				parIdx := parents[j+1]
-				stride[j] = stride[j+1] * len(nodeList[parIdx].Outcomes)
+				stride[j] = stride[j+1] * len(nodes[parIdx].Outcomes)
 			}
+			tableRows = stride[0] * len(nodes[parents[0]].Outcomes)
+		}
+
+		if len(n.Table) != tableRows {
+			return nil, fmt.Errorf("wrong number of table rows in node '%s'; got %d, expected %d", n.Variable, len(n.Table), tableRows)
+		}
+
+		tableCols := len(n.Outcomes)
+		if tableCols < 2 {
+			return nil, fmt.Errorf("node '%s' requires at least two outcomes, got %d", n.Variable, tableCols)
+		}
+
+		cum := make([][]float64, len(n.Table))
+		for j, probs := range n.Table {
+			if len(probs) != tableCols {
+				return nil, fmt.Errorf("wrong number of table columns in node '%s', row %d; got %d, expected %d", n.Variable, j, len(probs), tableCols)
+			}
+			cum[j] = cumulate(probs)
 		}
 
 		nd := node{
