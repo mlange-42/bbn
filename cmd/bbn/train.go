@@ -13,6 +13,7 @@ import (
 
 // trainCommand performs network training.
 func trainCommand() *cobra.Command {
+	var delim string
 	root := cobra.Command{
 		Use:           "train file data-file",
 		Short:         "Performs network training.",
@@ -27,7 +28,12 @@ func trainCommand() *cobra.Command {
 			netFile := args[0]
 			datafile := args[1]
 
-			net, err := runTrainCommand(netFile, datafile)
+			delimRunes := []rune(delim)
+			if len(delimRunes) != 1 {
+				return fmt.Errorf("argument for --delim must be a single rune; got '%s'", delim)
+			}
+
+			net, err := runTrainCommand(netFile, datafile, delimRunes[0])
 			if err != nil {
 				return err
 			}
@@ -42,10 +48,12 @@ func trainCommand() *cobra.Command {
 		},
 	}
 
+	root.Flags().StringVarP(&delim, "delim", "d", ",", "CSV delimiter")
+
 	return &root
 }
 
-func runTrainCommand(networkFile, dataFile string) (*bbn.Network, error) {
+func runTrainCommand(networkFile, dataFile string, delimiter rune) (*bbn.Network, error) {
 	net, nodes, err := bbn.FromYAMLFile(networkFile)
 	if err != nil {
 		return nil, err
@@ -58,6 +66,7 @@ func runTrainCommand(networkFile, dataFile string) (*bbn.Network, error) {
 
 	r := csv.NewReader(file)
 	r.ReuseRecord = true
+	r.Comma = delimiter
 
 	header, err := r.Read()
 	if err != nil {
