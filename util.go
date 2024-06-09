@@ -80,12 +80,10 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 			return nil, fmt.Errorf("node '%s' requires at least two outcomes, got %d", n.Variable, tableCols)
 		}
 
-		cum := make([][]float64, len(n.Table))
 		for j, probs := range n.Table {
 			if len(probs) != tableCols {
 				return nil, fmt.Errorf("wrong number of table columns in node '%s', row %d; got %d, expected %d", n.Variable, j, len(probs), tableCols)
 			}
-			cum[j] = cumulate(probs)
 		}
 
 		nd := node{
@@ -95,7 +93,7 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 			Stride:   stride,
 			Outcomes: n.Outcomes,
 			Table:    n.Table,
-			TableCum: cum,
+			TableCum: nil,
 		}
 
 		nodeList[i] = &nd
