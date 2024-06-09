@@ -36,7 +36,7 @@ func TestSort(t *testing.T) {
 		},
 	}
 
-	net, err := New(&sprinkler, &grassWet, &rain)
+	net, err := New("Sprinkler", &sprinkler, &grassWet, &rain)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "Rain", net.nodes[0].Variable)
@@ -91,7 +91,7 @@ func TestStride(t *testing.T) {
 		},
 	}
 
-	net, err := New(&a, &b, &c)
+	net, err := New("Test", &a, &b, &c)
 	assert.Nil(t, err)
 
 	assert.Equal(t, []int(nil), net.nodes[0].Stride)
@@ -130,7 +130,7 @@ func TestSortCycles(t *testing.T) {
 		},
 	}
 
-	_, err := New(&c, &a, &b)
+	_, err := New("Test", &c, &a, &b)
 	assert.NotNil(t, err)
 	assert.Equal(t, "graph has cycles", err.Error())
 }
@@ -164,7 +164,7 @@ func TestSample(t *testing.T) {
 		},
 	}
 
-	net, err := New(&sprinkler, &grassWet, &rain)
+	net, err := New("Test", &sprinkler, &grassWet, &rain)
 	assert.Nil(t, err)
 
 	evidence := map[string]string{
@@ -224,7 +224,7 @@ func BenchmarkSampleSprinkler_1000(b *testing.B) {
 		},
 	}
 
-	net, err := New(&sprinkler, &grassWet, &rain)
+	net, err := New("Test", &sprinkler, &grassWet, &rain)
 	assert.Nil(b, err)
 
 	rng := rand.New(rand.NewSource(1))

@@ -1,3 +1,6 @@
+name: Monty-Hall Problem
+variables:
+
 - variable: Player
   position: [1, 0]
   outcomes: [Door1, Door2, Door3]

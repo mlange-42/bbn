@@ -15,23 +15,28 @@ func (m *ConflictingEvidenceError) Error() string {
 	return "conflicting evidence / all samples rejected"
 }
 
-func NodesFromYAML(path string) ([]*Node, error) {
+func FromYAML(path string) (*Network, []*Node, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	reader := bytes.NewReader(content)
 	decoder := yaml.NewDecoder(reader)
 	decoder.KnownFields(true)
 
-	nodes := []*Node{}
-	err = decoder.Decode(&nodes)
+	net := networkDef{}
+	err = decoder.Decode(&net)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return nodes, nil
+	n, err := New(net.Name, net.Variables...)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return n, net.Variables, nil
 }
 
 // toInternalNodes transforms nodes to their internal representation.

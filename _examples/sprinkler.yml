@@ -1,3 +1,6 @@
+name: Sprinkler
+variables:
+
 - variable: Rain
   outcomes: [yes, no]
   position: [20, 0]
