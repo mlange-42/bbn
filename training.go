@@ -44,8 +44,11 @@ func (t *Trainer) AddSample(sample []int) {
 	}
 
 	for i, node := range t.network.nodes {
-		idx := node.Index(t.sample)
+		idx, ok := node.IndexWithNoData(t.sample)
 		s := t.sample[i]
+		if !ok || s < 0 {
+			continue
+		}
 		t.data[i][idx][s]++
 		t.counter[i][idx]++
 	}

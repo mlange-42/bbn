@@ -60,6 +60,40 @@ func (n *node) Index(samples []int) int {
 	return idx
 }
 
+func (n *node) IndexWithNoData(samples []int) (int, bool) {
+	idx := 0
+	switch len(n.Given) {
+	case 0:
+		// Root nodes use the evidence is available.
+		return 0, true
+	case 1:
+		// Optimized index calculation for one parent.
+		g := n.Given[0]
+		if samples[g] < 0 {
+			return -1, false
+		}
+		return samples[g], true
+	case 2:
+		// Optimized index calculation for two parents.
+		g1, g2 := n.Given[0], n.Given[1]
+		if samples[g1] < 0 || samples[g2] < 0 {
+			return -1, false
+		}
+		return samples[g1]*n.Stride[0] +
+			samples[g2]*n.Stride[1], true
+	default:
+		// Default for more than 2 parents.
+		for j, parIdx := range n.Given {
+			parSample := samples[parIdx]
+			if parSample < 0 {
+				return -1, false
+			}
+			idx += parSample * n.Stride[j]
+		}
+		return idx, true
+	}
+}
+
 // Network definition.
 type Network struct {
 	name   string
