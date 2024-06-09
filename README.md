@@ -39,7 +39,7 @@ go get github.com/mlange-42/bbn
 
 ### Command line tools
 
-Try the sprinkler example:
+Try the famous sprinkler example:
 
 ```
 bbni _examples/sprinkler.yml
@@ -50,6 +50,8 @@ Same example with the command line tool, given some evidence:
 ```
 bbn _examples/sprinkler.yml -e Rain=no,GrassWet=yes
 ```
+
+Also try the other examples in folder [_examples](https://github.com/mlange-42/bbn/tree/main/_examples).
 
 ### Library
 

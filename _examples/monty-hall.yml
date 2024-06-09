@@ -11,7 +11,7 @@
   - [1, 1, 1]
 
 - name: Host
-  coords: [16, 7]
+  coords: [16, 8]
   parents: [Player, Car]
   states: [Door1, Door2, Door3]
   cpt: 
