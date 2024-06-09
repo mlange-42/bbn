@@ -61,7 +61,7 @@ func (a *App) Run() error {
 
 	a.createCanvas()
 	a.createWidgets()
-	a.render()
+	a.render(false)
 
 	a.app = tview.NewApplication()
 	grid := a.createMainPanel()

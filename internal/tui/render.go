@@ -4,9 +4,11 @@ import (
 	"strings"
 )
 
-func (a *App) render() {
+func (a *App) render(isUpdate bool) {
+	if !isUpdate {
+		a.renderEdges()
+	}
 	a.renderNodes()
-	a.renderEdges()
 	a.updateCanvas()
 }
 
