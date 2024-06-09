@@ -14,6 +14,8 @@ import (
 // trainCommand performs network training.
 func trainCommand() *cobra.Command {
 	var delim string
+	var noData string
+
 	root := cobra.Command{
 		Use:           "train file data-file",
 		Short:         "Performs network training.",
@@ -33,7 +35,7 @@ func trainCommand() *cobra.Command {
 				return fmt.Errorf("argument for --delim must be a single rune; got '%s'", delim)
 			}
 
-			net, err := runTrainCommand(netFile, datafile, delimRunes[0])
+			net, err := runTrainCommand(netFile, datafile, noData, delimRunes[0])
 			if err != nil {
 				return err
 			}
@@ -48,12 +50,15 @@ func trainCommand() *cobra.Command {
 		},
 	}
 
+	root.Flags().StringVarP(&noData, "no-data", "n", "", "Value for missing data (default \"\")")
 	root.Flags().StringVarP(&delim, "delim", "d", ",", "CSV delimiter")
+
+	root.Flags().SortFlags = false
 
 	return &root
 }
 
-func runTrainCommand(networkFile, dataFile string, delimiter rune) (*bbn.Network, error) {
+func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn.Network, error) {
 	net, nodes, err := bbn.FromYAMLFile(networkFile)
 	if err != nil {
 		return nil, err
@@ -83,8 +88,12 @@ func runTrainCommand(networkFile, dataFile string, delimiter rune) (*bbn.Network
 
 		outcomes[i] = make(map[string]int, len(node.Outcomes))
 		for j, o := range node.Outcomes {
+			if o == noData {
+				return nil, fmt.Errorf("no-data value '%s' appears as outcomes of node '%s'", noData, node.Variable)
+			}
 			outcomes[i][o] = j
 		}
+		outcomes[i][noData] = -1
 	}
 
 	train := bbn.NewTrainer(net)
