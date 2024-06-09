@@ -2,6 +2,7 @@ package bbn
 
 import "fmt"
 
+// Trainer is a utility type to train a [Network].
 type Trainer struct {
 	network *Network
 	data    [][][]int
@@ -10,6 +11,7 @@ type Trainer struct {
 	sample  []int
 }
 
+// NewTrainer creates a new [Trainer] for the given [Network].
 func NewTrainer(net *Network) Trainer {
 	data := make([][][]int, len(net.nodes))
 	counter := make([][]int, len(net.nodes))
@@ -34,7 +36,9 @@ func NewTrainer(net *Network) Trainer {
 	}
 }
 
-func (t *Trainer) AddSamples(sample []int) {
+// AddSample adds a training sample.
+// Order of values in the sample is the same as the order in which nodes were passed into the [Network] constructor.
+func (t *Trainer) AddSample(sample []int) {
 	for i, s := range sample {
 		t.sample[t.indices[i]] = s
 	}
@@ -47,6 +51,7 @@ func (t *Trainer) AddSamples(sample []int) {
 	}
 }
 
+// UpdateNetwork applies the training to the network, and returns a pointer to the original network.
 func (t *Trainer) UpdateNetwork() (*Network, error) {
 	for i, node := range t.network.nodes {
 		data := t.data[i]

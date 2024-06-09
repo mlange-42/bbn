@@ -51,7 +51,7 @@ func TestTrainer(t *testing.T) {
 	trainer := bbn.NewTrainer(net)
 
 	for _, row := range data {
-		trainer.AddSamples(row)
+		trainer.AddSample(row)
 	}
 	net, err = trainer.UpdateNetwork()
 	assert.Nil(t, err)
