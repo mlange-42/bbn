@@ -87,11 +87,25 @@ func New(name string, nodes ...*Node) (*Network, error) {
 		}
 	}
 
-	return &Network{
+	network := Network{
 		name:   name,
 		nodes:  nodeList,
 		byName: byName,
-	}, nil
+	}
+
+	network.cumulateTables()
+
+	return &network, nil
+}
+
+func (n *Network) cumulateTables() {
+	for _, n := range n.nodes {
+		cum := make([][]float64, len(n.Table))
+		for j, probs := range n.Table {
+			cum[j] = cumulate(probs)
+		}
+		n.TableCum = cum
+	}
 }
 
 // Sample performs rejection sampling to calculate marginal probabilities of the network.
