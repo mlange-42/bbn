@@ -15,7 +15,7 @@ func (m *ConflictingEvidenceError) Error() string {
 	return "conflicting evidence / all samples rejected"
 }
 
-func FromYAML(path string) (*Network, []*Node, error) {
+func FromYAMLFile(path string) (*Network, []*Node, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return nil, nil, err
@@ -37,6 +37,34 @@ func FromYAML(path string) (*Network, []*Node, error) {
 	}
 
 	return n, net.Variables, nil
+}
+
+func ToYAML(net *Network) ([]byte, error) {
+	def := networkDef{
+		Name:      net.name,
+		Variables: make([]*Node, len(net.nodes)),
+	}
+
+	for _, node := range net.nodes {
+		def.Variables[node.ID] = &Node{
+			Variable: node.Variable,
+			Given:    node.GivenNames,
+			Outcomes: node.Outcomes,
+			Table:    node.Table,
+			Position: node.Position,
+		}
+	}
+
+	writer := bytes.Buffer{}
+	encoder := yaml.NewEncoder(&writer)
+	encoder.SetIndent(2)
+
+	err := encoder.Encode(def)
+	if err != nil {
+		return nil, err
+	}
+
+	return writer.Bytes(), nil
 }
 
 // toInternalNodes transforms nodes to their internal representation.
@@ -87,13 +115,15 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 		}
 
 		nd := node{
-			Variable: n.Variable,
-			ID:       i,
-			Given:    parents,
-			Stride:   stride,
-			Outcomes: n.Outcomes,
-			Table:    n.Table,
-			TableCum: nil,
+			Variable:   n.Variable,
+			ID:         i,
+			GivenNames: n.Given,
+			Given:      parents,
+			Stride:     stride,
+			Outcomes:   n.Outcomes,
+			Table:      n.Table,
+			TableCum:   nil,
+			Position:   n.Position,
 		}
 
 		nodeList[i] = &nd

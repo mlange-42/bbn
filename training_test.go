@@ -9,7 +9,6 @@ import (
 )
 
 func TestTrainer(t *testing.T) {
-
 	rain := bbn.Node{
 		Variable: "Rain",
 		Outcomes: []string{"yes", "no"},

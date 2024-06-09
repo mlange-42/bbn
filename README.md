@@ -48,7 +48,13 @@ bbni _examples/sprinkler.yml
 Same example with the command line tool, given some evidence:
 
 ```
-bbn _examples/sprinkler.yml -e Rain=no,GrassWet=yes
+bbn sample _examples/sprinkler.yml -e Rain=no,GrassWet=yes
+```
+
+Train a network from data:
+
+```
+bbn train _examples/fruits.yml _examples/fruits.csv
 ```
 
 Also try the other examples in folder [_examples](https://github.com/mlange-42/bbn/tree/main/_examples).

@@ -68,8 +68,11 @@ jobs:
       uses: actions/checkout@v2
     - name: Install dependencies
       run: go get ./...
+    - name: Build command line tool
+      run: go build ./cmd/bbn
     - name: Run CLI examples
       run: |
-        go run ./cmd/bbn _examples/sprinkler.yml
-        go run ./cmd/bbn _examples/monty-hall.yml
-        go run ./cmd/bbn _examples/asia.yml
+        ./bbn sample _examples/sprinkler.yml
+        ./bbn sample _examples/monty-hall.yml
+        ./bbn sample _examples/asia.yml
+        ./bbn train _examples/fruits.yml _examples/fruits.csv
