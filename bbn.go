@@ -14,40 +14,40 @@ import (
 // Values in each row are relative, i.e. they do not necessarily sum up to 1.0.
 // See the package examples.
 type Node struct {
-	Name    string      // Name of the node.
-	Parents []string    // Names of parent nodes.
-	States  []string    // Names of the node's possible states.
-	CPT     [][]float64 // Conditional probability table.
-	Coords  [2]int      // Coordinates for visualization, optional.
+	Variable string      // Name of the node.
+	Given    []string    // Names of parent nodes.
+	Outcomes []string    // Names of the node's possible states.
+	Table    [][]float64 // Conditional probability table.
+	Position [2]int      // Coordinates for visualization, optional.
 }
 
 // node is the [Network]s internal node type.
 type node struct {
-	Name    string
-	ID      int
-	Parents []int
-	Stride  []int
-	States  []string
-	CPT     [][]float64
-	CPTCum  [][]float64
+	Variable string
+	ID       int
+	Given    []int
+	Stride   []int
+	Outcomes []string
+	Table    [][]float64
+	TableCum [][]float64
 }
 
 func (n *node) Index(samples []int) int {
 	idx := 0
-	switch len(n.Parents) {
+	switch len(n.Given) {
 	case 0:
 		// Root nodes use the evidence is available.
 		return 0
 	case 1:
 		// Optimized index calculation for one parent.
-		idx = samples[n.Parents[0]]
+		idx = samples[n.Given[0]]
 	case 2:
 		// Optimized index calculation for two parents.
-		idx = samples[n.Parents[0]]*n.Stride[0] +
-			samples[n.Parents[1]]*n.Stride[1]
+		idx = samples[n.Given[0]]*n.Stride[0] +
+			samples[n.Given[1]]*n.Stride[1]
 	default:
 		// Default for more than 2 parents.
-		for j, parIdx := range n.Parents {
+		for j, parIdx := range n.Given {
 			parSample := samples[parIdx]
 			idx += parSample * n.Stride[j]
 		}
@@ -75,8 +75,8 @@ func New(nodes ...*Node) (*Network, error) {
 
 	byName := map[string]int{}
 	for i, n := range nodeList {
-		byName[n.Name] = i
-		if len(n.Parents) == 0 {
+		byName[n.Variable] = i
+		if len(n.Given) == 0 {
 			continue
 		}
 	}
@@ -110,7 +110,7 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 		for j, cnt := range counts[i] {
 			probs[j] = float64(cnt) / float64(matches)
 		}
-		result[node.Name] = probs
+		result[node.Variable] = probs
 	}
 
 	return result, nil
@@ -122,7 +122,7 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 	// Prepare slices for counting.
 	counts := make([][]int, len(n.nodes))
 	for i := range counts {
-		counts[i] = make([]int, len(n.nodes[i].States))
+		counts[i] = make([]int, len(n.nodes[i].Outcomes))
 	}
 
 	// Sampling.
@@ -136,13 +136,13 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 
 			e := ev[i]
 			// Don't sample for root nodes with given evidence
-			if len(node.Parents) == 0 && e >= 0 {
+			if len(node.Given) == 0 && e >= 0 {
 				samples[i] = e
 				continue
 			}
 
 			// Sample from cumulative probabilities.
-			s := sample(node.CPTCum[idx], rng)
+			s := sample(node.TableCum[idx], rng)
 
 			// Reject if sample is not equal to evidence
 			if e >= 0 && e != s {
@@ -179,9 +179,9 @@ func (n *Network) prepareEvidence(evidence map[string]string) ([]int, error) {
 		if !ok {
 			return nil, fmt.Errorf("node '%s' not found", k)
 		}
-		vIdx := slices.Index(n.nodes[idx].States, v)
+		vIdx := slices.Index(n.nodes[idx].Outcomes, v)
 		if vIdx < 0 {
-			return nil, fmt.Errorf("value '%s' not found for node '%s' (has %s)", v, n.nodes[idx].Name, n.nodes[idx].States)
+			return nil, fmt.Errorf("value '%s' not found for node '%s' (has %s)", v, n.nodes[idx].Variable, n.nodes[idx].Outcomes)
 		}
 		ev[idx] = vIdx
 	}

@@ -11,9 +11,9 @@ import (
 
 func TestNodeRender(t *testing.T) {
 	node := &bbn.Node{
-		Name:   "TestNode with a very long name",
-		States: []string{"yes", "no", "maybe"},
-		Coords: [2]int{0, 0},
+		Variable: "TestNode with a very long name",
+		Outcomes: []string{"yes", "no", "maybe"},
+		Position: [2]int{0, 0},
 	}
 
 	uiNode := tui.NewNode(node)

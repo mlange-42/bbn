@@ -43,16 +43,16 @@ func rootCommand() *cobra.Command {
 
 			for _, node := range nodes {
 				fmt.Print("                              ")
-				states := node.States
+				states := node.Outcomes
 				for _, s := range states {
 					fmt.Printf(" %10s", s)
 				}
-				fmt.Printf("\n%30s", node.Name)
-				probs := result[node.Name]
+				fmt.Printf("\n%30s", node.Variable)
+				probs := result[node.Variable]
 				for _, p := range probs {
 					fmt.Printf(" %9.3f%%", p*100)
 				}
-				if _, ok := ev[node.Name]; ok {
+				if _, ok := ev[node.Variable]; ok {
 					fmt.Print("  +")
 				}
 				fmt.Println()

@@ -30,7 +30,7 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 		return nil
 	} else if event.Rune() == ' ' {
 		// Cycle through states.
-		a.selectedState = (a.selectedState + 1) % len(a.nodes[a.selectedNode].Node().States)
+		a.selectedState = (a.selectedState + 1) % len(a.nodes[a.selectedNode].Node().Outcomes)
 		a.render(true)
 		return nil
 	} else if unicode.IsDigit(event.Rune()) {
@@ -40,7 +40,7 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 			panic(err)
 		}
 		idx -= 1
-		if idx >= 0 && idx < len(a.nodes[a.selectedNode].Node().States) {
+		if idx >= 0 && idx < len(a.nodes[a.selectedNode].Node().Outcomes) {
 			a.selectedState = idx
 			a.render(true)
 		}
@@ -59,7 +59,7 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 // inputEnter adds the currently selected node and state to the evidence.
 func (a *App) inputEnter() error {
 	node := a.nodes[a.selectedNode]
-	value := node.Node().States[a.selectedState]
+	value := node.Node().Outcomes[a.selectedState]
 
 	// Store old evidence in case of fail/error.
 	oldEvidence := make(map[string]string, len(a.evidence))
@@ -68,14 +68,14 @@ func (a *App) inputEnter() error {
 	}
 
 	// Add/clear selected state
-	if oldValue, ok := a.evidence[node.Node().Name]; ok {
+	if oldValue, ok := a.evidence[node.Node().Variable]; ok {
 		if oldValue == value {
-			delete(a.evidence, node.Node().Name)
+			delete(a.evidence, node.Node().Variable)
 		} else {
-			a.evidence[node.Node().Name] = value
+			a.evidence[node.Node().Variable] = value
 		}
 	} else {
-		a.evidence[node.Node().Name] = value
+		a.evidence[node.Node().Variable] = value
 	}
 
 	// Store old marginals in case of fail/error.

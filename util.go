@@ -38,20 +38,20 @@ func NodesFromYAML(path string) ([]*Node, error) {
 func toInternalNodes(nodes []*Node) ([]*node, error) {
 	nodeMap := map[string]int{}
 	for i, n := range nodes {
-		nodeMap[n.Name] = i
+		nodeMap[n.Variable] = i
 	}
 
 	nodeList := make([]*node, len(nodes))
 	for i, n := range nodes {
-		nodeMap[n.Name] = i
+		nodeMap[n.Variable] = i
 
-		cum := make([][]float64, len(n.CPT))
-		for j, probs := range n.CPT {
+		cum := make([][]float64, len(n.Table))
+		for j, probs := range n.Table {
 			cum[j] = cumulate(probs)
 		}
 
-		parents := make([]int, len(n.Parents))
-		for j, p := range n.Parents {
+		parents := make([]int, len(n.Given))
+		for j, p := range n.Given {
 			par, ok := nodeMap[p]
 			if !ok {
 				return nil, fmt.Errorf("parent node '%s' not found", p)
@@ -61,22 +61,22 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 
 		var stride []int
 		if len(parents) > 0 {
-			stride = make([]int, len(n.Parents))
+			stride = make([]int, len(n.Given))
 			stride[len(stride)-1] = 1
 			for j := len(stride) - 2; j >= 0; j-- {
 				parIdx := parents[j+1]
-				stride[j] = stride[j+1] * len(nodeList[parIdx].States)
+				stride[j] = stride[j+1] * len(nodeList[parIdx].Outcomes)
 			}
 		}
 
 		nd := node{
-			Name:    n.Name,
-			ID:      i,
-			Parents: parents,
-			Stride:  stride,
-			States:  n.States,
-			CPT:     n.CPT,
-			CPTCum:  cum,
+			Variable: n.Variable,
+			ID:       i,
+			Given:    parents,
+			Stride:   stride,
+			Outcomes: n.Outcomes,
+			Table:    n.Table,
+			TableCum: cum,
 		}
 
 		nodeList[i] = &nd
@@ -106,8 +106,8 @@ func sortTopological(nodes []*node) ([]*node, error) {
 	result := make([]*node, len(nodes))
 	for i, idx := range stack {
 		n := nodes[idx]
-		for i, par := range n.Parents {
-			n.Parents[i] = newIndex[par]
+		for i, par := range n.Given {
+			n.Given[i] = newIndex[par]
 		}
 		result[i] = n
 	}
@@ -124,7 +124,7 @@ func sortTopologicalRecursive(nodes []*node, index int, start int, visited []boo
 	visited[index] = true
 	n := nodes[index]
 
-	for _, parent := range n.Parents {
+	for _, parent := range n.Given {
 		if parent == start {
 			return nil, fmt.Errorf("graph has cycles")
 		}

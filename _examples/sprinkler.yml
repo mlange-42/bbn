@@ -1,24 +1,24 @@
-- name: Rain
-  states: [yes, no]
-  coords: [20, 0]
-  cpt:
+- variable: Rain
+  outcomes: [yes, no]
+  position: [20, 0]
+  table:
   #  yes   no
   - [0.2, 0.8]
 
-- name: Sprinkler
-  parents: [Rain]
-  states: [yes, no]
-  coords: [1, 7]
-  cpt:
+- variable: Sprinkler
+  given: [Rain]
+  outcomes: [yes, no]
+  position: [1, 7]
+  table:
   #   yes   no
   - [0.01, 0.99] # rain yes
   - [0.2,  0.8 ] # rain no
 
-- name: GrassWet
-  parents: [Rain, Sprinkler]
-  states: [yes, no]
-  coords: [36, 10]
-  cpt:
+- variable: GrassWet
+  given: [Rain, Sprinkler]
+  outcomes: [yes, no]
+  position: [36, 10]
+  table:
   #   yes   no
   - [0.99, 0.01] # rain yes, sprikler yes
   - [0.8,  0.2 ] # rain yes, sprikler no

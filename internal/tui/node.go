@@ -27,7 +27,7 @@ type node struct {
 
 func NewNode(n *bbn.Node) Node {
 	maxStateLen := 0
-	for _, state := range n.States {
+	for _, state := range n.Outcomes {
 		cnt := utf8.RuneCountInString(state)
 		if cnt > maxStateLen {
 			maxStateLen = cnt
@@ -38,10 +38,10 @@ func NewNode(n *bbn.Node) Node {
 	}
 
 	bounds := Bounds{
-		X: n.Coords[0],
-		Y: n.Coords[1],
+		X: n.Position[0],
+		Y: n.Position[1],
 		W: maxStateLen + maxBars + 7 + 6,
-		H: len(n.States) + 3,
+		H: len(n.Outcomes) + 3,
 	}
 
 	runes := make([][]rune, bounds.H)
@@ -66,7 +66,7 @@ func NewNode(n *bbn.Node) Node {
 	node.drawTitle()
 	node.drawStateLabels()
 
-	node.drawBars(make([]float64, len(n.States)), false, 0, false)
+	node.drawBars(make([]float64, len(n.Outcomes)), false, 0, false)
 
 	return &node
 }
@@ -106,12 +106,12 @@ func (n *node) drawBorder(selected bool) {
 }
 
 func (n *node) drawTitle() {
-	runes := []rune(n.node.Name)
+	runes := []rune(n.node.Variable)
 	copy(n.runes[1][2:n.bounds.W-2], runes)
 }
 
 func (n *node) drawStateLabels() {
-	for i, label := range n.node.States {
+	for i, label := range n.node.Outcomes {
 		copy(n.runes[i+2][2:n.barsX-1], []rune(label))
 	}
 }

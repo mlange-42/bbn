@@ -47,7 +47,7 @@ func (a *App) Run() error {
 	a.nodesByName = make(map[string]int, len(nodes))
 	for i, n := range nodes {
 		a.nodes[i] = NewNode(n)
-		a.nodesByName[n.Name] = i
+		a.nodesByName[n.Variable] = i
 	}
 
 	a.network, err = bbn.New(nodes...)
@@ -111,7 +111,7 @@ func (a *App) createMainPanel() tview.Primitive {
 
 	help := tview.NewTextView().
 		SetWrap(false).
-		SetText("Exit: ESC  Scroll: ←→↕  Nodes: Tab  States: Space/Numbers  Toggle: Enter")
+		SetText("Exit: ESC  Scroll: ←→↕  Nodes: Tab  Outcomes: Space/Numbers  Toggle: Enter")
 	grid.AddItem(help, 2, 0, 1, 2, 0, 0, false)
 
 	return grid
