@@ -6,9 +6,13 @@
 
 * Support reading BIF-XML file format (#25)
 
+### Documentation
+
+* Adds "Native Fish" example in YAML format (#28)
+
 ### Bugfixes
 
-* Fix outcome labels in probability table view (#26) 
+* Fix outcome labels in probability table view (#27)
 
 ## [[v0.1.0]](https://github.com/mlange-42/bbn/commits/v0.1.0/)
 

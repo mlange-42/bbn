@@ -1,0 +1,71 @@
+# Native Fish V1 from https://www.abnms.org/bn/107
+name: Native Fish
+variables:
+
+- variable: Pesticide Use
+  outcomes: [High, Low]
+  position: [1, 0]
+  table:
+  - [90, 10]
+
+- variable: Drought Conditions
+  outcomes: [Yes, No]
+  position: [32, 0]
+  table:
+  - [25, 75]
+
+- variable: Annual Rainfall
+  outcomes: [BelowAvg, Avg, AboveAvg]
+  position: [66, 0]
+  table:
+  - [10, 70, 20]
+
+- variable: Pesticide in River
+  given: [Pesticide Use, Annual Rainfall]
+  outcomes: [High, Low]
+  position: [1, 8]
+  table:
+  # high low    PesticideUse  AnnualRainfall
+  - [30, 70] #          High        BelowAvg
+  - [60, 40] #          High             Avg
+  - [80, 20] #          High        AboveAvg
+  - [10, 90] #           Low        BelowAvg
+  - [20, 80] #           Low             Avg
+  - [30, 70] #           Low        AboveAvg
+
+- variable: River Flow
+  given: [Drought Conditions, Annual Rainfall]
+  outcomes: [Good, Poor]
+  position: [32, 8]
+  table:
+  # good poor    DroughtCond  AnnualRainfall
+  - [ 5, 95] #           Yes        BelowAvg
+  - [15, 85] #           Yes             Avg
+  - [80, 20] #           Yes        AboveAvg
+  - [40, 60] #            No        BelowAvg
+  - [60, 40] #            No             Avg
+  - [99,  1] #            No        AboveAvg
+
+- variable: Tree Condition
+  given: [Drought Conditions, Annual Rainfall]
+  outcomes: [Good, Damaged, Dead]
+  position: [64, 8]
+  table:
+  # good damaged dead  DroughtCond  AnnualRainfall
+  - [ 20,  60,  20] #          Yes        BelowAvg
+  - [ 25,  60,  15] #          Yes             Avg
+  - [ 30,  60,  10] #          Yes        AboveAvg
+  - [ 70,  25,   5] #           No        BelowAvg
+  - [ 80,  18,   2] #           No             Avg
+  - [ 90,   9,   1] #           No        AboveAvg
+
+- variable: Native Fish Abundance
+  given: [Pesticide in River, River Flow]
+  outcomes: [High, Medium, Low]
+  position: [16, 16]
+  table:
+  # high medium low    PestInRiver       RiverFlow
+  - [ 20,  40,  40] #          Yes            Good
+  - [  1,  10,  89] #          Yes            Poor
+  - [ 80,  15,   5] #           No            Good
+  - [  5,  15,  80] #           No            Poor

@@ -75,4 +75,6 @@ jobs:
         ./bbn sample _examples/sprinkler.yml
         ./bbn sample _examples/monty-hall.yml
         ./bbn sample _examples/asia.yml
+        ./bbn sample _examples/native-fish.yml
         ./bbn train _examples/fruits.yml _examples/fruits.csv
+        ./bbn sample _examples/dog-problem.xml
