@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/mlange-42/bbn"
@@ -62,7 +63,12 @@ func sampleCommand() *cobra.Command {
 }
 
 func runSampleCommand(path string, evidence []string, samples int, seed int64) ([]*bbn.Node, map[string]string, map[string][]float64, error) {
-	net, nodes, err := bbn.FromYAMLFile(path)
+	yml, err := os.ReadFile(path)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	net, nodes, err := bbn.FromYAML(yml)
 	if err != nil {
 		return nil, nil, nil, err
 	}

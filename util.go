@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"math/rand"
-	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -15,18 +14,13 @@ func (m *ConflictingEvidenceError) Error() string {
 	return "conflicting evidence / all samples rejected"
 }
 
-func FromYAMLFile(path string) (*Network, []*Node, error) {
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return nil, nil, err
-	}
-
+func FromYAML(content []byte) (*Network, []*Node, error) {
 	reader := bytes.NewReader(content)
 	decoder := yaml.NewDecoder(reader)
 	decoder.KnownFields(true)
 
 	net := networkDef{}
-	err = decoder.Decode(&net)
+	err := decoder.Decode(&net)
 	if err != nil {
 		return nil, nil, err
 	}

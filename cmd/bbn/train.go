@@ -59,7 +59,12 @@ func trainCommand() *cobra.Command {
 }
 
 func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn.Network, error) {
-	net, nodes, err := bbn.FromYAMLFile(networkFile)
+	yml, err := os.ReadFile(networkFile)
+	if err != nil {
+		return nil, err
+	}
+
+	net, nodes, err := bbn.FromYAML(yml)
 	if err != nil {
 		return nil, err
 	}
