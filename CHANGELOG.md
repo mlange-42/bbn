@@ -6,6 +6,10 @@
 
 * Support reading BIF-XML file format (#25)
 
+### Bugfixes
+
+* Fix outcome labels in probability table view (#26) 
+
 ## [[v0.1.0]](https://github.com/mlange-42/bbn/commits/v0.1.0/)
 
 Initial release of BBN, the Bayesian Belief Network library and CLI/TUI tool for [Go](https://go.dev).
