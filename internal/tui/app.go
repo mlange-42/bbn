@@ -3,7 +3,6 @@ package tui
 import (
 	"fmt"
 	"math/rand"
-	"os"
 
 	"github.com/mlange-42/bbn"
 	"github.com/rivo/tview"
@@ -42,12 +41,7 @@ func New(path string, evidence map[string]string, samples int, seed int64) *App 
 }
 
 func (a *App) Run() error {
-	yml, err := os.ReadFile(a.file)
-	if err != nil {
-		return err
-	}
-
-	net, nodes, err := bbn.FromYAML(yml)
+	net, nodes, err := bbn.FromFile(a.file)
 	if err != nil {
 		return err
 	}
@@ -111,11 +105,9 @@ func (a *App) createWidgets() {
 		SetText("")
 	a.graph.SetBorder(true)
 
-	data := NewTable(a.nodes, 2, a.nodesByName)
 	a.table = tview.NewTable().
 		SetBorders(false).
 		SetSelectable(false, false).
-		SetContent(&data).
 		SetEvaluateAllRows(true).
 		SetFixed(1, 0).
 		SetSeparator(tview.Borders.Vertical)
