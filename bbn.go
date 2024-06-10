@@ -6,11 +6,6 @@ import (
 	"slices"
 )
 
-type networkDef struct {
-	Name      string
-	Variables []*Node
-}
-
 // Node definition.
 //
 // CPT is the conditional probability table.

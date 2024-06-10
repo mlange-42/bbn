@@ -3,7 +3,6 @@ package tui
 import (
 	"fmt"
 	"math/rand"
-	"os"
 
 	"github.com/mlange-42/bbn"
 	"github.com/rivo/tview"
@@ -42,12 +41,7 @@ func New(path string, evidence map[string]string, samples int, seed int64) *App 
 }
 
 func (a *App) Run() error {
-	yml, err := os.ReadFile(a.file)
-	if err != nil {
-		return err
-	}
-
-	net, nodes, err := bbn.FromYAML(yml)
+	net, nodes, err := bbn.FromFile(a.file)
 	if err != nil {
 		return err
 	}
