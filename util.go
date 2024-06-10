@@ -154,29 +154,9 @@ func FromBIFXML(content []byte) (*Network, []*Node, error) {
 			}
 			table[i] = row
 		}
-		position := [2]int{}
-		for _, prob := range variable.Properties {
-			parts := strings.Split(prob, "=")
-			if len(parts) != 2 || strings.TrimSpace(parts[0]) != "position" {
-				continue
-			}
-			value := strings.TrimSpace(parts[1])
-			value = strings.Trim(value, "()")
-			parts = strings.Split(value, ",")
-			if len(parts) != 2 {
-				return nil, nil, fmt.Errorf("syntax error in property 'position' of node '%s'", variable.Name)
-			}
-			var err error
-			position[0], err = strconv.Atoi(strings.TrimSpace(parts[0]))
-			if err != nil {
-				return nil, nil, fmt.Errorf("error parsing '%s' to integer in property 'position' of node '%s'", parts[0], variable.Name)
-			}
-			position[1], err = strconv.Atoi(strings.TrimSpace(parts[1]))
-			if err != nil {
-				return nil, nil, fmt.Errorf("error parsing '%s' to integer in property 'position' of node '%s'", parts[1], variable.Name)
-			}
-			position[0] /= 2
-			position[1] /= 12
+		position, err := parsePosition(&variable)
+		if err != nil {
+			return nil, nil, err
 		}
 
 		node := Node{
@@ -195,6 +175,35 @@ func FromBIFXML(content []byte) (*Network, []*Node, error) {
 	}
 
 	return n, nodes, nil
+}
+
+func parsePosition(variable *variableXml) ([2]int, error) {
+	position := [2]int{}
+	for _, prob := range variable.Properties {
+		parts := strings.Split(prob, "=")
+		if len(parts) != 2 || strings.TrimSpace(parts[0]) != "position" {
+			continue
+		}
+		value := strings.TrimSpace(parts[1])
+		value = strings.Trim(value, "()")
+		parts = strings.Split(value, ",")
+		if len(parts) != 2 {
+			return position, fmt.Errorf("syntax error in property 'position' of node '%s'", variable.Name)
+		}
+		var err error
+		position[0], err = strconv.Atoi(strings.TrimSpace(parts[0]))
+		if err != nil {
+			return position, fmt.Errorf("error parsing '%s' to integer in property 'position' of node '%s'", parts[0], variable.Name)
+		}
+		position[1], err = strconv.Atoi(strings.TrimSpace(parts[1]))
+		if err != nil {
+			return position, fmt.Errorf("error parsing '%s' to integer in property 'position' of node '%s'", parts[1], variable.Name)
+		}
+		position[0] /= 2
+		position[1] /= 12
+	}
+
+	return position, nil
 }
 
 // toInternalNodes transforms nodes to their internal representation.

@@ -105,11 +105,9 @@ func (a *App) createWidgets() {
 		SetText("")
 	a.graph.SetBorder(true)
 
-	data := NewTable(a.nodes, 2, a.nodesByName)
 	a.table = tview.NewTable().
 		SetBorders(false).
 		SetSelectable(false, false).
-		SetContent(&data).
 		SetEvaluateAllRows(true).
 		SetFixed(1, 0).
 		SetSeparator(tview.Borders.Vertical)
