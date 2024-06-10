@@ -29,3 +29,20 @@ variables:
   - [0, 1, 0] # P3 C1
   - [1, 0, 0] # P3 C2
   - [1, 1, 0] # P3 C3
+
+- variable: Change Door
+  position: [9, 16]
+  given: [Player, Car]
+  outcomes: [Yes, No]
+  table: 
+  - [0, 1] # P1 C1
+  - [1, 0] # P1 C2
+  - [1, 0] # P1 C3
+
+  - [1, 0] # P2 C1
+  - [0, 1] # P2 C2
+  - [1, 0] # P2 C3
+
+  - [1, 0] # P3 C1
+  - [1, 0] # P3 C2
+  - [0, 1] # P3 C3
