@@ -8,7 +8,9 @@
 
 ### Documentation
 
+* Adds "Dog Problem" example in BIF-XML format (#25)
 * Adds "Native Fish" example in YAML format (#28)
+* Adds "Mendel Genetics" example in YAML format (#29)
 
 ### Bugfixes
 

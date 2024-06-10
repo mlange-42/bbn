@@ -123,7 +123,7 @@ func (a *App) createMainPanel() *tview.Grid {
 
 	header := tview.NewTextView().
 		SetWrap(false).
-		SetText(fmt.Sprintf("BBNi - %s", a.file))
+		SetText(fmt.Sprintf("BBNi - %s (%s)", a.network.Name(), a.file))
 	grid.AddItem(header, 0, 0, 1, 2, 0, 0, false)
 
 	grid.AddItem(a.graph, 1, 0, 1, 2, 0, 0, true)
