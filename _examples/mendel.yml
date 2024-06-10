@@ -1,0 +1,62 @@
+# Mendel's experiment of breeding red and white flowered peas.
+# Source:
+# - https://www.abnms.org/bn/180
+# - https://www.norsys.com/netlibrary/nets/tut/Mendel%20Genetics_tut.htm
+
+name: Mendel Genetics
+variables:
+
+- variable: Genes Parent 1
+  outcomes: [RR, Rw, ww]
+  position: [17, 0]
+  table:
+  - [25, 50, 25]
+
+- variable: Genes Parent 2
+  outcomes: [RR, Rw, ww]
+  position: [49, 0]
+  table:
+  - [25, 50, 25]
+
+- variable: Color Parent 1
+  given: [Genes Parent 1]
+  outcomes: [red, white]
+  position: [1, 8]
+  table:
+  - [1, 0] # RR
+  - [1, 0] # Rw
+  - [0, 1] # ww
+
+- variable: Genes Child
+  given: [Genes Parent 1, Genes Parent 2]
+  outcomes: [RR, Rw, ww]
+  position: [33, 8]
+  table:
+  #   RR   Rw   ww     P1 P2
+  - [100,   0,   0]  # RR RR
+  - [ 50,  50,   0]  # RR Rw
+  - [  0, 100,   0]  # RR ww
+  - [ 50,  50,   0]  # Rw RR
+  - [ 25,  50,  25]  # Rw Rw
+  - [  0,  50,  50]  # Rw ww
+  - [  0, 100,   0]  # ww RR
+  - [  0,  50,  50]  # ww Rw
+  - [  0,   0, 100]  # ww ww
+
+- variable: Color Parent 2
+  given: [Genes Parent 2]
+  outcomes: [red, white]
+  position: [65, 8]
+  table:
+  - [1, 0] # RR
+  - [1, 0] # Rw
+  - [0, 1] # ww
+
+- variable: Color Child
+  given: [Genes Child]
+  outcomes: [red, white]
+  position: [31, 16]
+  table:
+  - [1, 0] # RR
+  - [1, 0] # Rw
+  - [0, 1] # ww

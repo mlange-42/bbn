@@ -9,6 +9,7 @@
 ### Documentation
 
 * Adds "Native Fish" example in YAML format (#28)
+* Adds "Mendel Genetics" example in YAML format (#29)
 
 ### Bugfixes
 

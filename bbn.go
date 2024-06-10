@@ -129,6 +129,10 @@ func New(name string, nodes ...*Node) (*Network, error) {
 	return &network, nil
 }
 
+func (n *Network) Name() string {
+	return n.name
+}
+
 func (n *Network) cumulateTables() {
 	for _, n := range n.nodes {
 		cum := make([][]float64, len(n.Table))
