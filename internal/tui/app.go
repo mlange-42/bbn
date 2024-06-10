@@ -14,7 +14,9 @@ type App struct {
 	file        string
 	nodes       []Node
 	nodesByName map[string]int
+	pages       *tview.Pages
 	graph       *tview.TextView
+	table       *tview.Table
 	canvas      [][]rune
 	network     *bbn.Network
 	rng         *rand.Rand
@@ -67,11 +69,14 @@ func (a *App) Run() error {
 	a.render(false)
 
 	a.app = tview.NewApplication()
-	grid := a.createMainPanel()
+
+	a.pages = tview.NewPages()
+	a.pages.AddAndSwitchToPage("Graph", a.createMainPanel(), true)
+	a.pages.AddPage("Table", a.createTablePanel(), true, false)
 
 	a.app.SetInputCapture(a.input)
 
-	if err := a.app.SetRoot(grid, true).Run(); err != nil {
+	if err := a.app.SetRoot(a.pages, true).Run(); err != nil {
 		return err
 	}
 	return nil
@@ -97,6 +102,16 @@ func (a *App) createWidgets() {
 		SetDynamicColors(true).
 		SetText("")
 	a.graph.SetBorder(true)
+
+	data := NewTable(a.nodes, 2, a.nodesByName)
+	a.table = tview.NewTable().
+		SetBorders(false).
+		SetSelectable(false, false).
+		SetContent(&data).
+		SetEvaluateAllRows(true).
+		SetSeparator(tview.Borders.Vertical)
+	a.table.SetBorder(true)
+
 }
 
 func (a *App) createMainPanel() tview.Primitive {
@@ -114,8 +129,18 @@ func (a *App) createMainPanel() tview.Primitive {
 
 	help := tview.NewTextView().
 		SetWrap(false).
-		SetText("Exit: ESC  Scroll: ←→↕  Nodes: Tab  Outcomes: Space/Numbers  Toggle: Enter")
+		SetText("Exit: ESC  Scroll: ←→↕  Nodes: Tab  Outcomes: Space/Numbers  Toggle: Enter  Table: T")
 	grid.AddItem(help, 2, 0, 1, 2, 0, 0, false)
+
+	return grid
+}
+
+func (a *App) createTablePanel() tview.Primitive {
+	grid := tview.NewGrid().
+		SetColumns(0, 60, 0).
+		SetRows(0, 16, 0)
+
+	grid.AddItem(a.table, 1, 1, 1, 1, 0, 0, true)
 
 	return grid
 }
