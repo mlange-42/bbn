@@ -16,6 +16,7 @@ type App struct {
 	nodesByName map[string]int
 	pages       *tview.Pages
 	graph       *tview.TextView
+	tableDialog *tview.Grid
 	table       *tview.Table
 	canvas      [][]rune
 	network     *bbn.Network
@@ -71,10 +72,17 @@ func (a *App) Run() error {
 	a.app = tview.NewApplication()
 
 	a.pages = tview.NewPages()
-	a.pages.AddAndSwitchToPage("Graph", a.createMainPanel(), true)
-	a.pages.AddPage("Table", a.createTablePanel(), true, false)
 
-	a.app.SetInputCapture(a.input)
+	mainPanel := a.createMainPanel()
+	a.pages.AddAndSwitchToPage("Graph", mainPanel, true)
+
+	a.tableDialog = a.createTablePanel()
+	a.pages.AddPage("Table", a.tableDialog, true, false)
+
+	mainPanel.SetInputCapture(a.inputMainPanel)
+	a.table.SetInputCapture(a.inputTable)
+
+	a.app.SetFocus(a.graph)
 
 	if err := a.app.SetRoot(a.pages, true).Run(); err != nil {
 		return err
@@ -109,12 +117,13 @@ func (a *App) createWidgets() {
 		SetSelectable(false, false).
 		SetContent(&data).
 		SetEvaluateAllRows(true).
+		SetFixed(1, 0).
 		SetSeparator(tview.Borders.Vertical)
 	a.table.SetBorder(true)
 
 }
 
-func (a *App) createMainPanel() tview.Primitive {
+func (a *App) createMainPanel() *tview.Grid {
 	grid := tview.NewGrid().
 		SetRows(1, 0, 1).
 		SetColumns(len(a.canvas[0])+3, 0).
@@ -135,12 +144,24 @@ func (a *App) createMainPanel() tview.Primitive {
 	return grid
 }
 
-func (a *App) createTablePanel() tview.Primitive {
+func (a *App) createTablePanel() *tview.Grid {
 	grid := tview.NewGrid().
 		SetColumns(0, 60, 0).
 		SetRows(0, 16, 0)
 
-	grid.AddItem(a.table, 1, 1, 1, 1, 0, 0, true)
+	subGrid := tview.NewGrid().
+		SetColumns(0).
+		SetRows(0, 1)
+	subGrid.SetBorder(true)
+
+	subGrid.AddItem(a.table, 0, 0, 1, 1, 0, 0, true)
+
+	help := tview.NewTextView().
+		SetWrap(false).
+		SetText("Close table: ESC  Scroll: ←→↕")
+	subGrid.AddItem(help, 1, 0, 1, 1, 0, 0, false)
+
+	grid.AddItem(subGrid, 1, 1, 1, 1, 0, 0, false)
 
 	return grid
 }

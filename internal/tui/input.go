@@ -8,14 +8,8 @@ import (
 	"github.com/mlange-42/bbn"
 )
 
-func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
+func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 	if event.Key() == tcell.KeyEsc {
-		front, _ := a.pages.GetFrontPage()
-		if front == "Table" {
-			a.pages.HidePage(front)
-			return nil
-		}
-
 		// Exit program.
 		a.app.Stop()
 		return nil
@@ -59,10 +53,19 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 		a.render(true)
 		return nil
 	} else if event.Rune() == 't' {
-		data := NewTable(a.nodes, a.selectedNode, a.nodesByName)
-		a.table.SetContent(&data)
-		a.table.SetTitle(" " + a.nodes[a.selectedNode].Node().Variable + " ")
-		a.pages.ShowPage("Table")
+		a.showTable()
+	}
+	return event
+}
+
+func (a *App) inputTable(event *tcell.EventKey) *tcell.EventKey {
+	if event.Key() == tcell.KeyEsc {
+		front, _ := a.pages.GetFrontPage()
+		if front == "Table" {
+			a.pages.HidePage(front)
+			return nil
+		}
+		return nil
 	}
 	return event
 }
@@ -106,4 +109,17 @@ func (a *App) inputEnter() error {
 		}
 	}
 	return nil
+}
+
+func (a *App) showTable() {
+	node := a.nodes[a.selectedNode].Node()
+
+	data := NewTable(a.nodes, a.selectedNode, a.nodesByName)
+
+	a.tableDialog.SetRows(0, len(node.Table)+6, 0)
+	a.table.SetContent(&data)
+	a.table.SetTitle(" " + node.Variable + " ")
+	a.pages.ShowPage("Table")
+
+	a.app.SetFocus(a.table)
 }
