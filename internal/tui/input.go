@@ -10,6 +10,12 @@ import (
 
 func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 	if event.Key() == tcell.KeyEsc {
+		front, _ := a.pages.GetFrontPage()
+		if front == "Table" {
+			a.pages.HidePage(front)
+			return nil
+		}
+
 		// Exit program.
 		a.app.Stop()
 		return nil
@@ -52,6 +58,11 @@ func (a *App) input(event *tcell.EventKey) *tcell.EventKey {
 		}
 		a.render(true)
 		return nil
+	} else if event.Rune() == 't' {
+		data := NewTable(a.nodes, a.selectedNode, a.nodesByName)
+		a.table.SetContent(&data)
+		a.table.SetTitle(" " + a.nodes[a.selectedNode].Node().Variable + " ")
+		a.pages.ShowPage("Table")
 	}
 	return event
 }
