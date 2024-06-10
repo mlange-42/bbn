@@ -9,6 +9,13 @@ Bayesian Belief Network library and CLI/TUI tool for [Go](https://go.dev).
 
 ![screenshot](https://github.com/mlange-42/bbn/assets/44003176/0844f5dd-0078-4ba3-8ef8-18441669900a)
 
+## Features
+
+* Minimal, fast API for usage as a library.
+* Human-readable YAML format for networks.
+* Train and query networks from the command line with `bbn`.
+* Visualize, query and explore networks in the interactive TUI app `bbni`.
+
 ## Installation
 
 ### Command line tools
