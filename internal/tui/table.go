@@ -45,7 +45,8 @@ func (t *Table) GetCell(row, column int) *tview.TableCell {
 			par := t.nodes[parIdx]
 			stride *= len(par.Node().Outcomes)
 		}
-		text := node.Node().Outcomes[(row/stride)%len(node.Node().Outcomes)]
+		parent := t.nodes[t.nodesByName[node.Node().Given[column]]].Node()
+		text := parent.Outcomes[(row/stride)%len(parent.Outcomes)]
 		cell := tview.NewTableCell(text)
 		cell.SetAlign(tview.AlignRight)
 		return cell

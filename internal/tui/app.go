@@ -138,7 +138,7 @@ func (a *App) createMainPanel() *tview.Grid {
 
 func (a *App) createTablePanel() *tview.Grid {
 	grid := tview.NewGrid().
-		SetColumns(0, 60, 0).
+		SetColumns(0, 72, 0).
 		SetRows(0, 16, 0)
 
 	subGrid := tview.NewGrid().
