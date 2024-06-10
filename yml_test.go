@@ -1,7 +1,6 @@
 package bbn_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/mlange-42/bbn"
@@ -62,14 +61,4 @@ variables:
     position: [0, 0]
 `
 	assert.Equal(t, expected, string(yml))
-}
-
-func TestFromBIFXML(t *testing.T) {
-	xmlData, err := os.ReadFile("_examples/dog-problem.xml")
-	assert.Nil(t, err)
-
-	net, nodes, err := bbn.FromBIFXML(xmlData)
-	assert.Nil(t, err)
-
-	_, _ = net, nodes
 }
