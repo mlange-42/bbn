@@ -20,19 +20,14 @@ Bayesian Belief Network library and CLI/TUI tool for [Go](https://go.dev).
 
 ### Command line tools
 
-As long as there are no precompiled binaries provided, [Go](https://go.dev) is required for installation.
+Pre-compiled binaries for Linux, Windows and MacOS are available in the
+[Releases](https://github.com/mlange-42/bbn/releases).
 
-The interactive terminal app `bbni`:
-
-```
-go install github.com/mlange-42/bbn/cmd/bbni@latest
-```
-
-The command line tool `bbn`:
-
-```
-go install github.com/mlange-42/bbn/cmd/bbn@latest
-```
+> Alternatively, install the latest development versions of `bbn` and `bbni` using [Go](https://go.dev):
+> ```shell
+> go install github.com/mlange-42/bbn/cmd/bbn@main
+> go install github.com/mlange-42/bbn/cmd/bbni@main
+> ```
 
 ### Library
 
