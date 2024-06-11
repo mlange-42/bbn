@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"slices"
+	"strconv"
 
 	"github.com/mlange-42/bbn"
 	"github.com/spf13/cobra"
@@ -68,6 +69,7 @@ func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	r := csv.NewReader(file)
 	r.ReuseRecord = true
@@ -78,6 +80,7 @@ func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn
 		return nil, err
 	}
 	indices := make([]int, len(nodes))
+	isUtility := make([]bool, len(nodes))
 	outcomes := make([]map[string]int, len(nodes))
 	for i, node := range nodes {
 		idx := slices.Index(header, node.Variable)
@@ -94,6 +97,8 @@ func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn
 			outcomes[i][o] = j
 		}
 		outcomes[i][noData] = -1
+
+		isUtility[i] = node.Type == bbn.UtilityNodeType
 	}
 
 	train := bbn.NewTrainer(net)
@@ -109,10 +114,18 @@ func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn
 		}
 
 		for i, idx := range indices {
-			var ok bool
-			sample[i], ok = outcomes[i][record[idx]]
-			if !ok {
-				return nil, fmt.Errorf("outcome '%s' not available in node '%s'", record[idx], nodes[i].Variable)
+			if isUtility[i] {
+				var err error
+				sample[i], err = strconv.Atoi(record[idx])
+				if err != nil {
+					return nil, fmt.Errorf("unable to parse utility value '%s' to integer in node '%s'", record[idx], nodes[i].Variable)
+				}
+			} else {
+				var ok bool
+				sample[i], ok = outcomes[i][record[idx]]
+				if !ok {
+					return nil, fmt.Errorf("outcome '%s' not available in node '%s'", record[idx], nodes[i].Variable)
+				}
 			}
 		}
 		train.AddSample(sample)
