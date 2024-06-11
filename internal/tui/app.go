@@ -64,6 +64,7 @@ func (a *App) Run() error {
 	a.render(false)
 
 	a.app = tview.NewApplication()
+	a.app.EnableMouse(true)
 
 	a.pages = tview.NewPages()
 
@@ -75,6 +76,8 @@ func (a *App) Run() error {
 
 	mainPanel.SetInputCapture(a.inputMainPanel)
 	a.table.SetInputCapture(a.inputTable)
+	a.table.SetMouseCapture(a.mouseInputTable)
+	a.graph.SetMouseCapture(a.mouseInputGraph)
 
 	a.app.SetFocus(a.graph)
 
@@ -117,7 +120,7 @@ func (a *App) createWidgets() {
 
 func (a *App) createMainPanel() *tview.Grid {
 	grid := tview.NewGrid().
-		SetRows(1, 0, 1).
+		SetRows(1, 0, 2).
 		SetColumns(len(a.canvas[0])+3, 0).
 		SetBorders(false)
 
@@ -130,7 +133,7 @@ func (a *App) createMainPanel() *tview.Grid {
 
 	help := tview.NewTextView().
 		SetWrap(false).
-		SetText("Exit: ESC  Scroll: ←→↕  Nodes: Tab  Outcomes: Space/Numbers  Toggle: Enter  Table: T")
+		SetText("Exit: ESC  Scroll: ←→↕  Navigate: Tab, Space/Numbers\nToggle outcome: Enter/LeftClick  Show table: T/RightClick")
 	grid.AddItem(help, 2, 0, 1, 2, 0, 0, false)
 
 	return grid

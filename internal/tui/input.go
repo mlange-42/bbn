@@ -6,6 +6,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/mlange-42/bbn"
+	"github.com/rivo/tview"
 )
 
 func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
@@ -60,11 +61,7 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 
 func (a *App) inputTable(event *tcell.EventKey) *tcell.EventKey {
 	if event.Key() == tcell.KeyEsc {
-		front, _ := a.pages.GetFrontPage()
-		if front == "Table" {
-			a.pages.HidePage(front)
-			return nil
-		}
+		a.pages.HidePage("Table")
 		return nil
 	}
 	return event
@@ -122,4 +119,59 @@ func (a *App) showTable() {
 	a.pages.ShowPage("Table")
 
 	a.app.SetFocus(a.table)
+}
+
+func (a *App) mouseInputGraph(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
+	if action == tview.MouseLeftClick || action == tview.MouseRightClick {
+		front, _ := a.pages.GetFrontPage()
+		if front == "Table" {
+			a.pages.HidePage("Table")
+			return tview.MouseConsumed, nil
+		}
+	}
+
+	if action == tview.MouseLeftClick {
+		x, y := a.mousePosInGraph(event.Position())
+		for i, node := range a.nodes {
+			if node.Bounds().Contains(x, y) {
+				a.selectedNode = i
+				if outcome, ok := node.SelectedOutcome(x, y); ok {
+					a.selectedState = outcome
+					if err := a.inputEnter(); err != nil {
+						panic(err)
+					}
+				}
+				a.render(true)
+				break
+			}
+		}
+		return tview.MouseConsumed, nil
+	} else if action == tview.MouseRightClick {
+		x, y := a.mousePosInGraph(event.Position())
+		for i, node := range a.nodes {
+			if node.Bounds().Contains(x, y) {
+				a.selectedNode = i
+				a.render(true)
+				a.showTable()
+				break
+			}
+		}
+		return tview.MouseConsumed, nil
+	}
+
+	return action, event
+}
+
+func (a *App) mouseInputTable(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
+	if action == tview.MouseLeftClick || action == tview.MouseRightClick {
+		a.pages.HidePage("Table")
+		return tview.MouseConsumed, nil
+	}
+	return action, event
+}
+
+func (a *App) mousePosInGraph(x, y int) (int, int) {
+	boxX, boxY, _, _ := a.graph.GetInnerRect()
+	scrollY, scrollX := a.graph.GetScrollOffset()
+	return x - boxX + scrollX, y - boxY + scrollY
 }
