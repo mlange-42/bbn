@@ -1,0 +1,57 @@
+name: Oil Driling
+variables:
+
+- variable: Oil
+  position: [1, 0]
+  outcomes: [Dry, Wet, Soaking]
+  table:
+  - [50, 30, 20]
+
+- variable: Do Test
+  position: [12, 16]
+  type: decision
+  outcomes: [Yes, No]
+  table:
+  - [0,0]
+
+- variable: Test Result
+  position: [1, 8]
+  given: ["Oil", "Do Test"]
+  outcomes: [Closed, Open, Diffuse]
+  table: 
+  - [10, 30, 60] # Closed   Yes
+  - [33, 33, 33] # Closed   No
+  - [30, 40, 30] # Open     Yes
+  - [33, 33, 33] # Open     No
+  - [50, 40, 10] # Diffuse  Yes
+  - [33, 33, 33] # Diffuse  No
+
+- variable: Do Drill
+  position: [40, 8]
+  type: decision
+  given: [Test Result, Do Test]
+  outcomes: [Yes, No]
+  table:
+  - [0,0]
+
+- variable: Drill Utility
+  position: [40, 0]
+  type: utility
+  given: [Oil, Do Drill]
+  outcomes: [Expected]
+  table:
+  - [-70] # Dry      Yes
+  - [  0] # Dry      No
+  - [ 50] # Wet      Yes
+  - [  0] # Wet      No
+  - [200] # Soaking  Yes
+  - [  0] # Soaking  No
+
+- variable: Test Utility
+  position: [48, 16]
+  type: utility
+  given: [Do Test]
+  outcomes: [Expected]
+  table:
+  - [-10] # Yes
+  - [  0] # No

@@ -236,8 +236,10 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool
 			if node.Type != UtilityNode {
 				continue
 			}
-			sumUtility += counts[i][0] / float64(matches)
+			sumUtility += counts[i][0]
 		}
+		sumUtility /= float64(matches)
+
 		if sumUtility > maxUtility {
 			maxUtility = sumUtility
 			maxUtilityIndex = choice

@@ -50,19 +50,25 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 	for i, n := range nodes {
 		nodeMap[n.Variable] = i
 
-		parents := make([]int, len(n.Given))
+		isDecisionNode := n.Type == DecisionNodeType
+		var parents []int
+		if !isDecisionNode {
+			parents = make([]int, len(n.Given))
+		}
 		for j, p := range n.Given {
 			par, ok := nodeMap[p]
 			if !ok {
 				return nil, fmt.Errorf("parent node '%s' not found", p)
 			}
-			parents[j] = par
+			if !isDecisionNode {
+				parents[j] = par
+			}
 		}
 
 		var stride []int
 		tableRows := 1
 		if len(parents) > 0 {
-			stride = make([]int, len(n.Given))
+			stride = make([]int, len(parents))
 			stride[len(stride)-1] = 1
 			for j := len(stride) - 2; j >= 0; j-- {
 				parIdx := parents[j+1]
@@ -122,9 +128,9 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 
 func checkNodes(nodes []*node) error {
 	for _, n := range nodes {
-		if n.Type == DecisionNode && len(n.Given) > 0 {
+		/*if n.Type == DecisionNode && len(n.Given) > 0 {
 			return fmt.Errorf("decision node '%s' can't have any parent nodes", n.Variable)
-		}
+		}*/
 		for _, parIdx := range n.Given {
 			par := nodes[parIdx]
 			if par.Type == UtilityNode {
