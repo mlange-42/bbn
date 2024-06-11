@@ -75,9 +75,20 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 			return nil, fmt.Errorf("wrong number of table rows in node '%s'; got %d, expected %d", n.Variable, len(n.Table), tableRows)
 		}
 
+		tp, ok := nodeTypes[n.Type]
+		if !ok {
+			return nil, fmt.Errorf("unknown node type '%s' for '%s'", n.Type, n.Variable)
+		}
+
 		tableCols := len(n.Outcomes)
-		if tableCols < 2 {
-			return nil, fmt.Errorf("node '%s' requires at least two outcomes, got %d", n.Variable, tableCols)
+		if tp == UtilityNode {
+			if tableCols != 1 {
+				return nil, fmt.Errorf("utility node '%s' must have a single table column, got %d", n.Variable, tableCols)
+			}
+		} else {
+			if tableCols < 2 {
+				return nil, fmt.Errorf("node '%s' requires at least two outcomes, got %d", n.Variable, tableCols)
+			}
 		}
 
 		for j, probs := range n.Table {
@@ -88,6 +99,7 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 
 		nd := node{
 			Variable:   n.Variable,
+			Type:       tp,
 			ID:         i,
 			GivenNames: n.Given,
 			Given:      parents,
@@ -101,7 +113,26 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 		nodeList[i] = &nd
 	}
 
+	if err := checkNodes(nodeList); err != nil {
+		return nil, err
+	}
+
 	return nodeList, nil
+}
+
+func checkNodes(nodes []*node) error {
+	for _, n := range nodes {
+		if n.Type == DecisionNode && len(n.Given) > 0 {
+			return fmt.Errorf("decision node '%s' can't have any parent nodes", n.Variable)
+		}
+		for _, parIdx := range n.Given {
+			par := nodes[parIdx]
+			if par.Type == UtilityNode {
+				return fmt.Errorf("utility node '%s' can't be a parent of any other node", par.Variable)
+			}
+		}
+	}
+	return nil
 }
 
 // sortTopological sorts nodes in topological order.
@@ -168,8 +199,8 @@ func cumulate(values []float64) []float64 {
 	return c
 }
 
-// sample from cumulative (relative) probabilities.
-func sample(cum []float64, rng *rand.Rand) int {
+// Sample from cumulative (relative) probabilities.
+func Sample(cum []float64, rng *rand.Rand) int {
 	ln := len(cum)
 	r := rng.Float64() * cum[ln-1]
 

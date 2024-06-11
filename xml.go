@@ -82,6 +82,7 @@ func FromBIFXML(content []byte) (*Network, []*Node, error) {
 
 		node := Node{
 			Variable: variable.Name,
+			Type:     variable.Type,
 			Given:    def.Given,
 			Outcomes: variable.Outcomes,
 			Table:    table,

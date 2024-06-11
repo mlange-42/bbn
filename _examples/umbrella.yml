@@ -1,0 +1,34 @@
+name: Umbrella Decision Network
+variables:
+
+- variable: Weather
+  position: [16, 0]
+  outcomes: [Sunny, Rainy]
+  table: 
+  - [30, 70]
+
+- variable: Forecast
+  position: [1, 8]
+  given: [Weather]
+  outcomes: [Sunny, Cloudy, Rainy]
+  table: 
+  - [70, 20, 10] # Sunny
+  - [15, 25, 60] # Rainy
+
+- variable: Umbrella
+  position: [16, 16]
+  type: decision
+  outcomes: [Take, Leave]
+  table: 
+  - [1, 1]
+
+- variable: Utility
+  position: [31, 8]
+  type: utility
+  given: [Weather, Umbrella]
+  outcomes: [Expected]
+  table: 
+  - [ 20] # Sunny, Take
+  - [100] # Sunny, Leave
+  - [ 70] # Rainy, Take
+  - [  0] # Rainy, Leave

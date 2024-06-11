@@ -2,9 +2,37 @@ package bbn
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"slices"
 )
+
+type NodeType uint8
+
+const (
+	NatureNode NodeType = iota
+	DecisionNode
+	UtilityNode
+)
+
+const (
+	NatureNodeType   = "nature"
+	DecisionNodeType = "decision"
+	UtilityNodeType  = "utility"
+)
+
+var nodeTypes = map[string]NodeType{
+	"":               NatureNode,
+	NatureNodeType:   NatureNode,
+	DecisionNodeType: DecisionNode,
+	UtilityNodeType:  UtilityNode,
+}
+
+var nodeTypeNames = map[NodeType]string{
+	NatureNode:   "",
+	DecisionNode: DecisionNodeType,
+	UtilityNode:  UtilityNodeType,
+}
 
 // Node definition.
 //
@@ -15,15 +43,17 @@ import (
 // See the package examples.
 type Node struct {
 	Variable string      // Name of the node.
-	Given    []string    `yaml:",flow"` // Names of parent nodes.
-	Outcomes []string    `yaml:",flow"` // Names of the node's possible states.
-	Table    [][]float64 `yaml:",flow"` // Conditional probability table.
-	Position [2]int      `yaml:",flow"` // Coordinates for visualization, optional.
+	Type     string      `yaml:",omitempty"` // Type of the node [chance, decision, utility]
+	Given    []string    `yaml:",flow"`      // Names of parent nodes.
+	Outcomes []string    `yaml:",flow"`      // Names of the node's possible states.
+	Table    [][]float64 `yaml:",flow"`      // Conditional probability table.
+	Position [2]int      `yaml:",flow"`      // Coordinates for visualization, optional.
 }
 
 // node is the [Network]s internal node type.
 type node struct {
 	Variable   string
+	Type       NodeType
 	ID         int
 	GivenNames []string
 	Given      []int
@@ -34,7 +64,7 @@ type node struct {
 	Position   [2]int
 }
 
-func (n *node) Index(samples []int) int {
+func (n *node) Index(sample []int) int {
 	idx := 0
 	switch len(n.Given) {
 	case 0:
@@ -42,15 +72,15 @@ func (n *node) Index(samples []int) int {
 		return 0
 	case 1:
 		// Optimized index calculation for one parent.
-		idx = samples[n.Given[0]]
+		idx = sample[n.Given[0]]
 	case 2:
 		// Optimized index calculation for two parents.
-		idx = samples[n.Given[0]]*n.Stride[0] +
-			samples[n.Given[1]]*n.Stride[1]
+		idx = sample[n.Given[0]]*n.Stride[0] +
+			sample[n.Given[1]]*n.Stride[1]
 	default:
 		// Default for more than 2 parents.
 		for j, parIdx := range n.Given {
-			parSample := samples[parIdx]
+			parSample := sample[parIdx]
 			idx += parSample * n.Stride[j]
 		}
 	}
@@ -113,9 +143,6 @@ func New(name string, nodes ...*Node) (*Network, error) {
 	byName := map[string]int{}
 	for i, n := range nodeList {
 		byName[n.Variable] = i
-		if len(n.Given) == 0 {
-			continue
-		}
 	}
 
 	network := Network{
@@ -154,21 +181,16 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 	}
 
 	// Do the actual sampling.
-	counts, matches := n.sample(ev, count, rng)
-
+	probs, ok := n.sample(ev, count, rng)
 	// Error on zero matches.
-	if matches == 0 {
+	if !ok {
 		return nil, &ConflictingEvidenceError{}
 	}
 
 	// Normalize result and return it as map.
 	result := map[string][]float64{}
 	for i, node := range n.nodes {
-		probs := make([]float64, len(counts[i]))
-		for j, cnt := range counts[i] {
-			probs[j] = float64(cnt) / float64(matches)
-		}
-		result[node.Variable] = probs
+		result[node.Variable] = probs[i]
 	}
 
 	return result, nil
@@ -176,31 +198,105 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 
 // sample performs rejection sampling to calculate marginal probabilities of the network.
 // Internal method working on prepared evidence and returning raw results.
-func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
-	// Prepare slices for counting.
-	counts := make([][]int, len(n.nodes))
-	for i := range counts {
-		counts[i] = make([]int, len(n.nodes[i].Outcomes))
+func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool) {
+	var savedCounts [][]float64
+	var savedMatches int
+	maxUtilityIndex := -1
+	maxUtility := math.Inf(-1)
+
+	decisionNodes, decisionStride, decisionChoices := n.collectDecisionNodes(ev)
+	for choice := 0; choice < decisionChoices; choice++ {
+		decisions := make([]int, len(n.nodes))
+		for i, idx := range decisionNodes {
+			node := n.nodes[idx]
+			selected := (choice / decisionStride[i]) % len(node.Outcomes)
+			decisions[idx] = selected
+		}
+
+		// Prepare slices for counting.
+		counts := n.prepareCounts()
+
+		// Sampling.
+		sample := make([]int, len(n.nodes))
+		utilitySample := make([]float64, len(n.nodes))
+		matches := 0
+		for r := 0; r < count; r++ {
+			// Sample nodes.
+			match := n.sampleOnce(sample, utilitySample, decisions, ev, rng)
+
+			// Count matching samples
+			if match {
+				n.countMatchingSample(sample, utilitySample, ev, counts)
+				matches++
+			}
+		}
+
+		sumUtility := 0.0
+		for i, node := range n.nodes {
+			if node.Type != UtilityNode {
+				continue
+			}
+			sumUtility += counts[i][0] / float64(matches)
+		}
+		if sumUtility > maxUtility {
+			maxUtility = sumUtility
+			maxUtilityIndex = choice
+
+			savedCounts = counts
+			savedMatches = matches
+		}
 	}
 
-	// Sampling.
-	samples := make([]int, len(n.nodes))
-	matches := 0
-	for r := 0; r < count; r++ {
-		// Sample nodes.
-		match := true
-		for i, node := range n.nodes {
-			idx := node.Index(samples)
+	decisions := make([]int, len(n.nodes))
+	for i, idx := range decisionNodes {
+		node := n.nodes[idx]
+		selected := (maxUtilityIndex / decisionStride[i]) % len(node.Outcomes)
+		decisions[idx] = selected
+	}
+	for _, idx := range decisionNodes {
+		savedCounts[idx][decisions[idx]] = float64(savedMatches)
+	}
 
-			e := ev[i]
+	// Error on zero matches.
+	if savedMatches == 0 {
+		return nil, false
+	}
+
+	// Normalize result.
+	normalizeCounts(savedCounts, savedMatches)
+
+	return savedCounts, true
+}
+
+func (n *Network) sampleOnce(
+	sample []int,
+	utilitySample []float64,
+	decisions []int,
+	evidence []int,
+	rng *rand.Rand) bool {
+
+	match := true
+	for i, node := range n.nodes {
+		idx := node.Index(sample)
+		e := evidence[i]
+
+		if node.Type == UtilityNode {
+			utilitySample[i] = node.Table[idx][0]
+		} else if node.Type == DecisionNode {
+			if e >= 0 {
+				sample[i] = e
+			} else {
+				sample[i] = decisions[i]
+			}
+		} else {
 			// Don't sample for root nodes with given evidence
 			if len(node.Given) == 0 && e >= 0 {
-				samples[i] = e
+				sample[i] = e
 				continue
 			}
 
 			// Sample from cumulative probabilities.
-			s := sample(node.TableCum[idx], rng)
+			s := Sample(node.TableCum[idx], rng)
 
 			// Reject if sample is not equal to evidence
 			if e >= 0 && e != s {
@@ -209,19 +305,62 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 			}
 
 			// Otherwise, fill in the sample.
-			samples[i] = s
+			sample[i] = s
 		}
+	}
+	return match
+}
 
-		// Count matching samples
-		if match {
-			for i, s := range samples {
+func (n *Network) countMatchingSample(sample []int, utilitySample []float64, evidence []int, counts [][]float64) {
+	for i, s := range sample {
+		node := n.nodes[i]
+		switch node.Type {
+		case UtilityNode:
+			counts[i][0] += utilitySample[i]
+		case DecisionNode:
+			if evidence[i] >= 0 {
 				counts[i][s]++
 			}
-			matches++
+		case NatureNode:
+			counts[i][s]++
+		}
+	}
+}
+
+func (n *Network) prepareCounts() [][]float64 {
+	counts := make([][]float64, len(n.nodes))
+	for i := range counts {
+		counts[i] = make([]float64, len(n.nodes[i].Outcomes))
+	}
+	return counts
+}
+
+func normalizeCounts(counts [][]float64, count int) {
+	for i := range counts {
+		for j, cnt := range counts[i] {
+			counts[i][j] = cnt / float64(count)
+		}
+	}
+}
+
+func (n *Network) collectDecisionNodes(evidence []int) (nodes []int, stride []int, choices int) {
+	choices = 1
+	for i, node := range n.nodes {
+		if node.Type == DecisionNode && evidence[i] < 0 {
+			nodes = append(nodes, i)
+			choices *= len(node.Outcomes)
 		}
 	}
 
-	return counts, matches
+	if len(nodes) > 0 {
+		stride = make([]int, len(nodes))
+		stride[len(stride)-1] = 1
+		for j := len(stride) - 2; j >= 0; j-- {
+			stride[j] = stride[j+1] * len(n.nodes[nodes[j+1]].Outcomes)
+		}
+	}
+
+	return
 }
 
 // transforms the evidence map into an array with one entry per node.

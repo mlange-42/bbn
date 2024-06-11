@@ -1,26 +1,30 @@
 package bbn
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // Trainer is a utility type to train a [Network].
 type Trainer struct {
 	network *Network
-	data    [][][]int
+	data    [][][]float64
 	counter [][]int
 	indices []int
 	sample  []int
+	utility []float64
 }
 
 // NewTrainer creates a new [Trainer] for the given [Network].
 func NewTrainer(net *Network) Trainer {
-	data := make([][][]int, len(net.nodes))
+	data := make([][][]float64, len(net.nodes))
 	counter := make([][]int, len(net.nodes))
 	indices := make([]int, len(net.nodes))
 
 	for i, node := range net.nodes {
-		d := make([][]int, len(node.Table))
+		d := make([][]float64, len(node.Table))
 		for j, row := range node.Table {
-			d[j] = make([]int, len(row))
+			d[j] = make([]float64, len(row))
 		}
 		data[i] = d
 		counter[i] = make([]int, len(node.Table))
@@ -33,23 +37,40 @@ func NewTrainer(net *Network) Trainer {
 		counter: counter,
 		indices: indices,
 		sample:  make([]int, len(net.nodes)),
+		utility: make([]float64, len(net.nodes)),
 	}
 }
 
 // AddSample adds a training sample.
 // Order of values in the sample is the same as the order in which nodes were passed into the [Network] constructor.
-func (t *Trainer) AddSample(sample []int) {
+func (t *Trainer) AddSample(sample []int, utility []float64) {
 	for i, s := range sample {
 		t.sample[t.indices[i]] = s
+	}
+	for i, u := range utility {
+		t.utility[t.indices[i]] = u
 	}
 
 	for i, node := range t.network.nodes {
 		idx, ok := node.IndexWithNoData(t.sample)
-		s := t.sample[i]
-		if !ok || s < 0 {
+		if !ok {
 			continue
 		}
-		t.data[i][idx][s]++
+
+		if node.Type == UtilityNode {
+			u := t.utility[i]
+			if math.IsNaN(u) {
+				continue
+			}
+			t.data[i][idx][0] += u
+		} else {
+			s := t.sample[i]
+			if s < 0 {
+				continue
+			}
+			t.data[i][idx][s]++
+		}
+
 		t.counter[i][idx]++
 	}
 }
