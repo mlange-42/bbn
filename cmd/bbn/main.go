@@ -15,7 +15,7 @@ func main() {
 	}
 }
 
-// rootCommand sets up the CLI
+// rootCommand sets up the CLI with sub-commands.
 func rootCommand() *cobra.Command {
 	root := cobra.Command{
 		Use:           "bbn",

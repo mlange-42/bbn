@@ -129,10 +129,12 @@ func New(name string, nodes ...*Node) (*Network, error) {
 	return &network, nil
 }
 
+// Name of the network.
 func (n *Network) Name() string {
 	return n.name
 }
 
+// cumulates CPTs of all nodes
 func (n *Network) cumulateTables() {
 	for _, n := range n.nodes {
 		cum := make([][]float64, len(n.Table))
