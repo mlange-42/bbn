@@ -11,7 +11,9 @@ import (
 )
 
 func TestRunTrainCommand(t *testing.T) {
-	net, err := runTrainCommand("../../_examples/fruits.yml", "../../_examples/fruits.csv", "", ',')
+	net, err := runTrainCommand(
+		"../../_examples/fruits-untrained.yml",
+		"../../_examples/fruits.csv", "", ',')
 	assert.Nil(t, err)
 
 	evidence := map[string]string{

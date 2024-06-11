@@ -79,4 +79,4 @@ jobs:
         ./bbn sample _examples/mendel.yml
         ./bbn sample _examples/umbrella.yml
         ./bbn sample _examples/dog-problem.xml
-        ./bbn train _examples/fruits.yml _examples/fruits.csv
+        ./bbn train _examples/fruits-untrained.yml _examples/fruits.csv
