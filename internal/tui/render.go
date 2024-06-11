@@ -52,7 +52,7 @@ func (a *App) renderEdge(from, to int) {
 	}
 }
 
-func (a *App) renderEdgeVertical(b1, b2 Bounds) {
+func (a *App) renderEdgeVertical(b1, b2 *Bounds) {
 	xMid := (max(b1.X, b2.X) + min(b1.X+b1.W, b2.X+b2.W)) / 2
 	if b1.Y < b2.Y {
 		for y := b1.Y + b1.H; y < b2.Y; y++ {
@@ -67,7 +67,7 @@ func (a *App) renderEdgeVertical(b1, b2 Bounds) {
 	}
 }
 
-func (a *App) renderEdgeHorizontal(b1, b2 Bounds) {
+func (a *App) renderEdgeHorizontal(b1, b2 *Bounds) {
 	yMid := (max(b1.Y, b2.Y) + min(b1.Y+b1.H, b2.Y+b2.H)) / 2
 	if b1.X < b2.X {
 		for x := b1.X + b1.W; x < b2.X; x++ {
@@ -82,7 +82,7 @@ func (a *App) renderEdgeHorizontal(b1, b2 Bounds) {
 	}
 }
 
-func (a *App) renderEdgeCorner(b1, b2 Bounds) {
+func (a *App) renderEdgeCorner(b1, b2 *Bounds) {
 	downwards := b2.Y > b1.Y
 	rightwards := b2.X > b1.X
 

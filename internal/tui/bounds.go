@@ -14,14 +14,14 @@ func NewBounds(x, y, w, h int) Bounds {
 }
 
 func (b *Bounds) Contains(x, y int) bool {
-	return x >= b.X && x <= b.X+b.W && y >= b.Y && y <= b.Y+b.H
+	return x >= b.X && x < b.X+b.W && y >= b.Y && y < b.Y+b.H
 }
 
 func (b *Bounds) Centroid() (int, int) {
 	return b.X + b.W/2, b.Y + b.H/2
 }
 
-func (b *Bounds) Extend(other Bounds) {
+func (b *Bounds) Extend(other *Bounds) {
 	if other.X < b.X {
 		b.W += b.X - other.X
 		b.X = other.X

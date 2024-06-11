@@ -13,8 +13,9 @@ const maxBars = 10
 
 type Node interface {
 	Node() *bbn.Node
-	Bounds() Bounds
+	Bounds() *Bounds
 	Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color)
+	SelectedOutcome(x, y int) (int, bool)
 }
 
 type node struct {
@@ -75,14 +76,26 @@ func (n *node) Node() *bbn.Node {
 	return n.node
 }
 
-func (n *node) Bounds() Bounds {
-	return n.bounds
+func (n *node) Bounds() *Bounds {
+	return &n.bounds
 }
 
 func (n *node) Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color) {
 	n.drawBorder(selected)
 	n.drawBars(probs, selected, state, evidence)
 	return n.runes, n.colors
+}
+
+func (n *node) SelectedOutcome(x, y int) (int, bool) {
+	if !n.bounds.Contains(x, y) {
+		return -1, false
+	}
+	for i := range n.node.Outcomes {
+		if y == n.bounds.Y+i+2 {
+			return i, true
+		}
+	}
+	return -1, false
 }
 
 func (n *node) drawBorder(selected bool) {
