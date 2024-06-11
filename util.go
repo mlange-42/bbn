@@ -192,8 +192,8 @@ func cumulate(values []float64) []float64 {
 	return c
 }
 
-// sample from cumulative (relative) probabilities.
-func sample(cum []float64, rng *rand.Rand) int {
+// Sample from cumulative (relative) probabilities.
+func Sample(cum []float64, rng *rand.Rand) int {
 	ln := len(cum)
 	r := rng.Float64() * cum[ln-1]
 
