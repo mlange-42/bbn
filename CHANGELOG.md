@@ -4,7 +4,7 @@
 
 ### Features
 
-* Add support for selecting outcomes by mouse click (#33)
+* Adds mouse support for setting outcomes and showing tables (#33)
 
 ## [[v0.2.0]](https://github.com/mlange-42/bbn/compare/v0.1.0...v0.2.0)
 
