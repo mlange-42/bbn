@@ -1,4 +1,4 @@
-name: Utility Test
+name: Umbrella Decision Network
 variables:
 
 - variable: Weather
@@ -32,10 +32,3 @@ variables:
   - [100] # Sunny, Leave
   - [ 70] # Rainy, Take
   - [  0] # Rainy, Leave
-
-- variable: DummyDecision
-  position: [48, 16]
-  type: decision
-  outcomes: [A, B, C]
-  table: 
-  - [1, 1, 1]

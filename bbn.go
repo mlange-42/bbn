@@ -192,21 +192,25 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 // sample performs rejection sampling to calculate marginal probabilities of the network.
 // Internal method working on prepared evidence and returning raw results.
 func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
-	// Prepare slices for counting.
-	counts := make([][]int, len(n.nodes))
-	for i := range counts {
-		counts[i] = make([]int, len(n.nodes[i].Outcomes))
-	}
-	totalMatches := 0
+
+	var savedCounts [][]int
+	var savedMatches int
+	maxUtilityIndex := -1
+	maxUtility := math.Inf(-1)
 
 	decisionNodes, decisionStride, decisionChoices := n.collectDecisionNodes(ev)
-	expectedUtility := make([]float64, decisionChoices)
-	for choice := range expectedUtility {
+	for choice := 0; choice < decisionChoices; choice++ {
 		decisions := make([]int, len(n.nodes))
 		for i, idx := range decisionNodes {
 			node := n.nodes[idx]
 			selected := (choice / decisionStride[i]) % len(node.Outcomes)
 			decisions[idx] = selected
+		}
+
+		// Prepare slices for counting.
+		counts := make([][]int, len(n.nodes))
+		for i := range counts {
+			counts[i] = make([]int, len(n.nodes[i].Outcomes))
 		}
 
 		// Sampling.
@@ -268,7 +272,6 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 				matches++
 			}
 		}
-		totalMatches += matches
 
 		sumUtility := 0.0
 		for i, node := range n.nodes {
@@ -277,15 +280,12 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 			}
 			sumUtility += float64(utility[i]) / float64(matches)
 		}
-		expectedUtility[choice] = sumUtility
-	}
+		if sumUtility > maxUtility {
+			maxUtility = sumUtility
+			maxUtilityIndex = choice
 
-	maxUtilityIndex := -1
-	maxUtility := math.Inf(-1)
-	for i, exp := range expectedUtility {
-		if exp > maxUtility {
-			maxUtility = exp
-			maxUtilityIndex = i
+			savedCounts = counts
+			savedMatches = matches
 		}
 	}
 
@@ -296,13 +296,10 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 		decisions[idx] = selected
 	}
 	for _, idx := range decisionNodes {
-		counts[idx][decisions[idx]] = totalMatches
+		savedCounts[idx][decisions[idx]] = savedMatches
 	}
 
-	fmt.Println(expectedUtility)
-	fmt.Println(decisions)
-
-	return counts, totalMatches
+	return savedCounts, savedMatches
 }
 
 func (n *Network) collectDecisionNodes(evidence []int) (nodes []int, stride []int, choices int) {
