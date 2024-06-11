@@ -80,7 +80,7 @@ func (n *node) Bounds() *Bounds {
 
 func (n *node) Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color) {
 	n.drawBorder(selected)
-	if n.node.Type == "utility" { // TODO: use enumeration values!
+	if n.node.Type == bbn.ChanceNodeName { // TODO: use enumeration values!
 		n.drawUtility(probs)
 	} else {
 		n.drawBars(probs, selected, state, evidence)

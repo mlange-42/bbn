@@ -15,11 +15,17 @@ const (
 	UtilityNode
 )
 
+const (
+	ChanceNodeName   = "chance"
+	DecisionNodeName = "decision"
+	UtilityNodeName  = "utility"
+)
+
 var nodeTypes = map[string]NodeType{
-	"":         ChanceNode,
-	"chance":   ChanceNode,
-	"decision": DecisionNode,
-	"utility":  UtilityNode,
+	"":               ChanceNode,
+	ChanceNodeName:   ChanceNode,
+	DecisionNodeName: DecisionNode,
+	UtilityNodeName:  UtilityNode,
 }
 
 // Node definition.

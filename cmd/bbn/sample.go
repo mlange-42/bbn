@@ -41,7 +41,11 @@ func sampleCommand() *cobra.Command {
 				fmt.Printf("\n%30s", node.Variable)
 				probs := result[node.Variable]
 				for _, p := range probs {
-					fmt.Printf(" %9.3f%%", p*100)
+					if node.Type == bbn.UtilityNodeName {
+						fmt.Printf(" %10.3f", p)
+					} else {
+						fmt.Printf(" %9.3f%%", p*100)
+					}
 				}
 				if _, ok := ev[node.Variable]; ok {
 					fmt.Print("  +")
