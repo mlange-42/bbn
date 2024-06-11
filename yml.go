@@ -36,6 +36,7 @@ func ToYAML(net *Network) ([]byte, error) {
 	for _, node := range net.nodes {
 		def.Variables[node.ID] = &Node{
 			Variable: node.Variable,
+			Type:     nodeTypeNames[node.Type],
 			Given:    node.GivenNames,
 			Outcomes: node.Outcomes,
 			Table:    node.Table,

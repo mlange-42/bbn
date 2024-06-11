@@ -28,6 +28,12 @@ var nodeTypes = map[string]NodeType{
 	UtilityNodeType:  UtilityNode,
 }
 
+var nodeTypeNames = map[NodeType]string{
+	ChanceNode:   "",
+	DecisionNode: DecisionNodeType,
+	UtilityNode:  UtilityNodeType,
+}
+
 // Node definition.
 //
 // CPT is the conditional probability table.
@@ -37,11 +43,11 @@ var nodeTypes = map[string]NodeType{
 // See the package examples.
 type Node struct {
 	Variable string      // Name of the node.
-	Type     string      // Type of the node [chance, decision, utility]
-	Given    []string    `yaml:",flow"` // Names of parent nodes.
-	Outcomes []string    `yaml:",flow"` // Names of the node's possible states.
-	Table    [][]float64 `yaml:",flow"` // Conditional probability table.
-	Position [2]int      `yaml:",flow"` // Coordinates for visualization, optional.
+	Type     string      `yaml:",omitempty"` // Type of the node [chance, decision, utility]
+	Given    []string    `yaml:",flow"`      // Names of parent nodes.
+	Outcomes []string    `yaml:",flow"`      // Names of the node's possible states.
+	Table    [][]float64 `yaml:",flow"`      // Conditional probability table.
+	Position [2]int      `yaml:",flow"`      // Coordinates for visualization, optional.
 }
 
 // node is the [Network]s internal node type.
