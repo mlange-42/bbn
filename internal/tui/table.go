@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 
+	"github.com/mlange-42/bbn"
 	"github.com/rivo/tview"
 )
 
@@ -52,12 +53,20 @@ func (t *Table) GetCell(row, column int) *tview.TableCell {
 		return cell
 	}
 
+	var text string
+
 	values := node.Node().Table[row]
-	sum := 0.0
-	for _, v := range values {
-		sum += v
+
+	if node.Node().Type == bbn.UtilityNodeType {
+		text = fmt.Sprintf("%9.3f", values[0])
+	} else {
+		sum := 0.0
+		for _, v := range values {
+			sum += v
+		}
+		text = fmt.Sprintf("%7.3f%%", 100*values[column-numParents]/sum)
 	}
-	text := fmt.Sprintf("%7.3f%%", 100*values[column-numParents]/sum)
+
 	cell := tview.NewTableCell(text)
 	cell.SetAlign(tview.AlignRight)
 	return cell

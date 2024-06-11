@@ -16,10 +16,11 @@ func (a *App) renderNodes() {
 	for i, node := range a.nodes {
 		data := a.marginals[node.Node().Variable]
 		_, hasEvidence := a.evidence[node.Node().Variable]
-		runes, _ := node.Render(data, i == a.selectedNode, a.selectedState, hasEvidence)
+		runes, colors := node.Render(data, i == a.selectedNode, a.selectedState, hasEvidence)
 		b := node.Bounds()
 		for i, line := range runes {
 			copy(a.canvas[b.Y+i][b.X:], line)
+			copy(a.colors[b.Y+i][b.X:], colors[i])
 		}
 	}
 }
@@ -127,12 +128,24 @@ func (a *App) renderEdgeCorner(b1, b2 *Bounds) {
 }
 
 func (a *App) updateCanvas() {
-	b := strings.Builder{}
-	for i, line := range a.canvas {
-		b.WriteString(string(line))
+	builder := strings.Builder{}
+	var prevColor Color
+	for i, runes := range a.canvas {
+		cols := a.colors[i]
+
+		for j, r := range runes {
+			c := cols[j]
+			if c != prevColor {
+				builder.WriteString(ColorTags[c])
+			}
+			builder.WriteRune(r)
+			prevColor = c
+		}
+		builder.WriteString(ColorTags[0])
+
 		if i < len(a.canvas)-1 {
-			b.WriteRune('\n')
+			builder.WriteRune('\n')
 		}
 	}
-	a.graph.SetText(b.String())
+	a.graph.SetText(builder.String())
 }
