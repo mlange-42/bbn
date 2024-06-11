@@ -199,7 +199,6 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 // sample performs rejection sampling to calculate marginal probabilities of the network.
 // Internal method working on prepared evidence and returning raw results.
 func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool) {
-
 	var savedCounts [][]float64
 	var savedMatches int
 	maxUtilityIndex := -1
@@ -215,10 +214,7 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool
 		}
 
 		// Prepare slices for counting.
-		counts := make([][]float64, len(n.nodes))
-		for i := range counts {
-			counts[i] = make([]float64, len(n.nodes[i].Outcomes))
-		}
+		counts := n.prepareCounts()
 
 		// Sampling.
 		sample := make([]int, len(n.nodes))
@@ -226,55 +222,11 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool
 		matches := 0
 		for r := 0; r < count; r++ {
 			// Sample nodes.
-			match := true
-			for i, node := range n.nodes {
-				idx := node.Index(sample)
-				e := ev[i]
-
-				if node.Type == UtilityNode {
-					utilitySample[i] = node.Table[idx][0]
-				} else if node.Type == DecisionNode {
-					if e >= 0 {
-						sample[i] = e
-					} else {
-						sample[i] = decisions[i]
-					}
-				} else {
-					// Don't sample for root nodes with given evidence
-					if len(node.Given) == 0 && e >= 0 {
-						sample[i] = e
-						continue
-					}
-
-					// Sample from cumulative probabilities.
-					s := Sample(node.TableCum[idx], rng)
-
-					// Reject if sample is not equal to evidence
-					if e >= 0 && e != s {
-						match = false
-						break
-					}
-
-					// Otherwise, fill in the sample.
-					sample[i] = s
-				}
-			}
+			match := n.sampleOnce(sample, utilitySample, decisions, ev, rng)
 
 			// Count matching samples
 			if match {
-				for i, s := range sample {
-					node := n.nodes[i]
-					switch node.Type {
-					case UtilityNode:
-						counts[i][0] += utilitySample[i]
-					case DecisionNode:
-						if ev[i] >= 0 {
-							counts[i][s]++
-						}
-					case NatureNode:
-						counts[i][s]++
-					}
-				}
+				n.countMatchingSample(sample, utilitySample, ev, counts)
 				matches++
 			}
 		}
@@ -311,13 +263,84 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool
 	}
 
 	// Normalize result.
-	for i := range savedCounts {
-		for j, cnt := range savedCounts[i] {
-			savedCounts[i][j] = cnt / float64(savedMatches)
-		}
-	}
+	normalizeCounts(savedCounts, savedMatches)
 
 	return savedCounts, true
+}
+
+func (n *Network) sampleOnce(
+	sample []int,
+	utilitySample []float64,
+	decisions []int,
+	evidence []int,
+	rng *rand.Rand) bool {
+
+	match := true
+	for i, node := range n.nodes {
+		idx := node.Index(sample)
+		e := evidence[i]
+
+		if node.Type == UtilityNode {
+			utilitySample[i] = node.Table[idx][0]
+		} else if node.Type == DecisionNode {
+			if e >= 0 {
+				sample[i] = e
+			} else {
+				sample[i] = decisions[i]
+			}
+		} else {
+			// Don't sample for root nodes with given evidence
+			if len(node.Given) == 0 && e >= 0 {
+				sample[i] = e
+				continue
+			}
+
+			// Sample from cumulative probabilities.
+			s := Sample(node.TableCum[idx], rng)
+
+			// Reject if sample is not equal to evidence
+			if e >= 0 && e != s {
+				match = false
+				break
+			}
+
+			// Otherwise, fill in the sample.
+			sample[i] = s
+		}
+	}
+	return match
+}
+
+func (n *Network) countMatchingSample(sample []int, utilitySample []float64, evidence []int, counts [][]float64) {
+	for i, s := range sample {
+		node := n.nodes[i]
+		switch node.Type {
+		case UtilityNode:
+			counts[i][0] += utilitySample[i]
+		case DecisionNode:
+			if evidence[i] >= 0 {
+				counts[i][s]++
+			}
+		case NatureNode:
+			counts[i][s]++
+		}
+	}
+}
+
+func (n *Network) prepareCounts() [][]float64 {
+	counts := make([][]float64, len(n.nodes))
+	for i := range counts {
+		counts[i] = make([]float64, len(n.nodes[i].Outcomes))
+	}
+	return counts
+}
+
+func normalizeCounts(counts [][]float64, count int) {
+	for i := range counts {
+		for j, cnt := range counts[i] {
+			counts[i][j] = cnt / float64(count)
+		}
+	}
 }
 
 func (n *Network) collectDecisionNodes(evidence []int) (nodes []int, stride []int, choices int) {
