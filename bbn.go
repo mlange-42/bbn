@@ -6,6 +6,21 @@ import (
 	"slices"
 )
 
+type NodeType uint8
+
+const (
+	ChanceNode NodeType = iota
+	DecisionNode
+	UtilityNode
+)
+
+var nodeTypes = map[string]NodeType{
+	"":         ChanceNode,
+	"chance":   ChanceNode,
+	"decision": DecisionNode,
+	"utility":  UtilityNode,
+}
+
 // Node definition.
 //
 // CPT is the conditional probability table.
@@ -15,6 +30,7 @@ import (
 // See the package examples.
 type Node struct {
 	Variable string      // Name of the node.
+	Type     string      // Type of the node [chance, decision, utility]
 	Given    []string    `yaml:",flow"` // Names of parent nodes.
 	Outcomes []string    `yaml:",flow"` // Names of the node's possible states.
 	Table    [][]float64 `yaml:",flow"` // Conditional probability table.
@@ -24,6 +40,7 @@ type Node struct {
 // node is the [Network]s internal node type.
 type node struct {
 	Variable   string
+	Type       NodeType
 	ID         int
 	GivenNames []string
 	Given      []int
@@ -34,7 +51,7 @@ type node struct {
 	Position   [2]int
 }
 
-func (n *node) Index(samples []int) int {
+func (n *node) Index(sample []int) int {
 	idx := 0
 	switch len(n.Given) {
 	case 0:
@@ -42,15 +59,15 @@ func (n *node) Index(samples []int) int {
 		return 0
 	case 1:
 		// Optimized index calculation for one parent.
-		idx = samples[n.Given[0]]
+		idx = sample[n.Given[0]]
 	case 2:
 		// Optimized index calculation for two parents.
-		idx = samples[n.Given[0]]*n.Stride[0] +
-			samples[n.Given[1]]*n.Stride[1]
+		idx = sample[n.Given[0]]*n.Stride[0] +
+			sample[n.Given[1]]*n.Stride[1]
 	default:
 		// Default for more than 2 parents.
 		for j, parIdx := range n.Given {
-			parSample := samples[parIdx]
+			parSample := sample[parIdx]
 			idx += parSample * n.Stride[j]
 		}
 	}
@@ -93,9 +110,12 @@ func (n *node) IndexWithNoData(samples []int) (int, bool) {
 
 // Network definition.
 type Network struct {
-	name   string
-	nodes  []*node
-	byName map[string]int
+	name           string
+	nodes          []*node
+	byName         map[string]int
+	utilityNodes   []int
+	decisionNodes  []int
+	decisionStride []int
 }
 
 // New creates a new network. Sorts nodes topologically.
@@ -111,17 +131,34 @@ func New(name string, nodes ...*Node) (*Network, error) {
 	}
 
 	byName := map[string]int{}
+	utilityNodes := []int{}
+	decisionNodes := []int{}
 	for i, n := range nodeList {
 		byName[n.Variable] = i
-		if len(n.Given) == 0 {
-			continue
+		switch n.Type {
+		case UtilityNode:
+			utilityNodes = append(utilityNodes, i)
+		case DecisionNode:
+			decisionNodes = append(decisionNodes, i)
+		}
+	}
+
+	var decisionStride []int
+	if len(decisionNodes) > 0 {
+		decisionStride = make([]int, len(decisionNodes))
+		decisionStride[len(decisionStride)-1] = 1
+		for j := len(decisionStride) - 2; j >= 0; j-- {
+			decisionStride[j] = decisionStride[j+1] * len(nodeList[decisionNodes[j]].Outcomes)
 		}
 	}
 
 	network := Network{
-		name:   name,
-		nodes:  nodeList,
-		byName: byName,
+		name:           name,
+		nodes:          nodeList,
+		byName:         byName,
+		utilityNodes:   utilityNodes,
+		decisionNodes:  decisionNodes,
+		decisionStride: decisionStride,
 	}
 
 	network.cumulateTables()
@@ -182,46 +219,81 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 	for i := range counts {
 		counts[i] = make([]int, len(n.nodes[i].Outcomes))
 	}
+	totalMatches := 0
 
-	// Sampling.
-	samples := make([]int, len(n.nodes))
-	matches := 0
-	for r := 0; r < count; r++ {
-		// Sample nodes.
-		match := true
-		for i, node := range n.nodes {
-			idx := node.Index(samples)
-
-			e := ev[i]
-			// Don't sample for root nodes with given evidence
-			if len(node.Given) == 0 && e >= 0 {
-				samples[i] = e
-				continue
-			}
-
-			// Sample from cumulative probabilities.
-			s := sample(node.TableCum[idx], rng)
-
-			// Reject if sample is not equal to evidence
-			if e >= 0 && e != s {
-				match = false
-				break
-			}
-
-			// Otherwise, fill in the sample.
-			samples[i] = s
+	decisionChoices := 1
+	for _, idx := range n.decisionNodes {
+		decisionChoices *= len(n.nodes[idx].Outcomes)
+	}
+	expectedUtility := make([]float64, decisionChoices)
+	for choice := range expectedUtility {
+		decisions := make([]int, len(n.nodes))
+		for i, idx := range n.decisionNodes {
+			node := n.nodes[idx]
+			selected := (choice / n.decisionStride[i]) % len(node.Outcomes)
+			decisions[idx] = selected
 		}
 
-		// Count matching samples
-		if match {
-			for i, s := range samples {
-				counts[i][s]++
+		// Sampling.
+		samples := make([]int, len(n.nodes))
+		matches := 0
+		for r := 0; r < count; r++ {
+			// Sample nodes.
+			match := true
+			for i, node := range n.nodes {
+				idx := node.Index(samples)
+
+				if node.Type == UtilityNode {
+					samples[i] = int(node.Table[idx][0])
+				} else if node.Type == DecisionNode {
+					samples[i] = decisions[i]
+				} else {
+					e := ev[i]
+					// Don't sample for root nodes with given evidence
+					if len(node.Given) == 0 && e >= 0 {
+						samples[i] = e
+						continue
+					}
+
+					// Sample from cumulative probabilities.
+					s := sample(node.TableCum[idx], rng)
+
+					// Reject if sample is not equal to evidence
+					if e >= 0 && e != s {
+						match = false
+						break
+					}
+
+					// Otherwise, fill in the sample.
+					samples[i] = s
+				}
 			}
-			matches++
+
+			// Count matching samples
+			if match {
+				for i, s := range samples {
+					node := n.nodes[i]
+					if node.Type == UtilityNode {
+						counts[i][0] += s
+					} else {
+						counts[i][s]++
+					}
+				}
+				matches++
+			}
 		}
+		totalMatches += matches
+
+		sumUtility := 0.0
+		for _, idx := range n.utilityNodes {
+			sumUtility += float64(counts[idx][0]) / float64(matches)
+		}
+		expectedUtility[choice] = sumUtility
 	}
 
-	return counts, matches
+	fmt.Println(expectedUtility)
+
+	return counts, totalMatches
 }
 
 // transforms the evidence map into an array with one entry per node.

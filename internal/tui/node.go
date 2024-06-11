@@ -67,8 +67,6 @@ func NewNode(n *bbn.Node) Node {
 	node.drawTitle()
 	node.drawStateLabels()
 
-	node.drawBars(make([]float64, len(n.Outcomes)), false, 0, false)
-
 	return &node
 }
 
@@ -82,7 +80,11 @@ func (n *node) Bounds() *Bounds {
 
 func (n *node) Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color) {
 	n.drawBorder(selected)
-	n.drawBars(probs, selected, state, evidence)
+	if n.node.Type == "utility" { // TODO: use enumeration values!
+		n.drawUtility(probs)
+	} else {
+		n.drawBars(probs, selected, state, evidence)
+	}
 	return n.runes, n.colors
 }
 
@@ -157,5 +159,12 @@ func (n *node) drawBars(probs []float64, selected bool, state int, evidence bool
 			n.runes[i+2][1] = Empty
 			n.runes[i+2][n.bounds.W-2] = Empty
 		}
+	}
+}
+
+func (n *node) drawUtility(probs []float64) {
+	for i, p := range probs {
+		text := []rune(fmt.Sprintf("%7.3f", p))
+		copy(n.runes[i+2][n.barsX+1:], text)
 	}
 }

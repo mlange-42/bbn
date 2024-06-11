@@ -75,9 +75,20 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 			return nil, fmt.Errorf("wrong number of table rows in node '%s'; got %d, expected %d", n.Variable, len(n.Table), tableRows)
 		}
 
+		tp, ok := nodeTypes[n.Type]
+		if !ok {
+			return nil, fmt.Errorf("unknown node type '%s' for '%s'", n.Type, n.Variable)
+		}
+
 		tableCols := len(n.Outcomes)
-		if tableCols < 2 {
-			return nil, fmt.Errorf("node '%s' requires at least two outcomes, got %d", n.Variable, tableCols)
+		if tp == UtilityNode {
+			if tableCols != 1 {
+				return nil, fmt.Errorf("utility node '%s' must have a single table column, got %d", n.Variable, tableCols)
+			}
+		} else {
+			if tableCols < 2 {
+				return nil, fmt.Errorf("node '%s' requires at least two outcomes, got %d", n.Variable, tableCols)
+			}
 		}
 
 		for j, probs := range n.Table {
@@ -88,6 +99,7 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 
 		nd := node{
 			Variable:   n.Variable,
+			Type:       tp,
 			ID:         i,
 			GivenNames: n.Given,
 			Given:      parents,
