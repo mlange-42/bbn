@@ -113,19 +113,26 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 		nodeList[i] = &nd
 	}
 
-	for _, n := range nodeList {
-		if n.Type == DecisionNode && len(n.Given) > 0 {
-			return nil, fmt.Errorf("decision node '%s' can't have any parent nodes", n.Variable)
-		}
-		for _, parIdx := range n.Given {
-			par := nodeList[parIdx]
-			if par.Type == UtilityNode {
-				return nil, fmt.Errorf("utility node '%s' can't be a parent of any other node", par.Variable)
-			}
-		}
+	if err := checkNodes(nodeList); err != nil {
+		return nil, err
 	}
 
 	return nodeList, nil
+}
+
+func checkNodes(nodes []*node) error {
+	for _, n := range nodes {
+		if n.Type == DecisionNode && len(n.Given) > 0 {
+			return fmt.Errorf("decision node '%s' can't have any parent nodes", n.Variable)
+		}
+		for _, parIdx := range n.Given {
+			par := nodes[parIdx]
+			if par.Type == UtilityNode {
+				return fmt.Errorf("utility node '%s' can't be a parent of any other node", par.Variable)
+			}
+		}
+	}
+	return nil
 }
 
 // sortTopological sorts nodes in topological order.
