@@ -2,6 +2,7 @@ package bbn
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"slices"
 )
@@ -110,12 +111,9 @@ func (n *node) IndexWithNoData(samples []int) (int, bool) {
 
 // Network definition.
 type Network struct {
-	name           string
-	nodes          []*node
-	byName         map[string]int
-	utilityNodes   []int
-	decisionNodes  []int
-	decisionStride []int
+	name   string
+	nodes  []*node
+	byName map[string]int
 }
 
 // New creates a new network. Sorts nodes topologically.
@@ -131,34 +129,14 @@ func New(name string, nodes ...*Node) (*Network, error) {
 	}
 
 	byName := map[string]int{}
-	utilityNodes := []int{}
-	decisionNodes := []int{}
 	for i, n := range nodeList {
 		byName[n.Variable] = i
-		switch n.Type {
-		case UtilityNode:
-			utilityNodes = append(utilityNodes, i)
-		case DecisionNode:
-			decisionNodes = append(decisionNodes, i)
-		}
-	}
-
-	var decisionStride []int
-	if len(decisionNodes) > 0 {
-		decisionStride = make([]int, len(decisionNodes))
-		decisionStride[len(decisionStride)-1] = 1
-		for j := len(decisionStride) - 2; j >= 0; j-- {
-			decisionStride[j] = decisionStride[j+1] * len(nodeList[decisionNodes[j]].Outcomes)
-		}
 	}
 
 	network := Network{
-		name:           name,
-		nodes:          nodeList,
-		byName:         byName,
-		utilityNodes:   utilityNodes,
-		decisionNodes:  decisionNodes,
-		decisionStride: decisionStride,
+		name:   name,
+		nodes:  nodeList,
+		byName: byName,
 	}
 
 	network.cumulateTables()
@@ -221,34 +199,36 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 	}
 	totalMatches := 0
 
-	decisionChoices := 1
-	for _, idx := range n.decisionNodes {
-		decisionChoices *= len(n.nodes[idx].Outcomes)
-	}
+	decisionNodes, decisionStride, decisionChoices := n.collectDecisionNodes(ev)
 	expectedUtility := make([]float64, decisionChoices)
 	for choice := range expectedUtility {
 		decisions := make([]int, len(n.nodes))
-		for i, idx := range n.decisionNodes {
+		for i, idx := range decisionNodes {
 			node := n.nodes[idx]
-			selected := (choice / n.decisionStride[i]) % len(node.Outcomes)
+			selected := (choice / decisionStride[i]) % len(node.Outcomes)
 			decisions[idx] = selected
 		}
 
 		// Sampling.
 		samples := make([]int, len(n.nodes))
+		utility := make([]int, len(n.nodes))
 		matches := 0
 		for r := 0; r < count; r++ {
 			// Sample nodes.
 			match := true
 			for i, node := range n.nodes {
 				idx := node.Index(samples)
+				e := ev[i]
 
 				if node.Type == UtilityNode {
 					samples[i] = int(node.Table[idx][0])
 				} else if node.Type == DecisionNode {
-					samples[i] = decisions[i]
+					if e >= 0 {
+						samples[i] = e
+					} else {
+						samples[i] = decisions[i]
+					}
 				} else {
-					e := ev[i]
 					// Don't sample for root nodes with given evidence
 					if len(node.Given) == 0 && e >= 0 {
 						samples[i] = e
@@ -273,9 +253,15 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 			if match {
 				for i, s := range samples {
 					node := n.nodes[i]
-					if node.Type == UtilityNode {
+					switch node.Type {
+					case UtilityNode:
 						counts[i][0] += s
-					} else {
+						utility[i] += s
+					case DecisionNode:
+						if ev[i] >= 0 {
+							counts[i][s]++
+						}
+					case ChanceNode:
 						counts[i][s]++
 					}
 				}
@@ -285,15 +271,58 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]int, int) {
 		totalMatches += matches
 
 		sumUtility := 0.0
-		for _, idx := range n.utilityNodes {
-			sumUtility += float64(counts[idx][0]) / float64(matches)
+		for i, node := range n.nodes {
+			if node.Type != UtilityNode {
+				continue
+			}
+			sumUtility += float64(utility[i]) / float64(matches)
 		}
 		expectedUtility[choice] = sumUtility
 	}
 
+	maxUtilityIndex := -1
+	maxUtility := math.Inf(-1)
+	for i, exp := range expectedUtility {
+		if exp > maxUtility {
+			maxUtility = exp
+			maxUtilityIndex = i
+		}
+	}
+
+	decisions := make([]int, len(n.nodes))
+	for i, idx := range decisionNodes {
+		node := n.nodes[idx]
+		selected := (maxUtilityIndex / decisionStride[i]) % len(node.Outcomes)
+		decisions[idx] = selected
+	}
+	for _, idx := range decisionNodes {
+		counts[idx][decisions[idx]] = totalMatches
+	}
+
 	fmt.Println(expectedUtility)
+	fmt.Println(decisions)
 
 	return counts, totalMatches
+}
+
+func (n *Network) collectDecisionNodes(evidence []int) (nodes []int, stride []int, choices int) {
+	choices = 1
+	for i, node := range n.nodes {
+		if node.Type == DecisionNode && evidence[i] < 0 {
+			nodes = append(nodes, i)
+			choices *= len(node.Outcomes)
+		}
+	}
+
+	if len(nodes) > 0 {
+		stride = make([]int, len(nodes))
+		stride[len(stride)-1] = 1
+		for j := len(stride) - 2; j >= 0; j-- {
+			stride[j] = stride[j+1] * len(n.nodes[nodes[j+1]].Outcomes)
+		}
+	}
+
+	return
 }
 
 // transforms the evidence map into an array with one entry per node.

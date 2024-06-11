@@ -36,6 +36,6 @@ variables:
 - variable: DummyDecision
   position: [48, 16]
   type: decision
-  outcomes: [Take, Leave]
+  outcomes: [A, B, C]
   table: 
-  - [1, 1]
+  - [1, 1, 1]
