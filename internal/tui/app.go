@@ -18,6 +18,7 @@ type App struct {
 	tableDialog *tview.Grid
 	table       *tview.Table
 	canvas      [][]rune
+	colors      [][]Color
 	network     *bbn.Network
 	rng         *rand.Rand
 	samples     int
@@ -93,10 +94,13 @@ func (a *App) createCanvas() {
 		bounds.Extend(n.Bounds())
 	}
 	a.canvas = make([][]rune, bounds.H)
+	a.colors = make([][]Color, bounds.H)
 	for i := range a.canvas {
 		a.canvas[i] = make([]rune, bounds.W)
+		a.colors[i] = make([]Color, bounds.W)
 		for j := range a.canvas[i] {
 			a.canvas[i][j] = Empty
+			a.colors[i][j] = White
 		}
 	}
 }

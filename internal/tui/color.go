@@ -7,6 +7,7 @@ const (
 	Yellow
 	Red
 	Blue
+	Green
 )
 
 var ColorTags = []string{
@@ -14,4 +15,5 @@ var ColorTags = []string{
 	"[yellow]",
 	"[red]",
 	"[blue]",
+	"[green]",
 }

@@ -45,6 +45,16 @@ func NewNode(n *bbn.Node) Node {
 		H: len(n.Outcomes) + 3,
 	}
 
+	var color Color
+	switch n.Type {
+	case bbn.NatureNodeType:
+		color = White
+	case bbn.UtilityNodeType:
+		color = Green
+	case bbn.DecisionNodeType:
+		color = Blue
+	}
+
 	runes := make([][]rune, bounds.H)
 	colors := make([][]Color, bounds.H)
 	for i := range runes {
@@ -52,6 +62,9 @@ func NewNode(n *bbn.Node) Node {
 		colors[i] = make([]Color, bounds.W)
 		for j := range runes[i] {
 			runes[i][j] = Empty
+		}
+		for j := range colors[i] {
+			colors[i][j] = color
 		}
 	}
 

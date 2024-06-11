@@ -43,7 +43,7 @@ var nodeTypeNames = map[NodeType]string{
 // See the package examples.
 type Node struct {
 	Variable string      // Name of the node.
-	Type     string      `yaml:",omitempty"` // Type of the node [chance, decision, utility]
+	Type     string      `yaml:",omitempty"` // Type of the node [nature, decision, utility]
 	Given    []string    `yaml:",flow"`      // Names of parent nodes.
 	Outcomes []string    `yaml:",flow"`      // Names of the node's possible states.
 	Table    [][]float64 `yaml:",flow"`      // Conditional probability table.
