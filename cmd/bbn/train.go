@@ -80,26 +80,10 @@ func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn
 	if err != nil {
 		return nil, err
 	}
-	indices := make([]int, len(nodes))
-	isUtility := make([]bool, len(nodes))
-	outcomes := make([]map[string]int, len(nodes))
-	for i, node := range nodes {
-		idx := slices.Index(header, node.Variable)
-		if idx < 0 {
-			return nil, fmt.Errorf("no column '%s' in file '%s'", node.Variable, dataFile)
-		}
-		indices[i] = idx
 
-		outcomes[i] = make(map[string]int, len(node.Outcomes))
-		for j, o := range node.Outcomes {
-			if o == noData {
-				return nil, fmt.Errorf("no-data value '%s' appears as outcomes of node '%s'", noData, node.Variable)
-			}
-			outcomes[i][o] = j
-		}
-		outcomes[i][noData] = -1
-
-		isUtility[i] = node.Type == bbn.UtilityNodeType
+	indices, isUtility, outcomes, err := prepare(nodes, header, noData)
+	if err != nil {
+		return nil, err
 	}
 
 	train := bbn.NewTrainer(net)
@@ -138,4 +122,31 @@ func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn
 	}
 
 	return train.UpdateNetwork()
+}
+
+func prepare(nodes []*bbn.Node, header []string, noData string) (indices []int, isUtility []bool, outcomes []map[string]int, err error) {
+	indices = make([]int, len(nodes))
+	isUtility = make([]bool, len(nodes))
+	outcomes = make([]map[string]int, len(nodes))
+	for i, node := range nodes {
+		idx := slices.Index(header, node.Variable)
+		if idx < 0 {
+			err = fmt.Errorf("no column '%s' in training data file", node.Variable)
+			return
+		}
+		indices[i] = idx
+
+		outcomes[i] = make(map[string]int, len(node.Outcomes))
+		for j, o := range node.Outcomes {
+			if o == noData {
+				err = fmt.Errorf("no-data value '%s' appears as outcomes of node '%s'", noData, node.Variable)
+				return
+			}
+			outcomes[i][o] = j
+		}
+		outcomes[i][noData] = -1
+
+		isUtility[i] = node.Type == bbn.UtilityNodeType
+	}
+	return
 }
