@@ -68,3 +68,59 @@ func TestTrainer(t *testing.T) {
 		"GrassWet":  {1, 0},
 	}, result)
 }
+
+func TestTrainerUtility(t *testing.T) {
+	a := bbn.Node{
+		Variable: "A",
+		Outcomes: []string{"yes", "no"},
+		Table:    [][]float64{{0.0, 0.0}},
+	}
+
+	b := bbn.Node{
+		Variable: "B",
+		Outcomes: []string{"yes", "no"},
+		Table:    [][]float64{{0.0, 0.0}},
+	}
+
+	utility := bbn.Node{
+		Variable: "U",
+		Type:     "utility",
+		Given:    []string{"A", "B"},
+		Outcomes: []string{"U"},
+		Table: [][]float64{
+			{0.0},
+			{0.0},
+			{0.0},
+			{0.0},
+		},
+	}
+
+	net, err := bbn.New("Utility", &a, &b, &utility)
+	assert.Nil(t, err)
+
+	trainer := bbn.NewTrainer(net)
+
+	data := [][]int{
+		{0, 0, 0},
+		{0, 0, 0},
+
+		{0, 1, 30},
+		{0, 1, 50},
+
+		{1, 0, 50},
+		{1, 0, 70},
+
+		{1, 1, 100},
+		{1, 1, 100},
+	}
+
+	for _, row := range data {
+		trainer.AddSample(row)
+	}
+	_, err = trainer.UpdateNetwork()
+	assert.Nil(t, err)
+
+	assert.Equal(t, [][]float64{{0}, {40}, {60}, {100}}, utility.Table)
+	assert.Equal(t, [][]float64{{0.5, 0.5}}, a.Table)
+	assert.Equal(t, [][]float64{{0.5, 0.5}}, b.Table)
+}

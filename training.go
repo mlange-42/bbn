@@ -49,7 +49,11 @@ func (t *Trainer) AddSample(sample []int) {
 		if !ok || s < 0 {
 			continue
 		}
-		t.data[i][idx][s]++
+		if node.Type == UtilityNode {
+			t.data[i][idx][0] += s
+		} else {
+			t.data[i][idx][s]++
+		}
 		t.counter[i][idx]++
 	}
 }
