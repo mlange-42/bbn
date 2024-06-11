@@ -98,6 +98,7 @@ func FromBIFXML(content []byte) (*Network, []*Node, error) {
 	return n, nodes, nil
 }
 
+// Search and parse position property in format `position = (x, y)`
 func parsePosition(variable *variableXml) ([2]int, error) {
 	position := [2]int{}
 	for _, prob := range variable.Properties {

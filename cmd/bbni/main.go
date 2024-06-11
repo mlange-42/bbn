@@ -16,7 +16,7 @@ func main() {
 	}
 }
 
-// rootCommand sets up the CLI
+// rootCommand sets up the CLI for the TUI.
 func rootCommand() *cobra.Command {
 	evidence := []string{}
 	var seed int64

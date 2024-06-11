@@ -8,12 +8,14 @@ import (
 	"strings"
 )
 
+// Error type for conflicting evidence.
 type ConflictingEvidenceError struct{}
 
 func (m *ConflictingEvidenceError) Error() string {
 	return "conflicting evidence / all samples rejected"
 }
 
+// helper for YAML serialization of a network.
 type networkYaml struct {
 	Name      string
 	Variables []*Node
