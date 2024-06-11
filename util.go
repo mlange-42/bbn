@@ -113,6 +113,18 @@ func toInternalNodes(nodes []*Node) ([]*node, error) {
 		nodeList[i] = &nd
 	}
 
+	for _, n := range nodeList {
+		if n.Type == DecisionNode && len(n.Given) > 0 {
+			return nil, fmt.Errorf("decision node '%s' can't have any parent nodes", n.Variable)
+		}
+		for _, parIdx := range n.Given {
+			par := nodeList[parIdx]
+			if par.Type == UtilityNode {
+				return nil, fmt.Errorf("utility node '%s' can't be a parent of any other node", par.Variable)
+			}
+		}
+	}
+
 	return nodeList, nil
 }
 
