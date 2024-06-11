@@ -10,26 +10,26 @@ import (
 type NodeType uint8
 
 const (
-	ChanceNode NodeType = iota
+	NatureNode NodeType = iota
 	DecisionNode
 	UtilityNode
 )
 
 const (
-	ChanceNodeType   = "chance"
+	NatureNodeType   = "nature"
 	DecisionNodeType = "decision"
 	UtilityNodeType  = "utility"
 )
 
 var nodeTypes = map[string]NodeType{
-	"":               ChanceNode,
-	ChanceNodeType:   ChanceNode,
+	"":               NatureNode,
+	NatureNodeType:   NatureNode,
 	DecisionNodeType: DecisionNode,
 	UtilityNodeType:  UtilityNode,
 }
 
 var nodeTypeNames = map[NodeType]string{
-	ChanceNode:   "",
+	NatureNode:   "",
 	DecisionNode: DecisionNodeType,
 	UtilityNode:  UtilityNodeType,
 }
@@ -271,7 +271,7 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool
 						if ev[i] >= 0 {
 							counts[i][s]++
 						}
-					case ChanceNode:
+					case NatureNode:
 						counts[i][s]++
 					}
 				}

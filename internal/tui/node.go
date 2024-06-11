@@ -8,7 +8,7 @@ import (
 	"github.com/mlange-42/bbn"
 )
 
-const maxStateLabelWidth = 6
+const maxStateLabelWidth = 8
 const maxBars = 10
 
 type Node interface {
@@ -123,6 +123,12 @@ func (n *node) drawBorder(selected bool) {
 func (n *node) drawTitle() {
 	runes := []rune(n.node.Variable)
 	copy(n.runes[1][2:n.bounds.W-2], runes)
+
+	if n.node.Type == bbn.DecisionNodeType {
+		n.runes[1][n.bounds.W-3] = '!'
+	} else if n.node.Type == bbn.UtilityNodeType {
+		n.runes[1][n.bounds.W-3] = '$'
+	}
 }
 
 func (n *node) drawStateLabels() {

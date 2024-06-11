@@ -26,7 +26,7 @@ variables:
   position: [31, 8]
   type: utility
   given: [Weather, Umbrella]
-  outcomes: [Utility]
+  outcomes: [Expected]
   table: 
   - [ 20] # Sunny, Take
   - [100] # Sunny, Leave
