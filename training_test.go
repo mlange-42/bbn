@@ -50,7 +50,7 @@ func TestTrainer(t *testing.T) {
 	trainer := bbn.NewTrainer(net)
 
 	for _, row := range data {
-		trainer.AddSample(row)
+		trainer.AddSample(row, nil)
 	}
 	net, err = trainer.UpdateNetwork()
 	assert.Nil(t, err)
@@ -100,27 +100,40 @@ func TestTrainerUtility(t *testing.T) {
 
 	trainer := bbn.NewTrainer(net)
 
-	data := [][]int{
+	samples := [][]int{
 		{0, 0, 0},
 		{0, 0, 0},
 
-		{0, 1, 30},
-		{0, 1, 50},
+		{0, 1, 0},
+		{0, 1, 0},
 
-		{1, 0, 50},
-		{1, 0, 70},
+		{1, 0, 0},
+		{1, 0, 0},
 
-		{1, 1, 100},
-		{1, 1, 100},
+		{1, 1, 0},
+		{1, 1, 0},
+	}
+	util := [][]float64{
+		{0, 0, 0},
+		{0, 0, 0},
+
+		{0, 0, 0.30},
+		{0, 1, 0.50},
+
+		{0, 0, 0.50},
+		{0, 0, 0.70},
+
+		{0, 0, 1.00},
+		{0, 0, 1.00},
 	}
 
-	for _, row := range data {
-		trainer.AddSample(row)
+	for i, row := range samples {
+		trainer.AddSample(row, util[i])
 	}
 	_, err = trainer.UpdateNetwork()
 	assert.Nil(t, err)
 
-	assert.Equal(t, [][]float64{{0}, {40}, {60}, {100}}, utility.Table)
+	assert.Equal(t, [][]float64{{0}, {0.4}, {0.6}, {1.0}}, utility.Table)
 	assert.Equal(t, [][]float64{{0.5, 0.5}}, a.Table)
 	assert.Equal(t, [][]float64{{0.5, 0.5}}, b.Table)
 }

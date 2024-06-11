@@ -5,6 +5,7 @@
 ### Features
 
 * Adds mouse support for setting outcomes and showing tables (#33)
+* Adds utility and decision nodes to form decision networks (#34)
 
 ## [[v0.2.0]](https://github.com/mlange-42/bbn/compare/v0.1.0...v0.2.0)
 

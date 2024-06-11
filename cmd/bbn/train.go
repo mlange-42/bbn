@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"slices"
 	"strconv"
@@ -103,6 +104,7 @@ func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn
 
 	train := bbn.NewTrainer(net)
 	sample := make([]int, len(nodes))
+	utility := make([]float64, len(nodes))
 
 	for {
 		record, err := r.Read()
@@ -116,10 +118,14 @@ func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn
 		for i, idx := range indices {
 			if isUtility[i] {
 				var err error
-				sample[i], err = strconv.Atoi(record[idx])
+				if record[idx] == noData {
+					utility[i] = math.NaN()
+				}
+				utility[i], err = strconv.ParseFloat(record[idx], 64)
 				if err != nil {
 					return nil, fmt.Errorf("unable to parse utility value '%s' to integer in node '%s'", record[idx], nodes[i].Variable)
 				}
+
 			} else {
 				var ok bool
 				sample[i], ok = outcomes[i][record[idx]]
@@ -128,7 +134,7 @@ func runTrainCommand(networkFile, dataFile, noData string, delimiter rune) (*bbn
 				}
 			}
 		}
-		train.AddSample(sample)
+		train.AddSample(sample, utility)
 	}
 
 	return train.UpdateNetwork()
