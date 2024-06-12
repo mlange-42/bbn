@@ -1,12 +1,18 @@
 # Changelog
 
+## [[unpublished]](https://github.com/mlange-42/bbn/compare/v0.3.0...main)
+
+### Documentation
+
+* Adds an earthquake sensor decision network example (#38)
+
 ## [[v0.3.0]](https://github.com/mlange-42/bbn/compare/v0.2.0...v0.3.0)
 
 ### Features
 
 * Adds mouse support for setting outcomes and showing tables (#33)
 * Adds utility and decision nodes to form decision networks (#34)
-* Color nodes by type (nature, decision, utility) (#53)
+* Color nodes by type (nature, decision, utility) (#35)
 
 ## [[v0.2.0]](https://github.com/mlange-42/bbn/compare/v0.1.0...v0.2.0)
 

@@ -1,0 +1,55 @@
+name: Earthquake Decision Network
+variables:
+
+- variable: Earthquake next week
+  position: [1, 0]
+  outcomes: [strong, slight, none]
+  table: 
+  - [1, 9, 90]
+
+- variable: Sensor warning
+  position: [1, 8]
+  given: [Earthquake next week, Sensor maintenance]
+  outcomes: [strong, slight, none]
+  table: 
+  - [90, 10,  0] # strong, good
+  - [60, 40,  0] # strong, poor
+  - [ 5, 90,  5] # slight, good
+  - [20, 60, 20] # slight, poor
+  - [ 0, 10, 90] # none,   good
+  - [ 0, 40, 60] # none,   poor
+
+- variable: Sensor maintenance
+  position: [1, 16]
+  outcomes: [good, poor]
+  table: 
+  - [50, 50]
+
+- variable: Evacuate
+  position: [48, 8]
+  type: decision
+  outcomes: [yes, no]
+  table: 
+  - [1, 1]
+
+- variable: Expected damage
+  position: [32, 0]
+  given: [Earthquake next week, Evacuate]
+  type: utility
+  outcomes: [Value]
+  table: 
+  - [-1000] # strong, e+
+  - [-5000] # strong, e-
+  - [ -250] # slight, e+
+  - [ -500] # slight, e-
+  - [    0] # none, e+
+  - [    0] # none, e-
+
+- variable: Evacuation cost
+  position: [64, 0]
+  given: [Evacuate]
+  type: utility
+  outcomes: [Value]
+  table: 
+  - [-100] # e+
+  - [-0] # e-
