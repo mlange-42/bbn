@@ -135,6 +135,25 @@ func checkNodes(nodes []*node) error {
 	return nil
 }
 
+func isAcyclic(nodes []*node) bool {
+	for i := range nodes {
+		if !isAcyclicRecursive(nodes, i, i) {
+			return false
+		}
+	}
+	return true
+}
+
+func isAcyclicRecursive(nodes []*node, index int, start int) bool {
+	n := nodes[index]
+	for _, parent := range n.Given {
+		if parent == start || !isAcyclicRecursive(nodes, parent, start) {
+			return false
+		}
+	}
+	return true
+}
+
 // sortTopological sorts nodes in topological order.
 func sortTopological(nodes []*node) ([]*node, error) {
 	visited := make([]bool, len(nodes))
@@ -142,7 +161,7 @@ func sortTopological(nodes []*node) ([]*node, error) {
 
 	for i := range nodes {
 		var err error
-		stack, err = sortTopologicalRecursive(nodes, i, i, visited, stack)
+		stack, err = sortTopologicalRecursive(nodes, i, visited, stack)
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +185,7 @@ func sortTopological(nodes []*node) ([]*node, error) {
 }
 
 // sortTopologicalRecursive performs the recursion used in sortTopological.
-func sortTopologicalRecursive(nodes []*node, index int, start int, visited []bool, stack []int) ([]int, error) {
+func sortTopologicalRecursive(nodes []*node, index int, visited []bool, stack []int) ([]int, error) {
 	if visited[index] {
 		return stack, nil
 	}
@@ -175,11 +194,8 @@ func sortTopologicalRecursive(nodes []*node, index int, start int, visited []boo
 	n := nodes[index]
 
 	for _, parent := range n.Given {
-		if parent == start {
-			return nil, fmt.Errorf("graph has cycles")
-		}
 		var err error
-		stack, err = sortTopologicalRecursive(nodes, parent, start, visited, stack)
+		stack, err = sortTopologicalRecursive(nodes, parent, visited, stack)
 		if err != nil {
 			return nil, err
 		}
