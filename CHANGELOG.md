@@ -2,6 +2,10 @@
 
 ## [[unpublished]](https://github.com/mlange-42/bbn/compare/v0.3.0...main)
 
+### Features
+
+* Uses likelihood-weighted sampling instead of simple rejection sampling (#39)
+
 ### Documentation
 
 * Adds an earthquake sensor decision network example (#38)
