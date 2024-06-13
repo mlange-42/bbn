@@ -5,7 +5,7 @@ variables:
   position: [1, 0]
   outcomes: [strong, slight, none]
   table: 
-  - [1, 9, 90]
+  - [1, 5, 94]
 
 - variable: Sensor warning
   position: [1, 8]
@@ -26,22 +26,32 @@ variables:
   - [50, 50]
 
 - variable: Evacuate
-  position: [48, 8]
+  position: [48, 10]
   type: decision
   outcomes: [yes, no]
   table: 
   - [1, 1]
 
-- variable: Expected damage
+- variable: Material damage
   position: [32, 0]
+  given: [Earthquake next week]
+  type: utility
+  outcomes: [Value]
+  table: 
+  - [-1000] # strong
+  - [ -250] # slight
+  - [    0] # none
+
+- variable: Human damage
+  position: [32, 4]
   given: [Earthquake next week, Evacuate]
   type: utility
   outcomes: [Value]
   table: 
-  - [-1000] # strong, e+
+  - [ -100] # strong, e+
   - [-5000] # strong, e-
-  - [ -250] # slight, e+
-  - [ -500] # slight, e-
+  - [  -20] # slight, e+
+  - [ -250] # slight, e-
   - [    0] # none, e+
   - [    0] # none, e-
 
