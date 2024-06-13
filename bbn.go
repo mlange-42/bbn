@@ -200,7 +200,7 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 // Internal method working on prepared evidence and returning raw results.
 func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool) {
 	var savedCounts [][]float64
-	var savedMatches int
+	var savedWeight float64
 	maxUtilityIndex := -1
 	maxUtility := math.Inf(-1)
 
@@ -219,16 +219,17 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool
 		// Sampling.
 		sample := make([]int, len(n.nodes))
 		utilitySample := make([]float64, len(n.nodes))
-		matches := 0
+		weight := 0.0
 		for r := 0; r < count; r++ {
 			// Sample nodes.
-			match := n.sampleOnce(sample, utilitySample, decisions, ev, rng)
-
+			w := n.sampleOnce(sample, utilitySample, decisions, ev, rng)
 			// Count matching samples
-			if match {
-				n.countMatchingSample(sample, utilitySample, ev, counts)
-				matches++
-			}
+			n.countMatchingSample(sample, utilitySample, ev, counts, w)
+			weight += w
+		}
+
+		if weight == 0 {
+			continue
 		}
 
 		sumUtility := 0.0
@@ -236,14 +237,14 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool
 			if node.Type != UtilityNode {
 				continue
 			}
-			sumUtility += counts[i][0] / float64(matches)
+			sumUtility += counts[i][0] / weight
 		}
 		if sumUtility > maxUtility {
 			maxUtility = sumUtility
 			maxUtilityIndex = choice
 
 			savedCounts = counts
-			savedMatches = matches
+			savedWeight = weight
 		}
 	}
 
@@ -253,17 +254,18 @@ func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool
 		selected := (maxUtilityIndex / decisionStride[i]) % len(node.Outcomes)
 		decisions[idx] = selected
 	}
-	for _, idx := range decisionNodes {
-		savedCounts[idx][decisions[idx]] = float64(savedMatches)
-	}
 
 	// Error on zero matches.
-	if savedMatches == 0 {
+	if savedWeight == 0 {
 		return nil, false
 	}
 
+	for _, idx := range decisionNodes {
+		savedCounts[idx][decisions[idx]] = savedWeight
+	}
+
 	// Normalize result.
-	normalizeCounts(savedCounts, savedMatches)
+	normalizeCounts(savedCounts, savedWeight)
 
 	return savedCounts, true
 }
@@ -273,9 +275,9 @@ func (n *Network) sampleOnce(
 	utilitySample []float64,
 	decisions []int,
 	evidence []int,
-	rng *rand.Rand) bool {
+	rng *rand.Rand) float64 {
 
-	match := true
+	weight := 1.0
 	for i, node := range n.nodes {
 		idx := node.Index(sample)
 		e := evidence[i]
@@ -289,40 +291,40 @@ func (n *Network) sampleOnce(
 				sample[i] = decisions[i]
 			}
 		} else {
-			// Don't sample for root nodes with given evidence
-			if len(node.Given) == 0 && e >= 0 {
-				sample[i] = e
+			if len(node.Given) == 0 {
+				// Don't sample for root nodes with given evidence
+				if e >= 0 {
+					sample[i] = e
+				} else {
+					sample[i] = Sample(node.TableCum[idx], rng)
+				}
 				continue
 			}
 
-			// Sample from cumulative probabilities.
-			s := Sample(node.TableCum[idx], rng)
-
-			// Reject if sample is not equal to evidence
-			if e >= 0 && e != s {
-				match = false
-				break
+			if e >= 0 {
+				sample[i] = e
+				cum := node.TableCum[idx]
+				weight *= node.Table[idx][e] / cum[len(cum)-1]
+			} else {
+				sample[i] = Sample(node.TableCum[idx], rng)
 			}
-
-			// Otherwise, fill in the sample.
-			sample[i] = s
 		}
 	}
-	return match
+	return weight
 }
 
-func (n *Network) countMatchingSample(sample []int, utilitySample []float64, evidence []int, counts [][]float64) {
+func (n *Network) countMatchingSample(sample []int, utilitySample []float64, evidence []int, counts [][]float64, weight float64) {
 	for i, s := range sample {
 		node := n.nodes[i]
 		switch node.Type {
 		case UtilityNode:
-			counts[i][0] += utilitySample[i]
+			counts[i][0] += utilitySample[i] * weight
 		case DecisionNode:
 			if evidence[i] >= 0 {
-				counts[i][s]++
+				counts[i][s] += weight
 			}
 		case NatureNode:
-			counts[i][s]++
+			counts[i][s] += weight
 		}
 	}
 }
@@ -335,10 +337,10 @@ func (n *Network) prepareCounts() [][]float64 {
 	return counts
 }
 
-func normalizeCounts(counts [][]float64, count int) {
+func normalizeCounts(counts [][]float64, weight float64) {
 	for i := range counts {
 		for j, cnt := range counts[i] {
-			counts[i][j] = cnt / float64(count)
+			counts[i][j] = cnt / float64(weight)
 		}
 	}
 }
