@@ -176,7 +176,7 @@ func (n *Network) cumulateTables() {
 	}
 }
 
-// Sample performs rejection sampling to calculate marginal probabilities of the network.
+// Sample performs importance-weighted sampling to calculate marginal probabilities of the network.
 func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) (map[string][]float64, error) {
 	// Evidence map to int slice.
 	ev, err := n.prepareEvidence(evidence)
@@ -200,7 +200,7 @@ func (n *Network) Sample(evidence map[string]string, count int, rng *rand.Rand) 
 	return result, nil
 }
 
-// sample performs rejection sampling to calculate marginal probabilities of the network.
+// sample performs importance-weighted sampling to calculate marginal probabilities of the network.
 // Internal method working on prepared evidence and returning raw results.
 func (n *Network) sample(ev []int, count int, rng *rand.Rand) ([][]float64, bool) {
 	var savedCounts [][]float64
