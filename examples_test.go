@@ -105,5 +105,5 @@ func Example_montyHall() {
 
 	fmt.Println(result)
 	// Output:
-	// map[Car:[0.3341143251930641 0 0.6658856748071387] Host:[0 1 0] Player:[1 0 0]]
+	// map[Car:[0.3341143251929951 0 0.6658856748070049] Host:[0 1 0] Player:[1 0 0]]
 }
