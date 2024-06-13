@@ -9,14 +9,14 @@ variables:
 
 - variable: Sensor warning
   position: [1, 8]
-  given: [Earthquake next week, Sensor maintenance]
+  given: [Sensor maintenance, Earthquake next week]
   outcomes: [strong, slight, none]
   table: 
   - [90, 10,  0] # strong, good
-  - [60, 40,  0] # strong, poor
   - [ 5, 90,  5] # slight, good
-  - [20, 60, 20] # slight, poor
   - [ 0, 10, 90] # none,   good
+  - [60, 40,  0] # strong, poor
+  - [20, 60, 20] # slight, poor
   - [ 0, 40, 60] # none,   poor
 
 - variable: Sensor maintenance
@@ -44,15 +44,15 @@ variables:
 
 - variable: Human damage
   position: [32, 4]
-  given: [Earthquake next week, Evacuate]
+  given: [Evacuate, Earthquake next week]
   type: utility
   outcomes: [Value]
   table: 
   - [ -100] # strong, e+
-  - [-5000] # strong, e-
   - [  -20] # slight, e+
-  - [ -250] # slight, e-
   - [    0] # none, e+
+  - [-5000] # strong, e-
+  - [ -250] # slight, e-
   - [    0] # none, e-
 
 - variable: Evacuation cost
