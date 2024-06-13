@@ -135,6 +135,10 @@ func New(name string, nodes ...*Node) (*Network, error) {
 		return nil, err
 	}
 
+	if !isAcyclic(nodeList) {
+		return nil, fmt.Errorf("graph has cycles")
+	}
+
 	nodeList, err = sortTopological(nodeList)
 	if err != nil {
 		return nil, err

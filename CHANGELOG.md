@@ -10,6 +10,10 @@
 
 * Adds an earthquake sensor decision network example (#38, #40)
 
+### Other
+
+* Consistently check whether a new network is an acyclic graph (#40)
+
 ## [[v0.3.0]](https://github.com/mlange-42/bbn/compare/v0.2.0...v0.3.0)
 
 ### Features
