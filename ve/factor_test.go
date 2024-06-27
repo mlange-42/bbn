@@ -48,7 +48,7 @@ func TestFactorRowIndex(t *testing.T) {
 	assert.Equal(t, 4, ln)
 }
 
-func TestOutcomes(t *testing.T) {
+func TestFactorOutcomes(t *testing.T) {
 	f := Factor{
 		variables: []Variable{
 			{id: 0, outcomes: 3},
@@ -70,4 +70,19 @@ func TestOutcomes(t *testing.T) {
 
 	f.Outcomes(5, result)
 	assert.Equal(t, []int{2, 1}, result)
+}
+
+func TestFactorNormalize(t *testing.T) {
+	f := Factor{
+		variables: []Variable{
+			{id: 0, outcomes: 3},
+		},
+		data: []float64{
+			2, 1, 1,
+		},
+	}
+
+	f.Normalize()
+
+	assert.Equal(t, []float64{0.5, 0.25, 0.25}, f.data)
 }

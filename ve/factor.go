@@ -72,3 +72,17 @@ func (f *Factor) GetRow(indices []int) []float64 {
 	idx, ln := f.RowIndex(indices)
 	return f.data[idx : idx+ln]
 }
+
+func (f *Factor) Normalize() {
+	sum := 0.0
+	for _, v := range f.data {
+		sum += v
+	}
+	if sum == 0 {
+		return
+	}
+
+	for i := range f.data {
+		f.data[i] /= sum
+	}
+}
