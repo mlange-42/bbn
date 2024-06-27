@@ -1,6 +1,9 @@
 package ve
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+)
 
 type Variable struct {
 	id       uint16
@@ -31,8 +34,12 @@ func (v *Variables) CreateFactor(vars []Variable, data []float64) Factor {
 		variables[i] = v
 		rows *= int(v.outcomes)
 	}
-	if len(data) != rows {
-		panic(fmt.Sprintf("wrong data length for factor. expected %d, got %d", rows, len(data)))
+	if data == nil {
+		data = make([]float64, rows)
+	} else {
+		if len(data) != rows {
+			panic(fmt.Sprintf("wrong data length for factor. expected %d, got %d", rows, len(data)))
+		}
 	}
 
 	return Factor{
@@ -62,7 +69,7 @@ func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Fact
 		panic(fmt.Sprintf("variable %d not in this factor", variable.id))
 	}
 
-	fNew := v.CreateFactor(newVars, make([]float64, rows))
+	fNew := v.CreateFactor(newVars, nil)
 
 	oldIndex := make([]int, len(f.variables))
 	newIndex := make([]int, len(newVars))
@@ -101,7 +108,7 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 		panic(fmt.Sprintf("variable %d not in this factor", variable.id))
 	}
 
-	fNew := v.CreateFactor(newVars, make([]float64, rows))
+	fNew := v.CreateFactor(newVars, nil)
 
 	oldIndex := make([]int, len(f.variables))
 	newIndex := make([]int, len(newVars))
@@ -118,4 +125,45 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 	}
 
 	return fNew
+}
+
+func (v *Variables) Product(f1 *Factor, f2 *Factor) Factor {
+	newVars := []Variable{}
+	map1 := make([]int, len(f1.variables))
+	map2 := make([]int, len(f2.variables))
+
+	for i, v := range f1.variables {
+		idx := slices.Index(newVars, v)
+		if idx < 0 {
+			idx = len(newVars)
+			newVars = append(newVars, v)
+		}
+		map1[i] = idx
+	}
+	for i, v := range f2.variables {
+		idx := slices.Index(newVars, v)
+		if idx < 0 {
+			idx = len(newVars)
+			newVars = append(newVars, v)
+		}
+		map2[i] = idx
+	}
+
+	f := v.CreateFactor(newVars, nil)
+
+	oldIndex1 := make([]int, len(f1.variables))
+	oldIndex2 := make([]int, len(f2.variables))
+	newIndex := make([]int, len(f.variables))
+	for i := range f.data {
+		f.Outcomes(i, newIndex)
+		for j, idx := range map1 {
+			oldIndex1[j] = newIndex[idx]
+		}
+		for j, idx := range map2 {
+			oldIndex2[j] = newIndex[idx]
+		}
+		f.data[i] = f1.Get(oldIndex1) * f2.Get(oldIndex2)
+	}
+
+	return f
 }
