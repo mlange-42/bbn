@@ -82,3 +82,40 @@ func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Fact
 
 	return fNew
 }
+
+func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
+	newVars := []Variable{}
+	idx := -1
+
+	rows := 1
+	for i := range f.variables {
+		if f.variables[i].id == variable.id {
+			idx = i
+		} else {
+			newVars = append(newVars, f.variables[i])
+			rows *= int(f.variables[i].outcomes)
+		}
+	}
+
+	if idx < 0 {
+		panic(fmt.Sprintf("variable %d not in this factor", variable.id))
+	}
+
+	fNew := v.CreateFactor(newVars, make([]float64, rows))
+
+	oldIndex := make([]int, len(f.variables))
+	newIndex := make([]int, len(newVars))
+	for i, v := range f.data {
+		f.Outcomes(i, oldIndex)
+		for j := 0; j < idx; j++ {
+			newIndex[j] = oldIndex[j]
+		}
+		for j := idx + 1; j < len(oldIndex); j++ {
+			newIndex[j-1] = oldIndex[j]
+		}
+		idx := fNew.Index(newIndex)
+		fNew.data[idx] += v
+	}
+
+	return fNew
+}
