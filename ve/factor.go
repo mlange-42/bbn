@@ -24,6 +24,24 @@ func (f *Factor) Index(indices []int) int {
 	return idx
 }
 
+func (f *Factor) Outcomes(index int, indices []int) {
+	if len(indices) != len(f.variables) {
+		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(f.variables), len(indices)))
+	}
+	curr := len(f.variables) - 1
+
+	n := int(f.variables[curr].outcomes)
+	indices[curr] = index % n
+	index /= n
+	curr--
+	for curr >= 0 {
+		n := int(f.variables[curr].outcomes)
+		indices[curr] = index % n
+		index /= n
+		curr--
+	}
+}
+
 func (f *Factor) RowIndex(indices []int) (int, int) {
 	if len(indices) != len(f.variables)-1 {
 		panic(fmt.Sprintf("factor with %d variables can't use %d row indices", len(f.variables), len(indices)))
@@ -43,6 +61,11 @@ func (f *Factor) RowIndex(indices []int) (int, int) {
 func (f *Factor) Get(indices []int) float64 {
 	idx := f.Index(indices)
 	return f.data[idx]
+}
+
+func (f *Factor) Set(indices []int, value float64) {
+	idx := f.Index(indices)
+	f.data[idx] = value
 }
 
 func (f *Factor) GetRow(indices []int) []float64 {

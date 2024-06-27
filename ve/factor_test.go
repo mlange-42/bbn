@@ -47,3 +47,27 @@ func TestFactorRowIndex(t *testing.T) {
 	assert.Equal(t, 12, idx)
 	assert.Equal(t, 4, ln)
 }
+
+func TestOutcomes(t *testing.T) {
+	f := Factor{
+		variables: []Variable{
+			{id: 0, outcomes: 3},
+			{id: 1, outcomes: 2},
+		},
+		data: make([]float64, 6),
+	}
+
+	result := []int{0, 0}
+
+	f.Outcomes(0, result)
+	assert.Equal(t, []int{0, 0}, result)
+
+	f.Outcomes(1, result)
+	assert.Equal(t, []int{0, 1}, result)
+
+	f.Outcomes(2, result)
+	assert.Equal(t, []int{1, 0}, result)
+
+	f.Outcomes(5, result)
+	assert.Equal(t, []int{2, 1}, result)
+}
