@@ -30,13 +30,76 @@ func TestEliminate(t *testing.T) {
 		0.0, 1.0, // rain- sprinkler-
 	})
 
-	ve := New(vars, []Factor{fRain, fSprinkler, fGrass})
+	evidence := []Evidence{{Variable: sprinkler, Value: 1}}
 	query := []Variable{rain}
-	result := ve.Eliminate([]Evidence{{Variable: sprinkler, Value: 1}, {Variable: grass, Value: 0}}, query)
+	ve := New(vars, []Factor{fRain, fSprinkler, fGrass}, evidence, query)
+	result := ve.Eliminate()
 
 	for _, q := range query {
 		fmt.Println(vars.Marginal(result, q))
 	}
 
-	assert.Equal(t, []float64{1, 0}, vars.Marginal(result, rain).data)
+	pRain := vars.Marginal(result, rain)
+	pRain.Normalize()
+	assert.Equal(t, []float64{1, 0}, pRain.data)
+}
+
+func TestEliminateDecision(t *testing.T) {
+	vars := NewVariables()
+
+	weather := vars.Add(ChanceNode, 2)
+	forecast := vars.Add(ChanceNode, 3)
+	umbrella := vars.Add(DecisionNode, 2)
+	utility := vars.Add(UtilityNode, 1)
+
+	fWeather := vars.CreateFactor([]Variable{weather}, []float64{
+		0.3, 0.7,
+	})
+
+	fForecast := vars.CreateFactor([]Variable{weather, forecast}, []float64{
+		0.7, 0.2, 0.1, // sunny
+		0.15, 0.25, 0.6, // rainy
+	})
+
+	fUmbrella := vars.CreateFactor([]Variable{umbrella}, []float64{
+		1, 1,
+	})
+
+	fUtility := vars.CreateFactor([]Variable{weather, umbrella, utility}, []float64{
+		20,  // sunny, umbrella+
+		100, // sunny, umbrella-
+		70,  // rainy, umbrella+
+		0,   // rainy, umbrella-
+	})
+
+	evidence := []Evidence{{Variable: forecast, Value: 0}}
+	query := []Variable{umbrella}
+	ve := New(vars, []Factor{fWeather, fForecast, fUmbrella, fUtility}, evidence, query)
+
+	ve.eliminateEvidence()
+	fmt.Println("Eliminate evidence")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	ve.eliminateHidden()
+
+	fmt.Println("Eliminate hidden")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	result := ve.summarize()
+
+	fmt.Println("Summarize")
+	fmt.Println(result)
+
+	fmt.Println("Marginalize")
+	for _, q := range query {
+		marg := vars.Marginal(result, q)
+		if q.nodeType == ChanceNode {
+			marg.Normalize()
+		}
+		fmt.Println(marg)
+	}
 }

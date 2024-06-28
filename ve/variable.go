@@ -204,8 +204,6 @@ func (v *Variables) Marginal(f *Factor, variable Variable) Factor {
 		f.Outcomes(i, oldIndex)
 		fNew.data[oldIndex[idx]] += v
 	}
-
-	fNew.Normalize()
 	return fNew
 }
 

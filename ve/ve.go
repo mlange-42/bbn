@@ -12,9 +12,11 @@ type Evidence struct {
 type VE struct {
 	variables *Variables
 	factors   map[int]*Factor
+	evidence  []Evidence
+	query     []Variable
 }
 
-func New(variables *Variables, factors []Factor) VE {
+func New(variables *Variables, factors []Factor, evidence []Evidence, query []Variable) VE {
 	fac := map[int]*Factor{}
 	for _, f := range factors {
 		fac[f.id] = &f
@@ -22,37 +24,44 @@ func New(variables *Variables, factors []Factor) VE {
 	return VE{
 		variables: variables,
 		factors:   fac,
+		evidence:  evidence,
+		query:     query,
 	}
 }
 
-func (ve *VE) Eliminate(evidence []Evidence, query []Variable) *Factor {
-	for _, ev := range evidence {
+func (ve *VE) eliminateEvidence() {
+	for _, ev := range ve.evidence {
 		ve.restrictEvidence(ev)
 	}
-
+}
+func (ve *VE) eliminateHidden() {
 	hidden := map[uint16]Variable{}
 	for _, v := range ve.variables.variables {
 		hidden[v.id] = v
 	}
-	for _, ev := range evidence {
+	for _, ev := range ve.evidence {
 		delete(hidden, ev.Variable.id)
 	}
-	for _, v := range query {
+	for _, v := range ve.query {
 		delete(hidden, v.id)
 	}
 
 	for _, v := range hidden {
-		ve.eliminateHidden(v)
+		ve.removeHidden(v)
 	}
+}
 
+func (ve *VE) summarize() *Factor {
 	result := ve.multiplyAll()
 	resultCopy := *result
 
-	if len(resultCopy.variables) == 1 {
-		resultCopy.Normalize()
-	}
-
 	return &resultCopy
+}
+
+func (ve *VE) Eliminate() *Factor {
+	ve.eliminateEvidence()
+	ve.eliminateHidden()
+	return ve.summarize()
 }
 
 func (ve *VE) restrictEvidence(evidence Evidence) {
@@ -72,7 +81,7 @@ func (ve *VE) restrictEvidence(evidence Evidence) {
 	}
 }
 
-func (ve *VE) eliminateHidden(variable Variable) {
+func (ve *VE) removeHidden(variable Variable) {
 	indices := []int{}
 	factors := []*Factor{}
 
