@@ -18,6 +18,7 @@ type Dependencies struct {
 type VE struct {
 	variables    *Variables
 	eliminated   []bool
+	decisions    []Variable
 	dependencies []Dependencies
 	factors      map[int]*Factor
 	evidence     []Evidence
@@ -30,8 +31,16 @@ func New(variables *Variables, factors []Factor, dependencies []Dependencies, ev
 		fac[f.id] = &f
 	}
 
+	dec := []Variable{}
+	for _, v := range variables.variables {
+		if v.nodeType == DecisionNode {
+			dec = append(dec, v)
+		}
+	}
+
 	return VE{
 		variables:    variables,
+		decisions:    sortTopological(dec, dependencies),
 		eliminated:   make([]bool, len(variables.variables)),
 		dependencies: dependencies,
 		factors:      fac,
@@ -144,4 +153,38 @@ func (ve *VE) multiplyAll() *Factor {
 	ve.factors[f.id] = &f
 
 	return &f
+}
+
+func sortTopological(dec []Variable, deps []Dependencies) []Variable {
+	result := []Variable{}
+	visited := make([]bool, len(dec))
+
+	for i := range dec {
+		result = sortTopologicalRecursive(dec, i, deps, visited, result)
+	}
+
+	return result
+}
+
+func sortTopologicalRecursive(dec []Variable, index int, deps []Dependencies, visited []bool, result []Variable) []Variable {
+	if visited[index] {
+		return result
+	}
+
+	visited[index] = true
+
+	v := dec[index]
+	for _, dep := range deps {
+		if dep.Decision.id == v.id {
+			for _, p := range dep.Parents {
+				if p.nodeType != DecisionNode {
+					continue
+				}
+				idx := slices.Index(dec, p)
+				result = sortTopologicalRecursive(dec, idx, deps, visited, result)
+			}
+		}
+	}
+
+	return append(result, dec[index])
 }

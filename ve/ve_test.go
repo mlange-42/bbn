@@ -132,3 +132,23 @@ func TestEliminateDecision(t *testing.T) {
 		assert.Less(t, math.Abs(expected[i]-result.data[i]), 0.0001)
 	}
 }
+
+func TestSortDecisions(t *testing.T) {
+	v := NewVariables()
+
+	d3 := v.Add(DecisionNode, 2)
+	d2 := v.Add(DecisionNode, 2)
+	d1 := v.Add(DecisionNode, 2)
+
+	deps := []Dependencies{
+		{Decision: d2, Parents: []Variable{d1}},
+		{Decision: d3, Parents: []Variable{d2}},
+	}
+
+	ve := New(v,
+		[]Factor{},
+		deps,
+		[]Evidence{}, []Variable{})
+
+	assert.Equal(t, []Variable{d1, d2, d3}, ve.decisions)
+}
