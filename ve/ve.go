@@ -37,6 +37,9 @@ func (ve *VE) eliminateEvidence() {
 func (ve *VE) eliminateHidden() {
 	hidden := map[uint16]Variable{}
 	for _, v := range ve.variables.variables {
+		if v.nodeType == UtilityNode {
+			continue
+		}
 		hidden[v.id] = v
 	}
 	for _, ev := range ve.evidence {

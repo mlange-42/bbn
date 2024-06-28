@@ -51,6 +51,7 @@ func TestEliminateDecision(t *testing.T) {
 	forecast := vars.Add(ChanceNode, 3)
 	umbrella := vars.Add(DecisionNode, 2)
 	utility := vars.Add(UtilityNode, 1)
+	_ = utility
 
 	fWeather := vars.CreateFactor([]Variable{weather}, []float64{
 		0.3, 0.7,
@@ -61,20 +62,16 @@ func TestEliminateDecision(t *testing.T) {
 		0.15, 0.25, 0.6, // rainy
 	})
 
-	fUmbrella := vars.CreateFactor([]Variable{umbrella}, []float64{
-		1, 1,
-	})
-
-	fUtility := vars.CreateFactor([]Variable{weather, umbrella, utility}, []float64{
+	fUtility := vars.CreateFactor([]Variable{weather, umbrella}, []float64{
 		20,  // sunny, umbrella+
 		100, // sunny, umbrella-
 		70,  // rainy, umbrella+
 		0,   // rainy, umbrella-
 	})
 
-	evidence := []Evidence{{Variable: forecast, Value: 0}}
+	evidence := []Evidence{}
 	query := []Variable{umbrella}
-	ve := New(vars, []Factor{fWeather, fForecast, fUmbrella, fUtility}, evidence, query)
+	ve := New(vars, []Factor{fWeather, fForecast, fUtility}, evidence, query)
 
 	ve.eliminateEvidence()
 	fmt.Println("Eliminate evidence")
