@@ -2,6 +2,7 @@ package ve
 
 import (
 	"fmt"
+	"math"
 	"slices"
 )
 
@@ -136,6 +137,73 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 		}
 		idx := fNew.Index(newIndex)
 		fNew.data[idx] += v
+	}
+
+	return fNew
+}
+
+func (v *Variables) Policy(f *Factor, variable Variable) Factor {
+	newVars := []Variable{}
+	idx := -1
+
+	for i := range f.variables {
+		if f.variables[i].id == variable.id {
+			idx = i
+		} else {
+			newVars = append(newVars, f.variables[i])
+		}
+	}
+
+	if idx < 0 {
+		panic(fmt.Sprintf("variable %d not in this factor", variable.id))
+	}
+	newVars = append(newVars, f.variables[idx])
+
+	fNew := v.CreateFactor(newVars, nil)
+
+	oldIndex := make([]int, len(f.variables))
+	newIndex := make([]int, len(newVars))
+	idxNew := len(newVars) - 1
+
+	cols := int(f.variables[idx].outcomes)
+	rows := len(f.data) / cols
+
+	rowData := make([]float64, cols)
+	for row := 0; row < rows; row++ {
+		fNew.Outcomes(row*cols, newIndex)
+		for c := 0; c < cols; c++ {
+			newIndex[idxNew] = c
+
+			for j := 0; j < idx; j++ {
+				oldIndex[j] = newIndex[j]
+			}
+			for j := idx + 1; j < len(oldIndex); j++ {
+				oldIndex[j] = newIndex[j-1]
+			}
+			oldIndex[idx] = newIndex[idxNew]
+			rowData[c] = f.Get(oldIndex)
+		}
+		maxUtility := math.Inf(-1)
+		maxIdx := -1
+		for c, u := range rowData {
+			if u > maxUtility {
+				maxUtility = u
+				maxIdx = c
+			}
+		}
+
+		if maxIdx < 0 {
+			panic("no utility values to derive policy")
+		}
+
+		for c := 0; c < cols; c++ {
+			newIndex[idxNew] = c
+			if c == maxIdx {
+				fNew.Set(newIndex, 1)
+			} else {
+				fNew.Set(newIndex, 0)
+			}
+		}
 	}
 
 	return fNew

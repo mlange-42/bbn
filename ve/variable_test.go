@@ -208,3 +208,31 @@ func TestVariablesProductScalar(t *testing.T) {
 
 	assert.Equal(t, []float64{2, 18, 10, 10, 16, 4}, f3.data)
 }
+
+func TestVariablesPolicy(t *testing.T) {
+	v := NewVariables()
+
+	v1 := v.Add(ChanceNode, 3)
+	v2 := v.Add(ChanceNode, 2)
+
+	f1 := v.CreateFactor([]Variable{v1, v2}, []float64{
+		0.4, 0.6,
+		0.9, 0.1,
+		0.2, 0.8,
+	})
+
+	p := v.Policy(&f1, v2)
+	assert.Equal(t, variables{v1, v2}, p.variables)
+	assert.Equal(t, []float64{
+		0, 1,
+		1, 0,
+		0, 1,
+	}, p.data)
+
+	p = v.Policy(&f1, v1)
+	assert.Equal(t, variables{v2, v1}, p.variables)
+	assert.Equal(t, []float64{
+		0, 1, 0,
+		0, 0, 1,
+	}, p.data)
+}
