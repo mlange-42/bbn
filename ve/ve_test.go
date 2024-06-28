@@ -3,14 +3,16 @@ package ve
 import (
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEliminate(t *testing.T) {
 	vars := NewVariables()
 
-	rain := vars.Add(2)
-	sprinkler := vars.Add(2)
-	grass := vars.Add(2)
+	rain := vars.Add(ChanceNode, 2)
+	sprinkler := vars.Add(ChanceNode, 2)
+	grass := vars.Add(ChanceNode, 2)
 
 	fRain := vars.CreateFactor([]Variable{rain}, []float64{
 		0.2, 0.8,
@@ -29,17 +31,12 @@ func TestEliminate(t *testing.T) {
 	})
 
 	ve := New(vars, []Factor{fRain, fSprinkler, fGrass})
-
-	for k, f := range ve.factors {
-		fmt.Println(k)
-		fmt.Println(f)
-	}
-	fmt.Println("----------------")
-
-	query := []Variable{rain, grass}
-	result := ve.Eliminate([]Evidence{{Variable: sprinkler, Value: 0}}, query)
+	query := []Variable{rain}
+	result := ve.Eliminate([]Evidence{{Variable: sprinkler, Value: 1}, {Variable: grass, Value: 0}}, query)
 
 	for _, q := range query {
 		fmt.Println(vars.Marginal(result, q))
 	}
+
+	assert.Equal(t, []float64{1, 0}, vars.Marginal(result, rain).data)
 }

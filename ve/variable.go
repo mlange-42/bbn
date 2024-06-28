@@ -5,9 +5,18 @@ import (
 	"slices"
 )
 
+type NodeType uint8
+
+const (
+	ChanceNode NodeType = iota
+	DecisionNode
+	UtilityNode
+)
+
 type Variable struct {
 	id       uint16
 	outcomes uint16
+	nodeType NodeType
 }
 
 type Variables struct {
@@ -19,11 +28,12 @@ func NewVariables() *Variables {
 	return &Variables{}
 }
 
-func (v *Variables) Add(outcomes uint16) Variable {
+func (v *Variables) Add(nodeType NodeType, outcomes uint16) Variable {
 	v.variables = append(v.variables,
 		Variable{
 			id:       uint16(len(v.variables)),
 			outcomes: outcomes,
+			nodeType: nodeType,
 		})
 	return v.variables[len(v.variables)-1]
 }

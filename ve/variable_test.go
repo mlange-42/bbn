@@ -9,8 +9,8 @@ import (
 func TestVariablesCreateFactor(t *testing.T) {
 	v := NewVariables()
 
-	v1 := v.Add(2)
-	v2 := v.Add(3)
+	v1 := v.Add(ChanceNode, 2)
+	v2 := v.Add(ChanceNode, 3)
 
 	f := v.CreateFactor([]Variable{v1, v2}, []float64{0.1, 0.2, 0.7, 0.6, 0.2, 0.2})
 
@@ -21,8 +21,8 @@ func TestVariablesCreateFactor(t *testing.T) {
 func TestVariablesRestrict(t *testing.T) {
 	v := NewVariables()
 
-	v1 := v.Add(2)
-	v2 := v.Add(3)
+	v1 := v.Add(ChanceNode, 2)
+	v2 := v.Add(ChanceNode, 3)
 
 	f := v.CreateFactor([]Variable{v1, v2}, []float64{0.1, 0.2, 0.7, 0.6, 0.2, 0.2})
 
@@ -38,8 +38,8 @@ func TestVariablesRestrict(t *testing.T) {
 func TestVariablesSumOut(t *testing.T) {
 	v := NewVariables()
 
-	v1 := v.Add(2)
-	v2 := v.Add(3)
+	v1 := v.Add(ChanceNode, 2)
+	v2 := v.Add(ChanceNode, 3)
 
 	f := v.CreateFactor([]Variable{v1, v2}, []float64{
 		1, 2, 7,
@@ -58,9 +58,9 @@ func TestVariablesSumOut(t *testing.T) {
 func TestVariablesProduct(t *testing.T) {
 	v := NewVariables()
 
-	v1 := v.Add(3)
-	v3 := v.Add(2)
-	v2 := v.Add(2)
+	v1 := v.Add(ChanceNode, 3)
+	v3 := v.Add(ChanceNode, 2)
+	v2 := v.Add(ChanceNode, 2)
 
 	f1 := v.CreateFactor([]Variable{v1, v2}, []float64{
 		0.1, 0.9,
@@ -89,8 +89,8 @@ func TestVariablesProduct(t *testing.T) {
 func TestVariablesProductScalar(t *testing.T) {
 	v := NewVariables()
 
-	v1 := v.Add(3)
-	v2 := v.Add(2)
+	v1 := v.Add(ChanceNode, 3)
+	v2 := v.Add(ChanceNode, 2)
 
 	f1 := v.CreateFactor([]Variable{v1, v2}, []float64{
 		1, 9,
