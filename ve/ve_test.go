@@ -2,6 +2,7 @@ package ve
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,33 +46,35 @@ func TestEliminate(t *testing.T) {
 }
 
 func TestEliminateDecision(t *testing.T) {
-	vars := NewVariables()
+	v := NewVariables()
 
-	weather := vars.Add(ChanceNode, 2)
-	forecast := vars.Add(ChanceNode, 3)
-	umbrella := vars.Add(DecisionNode, 2)
-	utility := vars.Add(UtilityNode, 1)
+	weather := v.Add(ChanceNode, 2)
+	forecast := v.Add(ChanceNode, 3)
+	umbrella := v.Add(DecisionNode, 2)
+	utility := v.Add(UtilityNode, 1)
 	_ = utility
 
-	fWeather := vars.CreateFactor([]Variable{weather}, []float64{
+	fWeather := v.CreateFactor([]Variable{weather}, []float64{
+		// rain+, rain-
 		0.3, 0.7,
 	})
 
-	fForecast := vars.CreateFactor([]Variable{weather, forecast}, []float64{
-		0.7, 0.2, 0.1, // sunny
-		0.15, 0.25, 0.6, // rainy
+	fForecast := v.CreateFactor([]Variable{weather, forecast}, []float64{
+		// sunny, cloudy, rainy
+		0.15, 0.25, 0.6, // rain+
+		0.7, 0.2, 0.1, // rain-
 	})
 
-	fUtility := vars.CreateFactor([]Variable{weather, umbrella}, []float64{
-		20,  // sunny, umbrella+
-		100, // sunny, umbrella-
-		70,  // rainy, umbrella+
-		0,   // rainy, umbrella-
+	fUtility := v.CreateFactor([]Variable{weather, umbrella}, []float64{
+		70,  // rain+, umbrella+
+		0,   // rain+, umbrella-
+		20,  // rain-, umbrella+
+		100, // rain-, umbrella-
 	})
 
 	evidence := []Evidence{}
-	query := []Variable{umbrella}
-	ve := New(vars, []Factor{fWeather, fForecast, fUtility}, evidence, query)
+	query := []Variable{forecast, umbrella}
+	ve := New(v, []Factor{fWeather, fForecast, fUtility}, evidence, query)
 
 	ve.eliminateEvidence()
 	fmt.Println("Eliminate evidence")
@@ -93,10 +96,33 @@ func TestEliminateDecision(t *testing.T) {
 
 	fmt.Println("Marginalize")
 	for _, q := range query {
-		marg := vars.Marginal(result, q)
+		marg := v.Marginal(result, q)
 		if q.nodeType == ChanceNode {
 			marg.Normalize()
 		}
 		fmt.Println(marg)
+	}
+
+	var expected []float64
+	if result.variables[0].id == 1 {
+		expected = []float64{
+			12.95, 49, // sunny
+			8.05, 14, // cloudy
+			14, 7, // rainy
+		}
+	} else if result.variables[0].id == 2 {
+		expected = []float64{
+			// sunny, cloudy, rainy
+			12.95, 8.05, 14, // umbrella+
+			49, 14, 7, // umbrella-
+		}
+	} else {
+		panic("unexpected variable order")
+	}
+
+	assert.Equal(t, len(expected), len(result.data))
+
+	for i := range expected {
+		assert.Less(t, math.Abs(expected[i]-result.data[i]), 0.0001)
 	}
 }

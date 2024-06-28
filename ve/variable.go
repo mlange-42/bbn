@@ -169,12 +169,13 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 		f.Outcomes(i, newIndex)
 
 		product := 1.0
-		for j, f := range factors {
+		for j, fOld := range factors {
 			m := maps[j]
+			oldIdx := oldIndex[j]
 			for k, idx := range m {
-				oldIndex[j][k] = newIndex[idx]
+				oldIdx[k] = newIndex[idx]
 			}
-			product *= f.Get(oldIndex[j])
+			product *= fOld.Get(oldIdx)
 		}
 		f.data[i] = product
 	}

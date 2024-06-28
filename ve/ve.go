@@ -1,6 +1,7 @@
 package ve
 
 import (
+	"fmt"
 	"slices"
 )
 
@@ -96,7 +97,12 @@ func (ve *VE) removeHidden(variable Variable) {
 	}
 
 	prod := ve.variables.Product(factors...)
+	fmt.Println("Product:")
+	fmt.Println(prod)
+
 	prod = ve.variables.SumOut(&prod, variable)
+	fmt.Println("SumOut:")
+	fmt.Println(prod)
 
 	for _, idx := range indices {
 		delete(ve.factors, idx)
