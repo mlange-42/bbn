@@ -11,7 +11,8 @@ type Variable struct {
 }
 
 type Variables struct {
-	variables []Variable
+	factorCounter int
+	variables     variables
 }
 
 func NewVariables() *Variables {
@@ -42,7 +43,10 @@ func (v *Variables) CreateFactor(vars []Variable, data []float64) Factor {
 		}
 	}
 
+	v.factorCounter++
+
 	return Factor{
+		id:        v.factorCounter - 1,
 		variables: variables,
 		data:      data,
 	}
@@ -166,4 +170,49 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 	}
 
 	return f
+}
+
+type variables []Variable
+
+func (v variables) Index(indices []int) int {
+	if len(indices) != len(v) {
+		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(v), len(indices)))
+	}
+	if len(v) == 0 {
+		return 0
+	}
+
+	curr := len(v) - 1
+	idx := indices[curr]
+	stride := 1
+
+	curr--
+	for curr >= 0 {
+		stride *= int(v[curr+1].outcomes)
+		idx += indices[curr] * stride
+		curr--
+	}
+	return idx
+}
+
+func (v variables) Outcomes(index int, indices []int) {
+	if len(indices) != len(v) {
+		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(v), len(indices)))
+	}
+	if len(v) == 0 {
+		return
+	}
+
+	curr := len(v) - 1
+
+	n := int(v[curr].outcomes)
+	indices[curr] = index % n
+	index /= n
+	curr--
+	for curr >= 0 {
+		n := int(v[curr].outcomes)
+		indices[curr] = index % n
+		index /= n
+		curr--
+	}
 }
