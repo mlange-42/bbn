@@ -15,10 +15,17 @@ type Dependencies struct {
 	Parents  []Variable
 }
 
+type Policy struct {
+	Decision Variable
+	Factor   *Factor
+}
+
 type VE struct {
-	variables    *Variables
-	eliminated   []bool
-	decisions    []Variable
+	variables          *Variables
+	eliminated         []bool
+	decisions          []Variable
+	unhandledDecisions []Variable
+	//policies           []Policy
 	dependencies []Dependencies
 	factors      map[int]*Factor
 	evidence     []Evidence
@@ -38,14 +45,17 @@ func New(variables *Variables, factors []Factor, dependencies []Dependencies, ev
 		}
 	}
 
+	dec = sortTopological(dec, dependencies)
+
 	return VE{
-		variables:    variables,
-		decisions:    sortTopological(dec, dependencies),
-		eliminated:   make([]bool, len(variables.variables)),
-		dependencies: dependencies,
-		factors:      fac,
-		evidence:     evidence,
-		query:        query,
+		variables:          variables,
+		decisions:          dec,
+		unhandledDecisions: append([]Variable{}, dec...),
+		eliminated:         make([]bool, len(variables.variables)),
+		dependencies:       dependencies,
+		factors:            fac,
+		evidence:           evidence,
+		query:              query,
 	}
 }
 
@@ -54,6 +64,11 @@ func (ve *VE) eliminateEvidence() {
 		ve.restrictEvidence(ev)
 	}
 }
+
+func (ve *VE) eliminateDecisions() {
+	ve.eliminateHidden()
+}
+
 func (ve *VE) eliminateHidden() {
 	isDecisionParent := make([]bool, len(ve.variables.variables))
 	for _, dep := range ve.dependencies {
@@ -72,6 +87,7 @@ func (ve *VE) eliminateHidden() {
 		}
 		hidden[v.id] = v
 	}
+	// TODO: really exclude evidence variables?
 	for _, ev := range ve.evidence {
 		delete(hidden, ev.Variable.id)
 	}
@@ -93,7 +109,7 @@ func (ve *VE) summarize() *Factor {
 
 func (ve *VE) Eliminate() *Factor {
 	ve.eliminateEvidence()
-	ve.eliminateHidden()
+	ve.eliminateDecisions()
 	return ve.summarize()
 }
 

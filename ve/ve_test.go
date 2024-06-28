@@ -48,7 +48,7 @@ func TestEliminate(t *testing.T) {
 	assert.Equal(t, []float64{1, 0}, pRain.data)
 }
 
-func TestEliminateDecision(t *testing.T) {
+func TestDecisionUmbrella(t *testing.T) {
 	v := NewVariables()
 
 	weather := v.Add(ChanceNode, 2)
@@ -88,7 +88,7 @@ func TestEliminateDecision(t *testing.T) {
 		fmt.Printf("%d %v\n", k, v)
 	}
 
-	ve.eliminateHidden()
+	ve.eliminateDecisions()
 
 	fmt.Println("Eliminate hidden")
 	for k, v := range ve.factors {
@@ -130,6 +130,83 @@ func TestEliminateDecision(t *testing.T) {
 
 	for i := range expected {
 		assert.Less(t, math.Abs(expected[i]-result.data[i]), 0.0001)
+	}
+}
+
+func TestDecisionEvacuate(t *testing.T) {
+	v := NewVariables()
+
+	earthquake := v.Add(ChanceNode, 3)
+	sensor := v.Add(ChanceNode, 3)
+	maintenance := v.Add(ChanceNode, 2)
+	evacuate := v.Add(DecisionNode, 2)
+
+	materialDamage := v.Add(UtilityNode, 1)
+	humanDamage := v.Add(UtilityNode, 1)
+	evacCost := v.Add(UtilityNode, 1)
+
+	_, _, _ = materialDamage, humanDamage, evacCost
+
+	fEarthquake := v.CreateFactor([]Variable{earthquake}, []float64{
+		0.01, 0.05, 0.94,
+	})
+	fSensor := v.CreateFactor([]Variable{maintenance, earthquake, sensor}, []float64{
+		0.9, 0.1, 0.0, // strong, good
+		0.05, 0.9, 0.05, // slight, good
+		0.0, 0.1, 0.9, // none,   good
+		0.6, 0.4, 0.0, // strong, poor
+		0.2, 0.6, 0.2, // slight, poor
+		0.0, 0.4, 0.6, // none,   poor
+	})
+	fMaintenance := v.CreateFactor([]Variable{maintenance}, []float64{
+		0.5, 0.5,
+	})
+	fMaterialDamage := v.CreateFactor([]Variable{earthquake}, []float64{
+		1000, 250, 0,
+	})
+	fHumanDamage := v.CreateFactor([]Variable{evacuate, earthquake}, []float64{
+		-100,  // strong, e+
+		-20,   // slight, e+
+		0,     // none, e+
+		-5000, // strong, e-
+		-250,  // slight, e-
+		0,     // none, e-
+	})
+	fEvacCost := v.CreateFactor([]Variable{evacuate}, []float64{
+		-100, 0,
+	})
+
+	query := []Variable{}
+	ve := New(v,
+		[]Factor{fEarthquake, fSensor, fMaintenance, fMaterialDamage, fHumanDamage, fEvacCost},
+		[]Dependencies{{Decision: evacuate, Parents: []Variable{sensor}}},
+		[]Evidence{}, query)
+
+	ve.eliminateEvidence()
+	fmt.Println("Eliminate evidence")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	ve.eliminateDecisions()
+
+	fmt.Println("Eliminate hidden")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	result := ve.summarize()
+
+	fmt.Println("Summarize")
+	fmt.Println(result)
+
+	fmt.Println("Marginalize")
+	for _, q := range query {
+		marg := v.Marginal(result, q)
+		if q.nodeType == ChanceNode {
+			marg.Normalize()
+		}
+		fmt.Println(marg)
 	}
 }
 
