@@ -127,42 +127,42 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 	return fNew
 }
 
-func (v *Variables) Product(f1 *Factor, f2 *Factor) Factor {
+func (v *Variables) Product(factors ...*Factor) Factor {
 	newVars := []Variable{}
-	map1 := make([]int, len(f1.variables))
-	map2 := make([]int, len(f2.variables))
-
-	for i, v := range f1.variables {
-		idx := slices.Index(newVars, v)
-		if idx < 0 {
-			idx = len(newVars)
-			newVars = append(newVars, v)
+	maps := make([][]int, len(factors))
+	for i, f := range factors {
+		m := make([]int, len(f.variables))
+		for j, v := range f.variables {
+			idx := slices.Index(newVars, v)
+			if idx < 0 {
+				idx = len(newVars)
+				newVars = append(newVars, v)
+			}
+			m[j] = idx
 		}
-		map1[i] = idx
-	}
-	for i, v := range f2.variables {
-		idx := slices.Index(newVars, v)
-		if idx < 0 {
-			idx = len(newVars)
-			newVars = append(newVars, v)
-		}
-		map2[i] = idx
+		maps[i] = m
 	}
 
 	f := v.CreateFactor(newVars, nil)
 
-	oldIndex1 := make([]int, len(f1.variables))
-	oldIndex2 := make([]int, len(f2.variables))
+	oldIndex := make([][]int, len(factors))
+	for i, f := range factors {
+		oldIndex[i] = make([]int, len(f.variables))
+	}
+
 	newIndex := make([]int, len(f.variables))
 	for i := range f.data {
 		f.Outcomes(i, newIndex)
-		for j, idx := range map1 {
-			oldIndex1[j] = newIndex[idx]
+
+		product := 1.0
+		for j, f := range factors {
+			m := maps[j]
+			for k, idx := range m {
+				oldIndex[j][k] = newIndex[idx]
+			}
+			product *= f.Get(oldIndex[j])
 		}
-		for j, idx := range map2 {
-			oldIndex2[j] = newIndex[idx]
-		}
-		f.data[i] = f1.Get(oldIndex1) * f2.Get(oldIndex2)
+		f.data[i] = product
 	}
 
 	return f
