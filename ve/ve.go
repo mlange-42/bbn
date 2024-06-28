@@ -77,6 +77,10 @@ func (ve *VE) sumUtilities() {
 		}
 	}
 
+	if len(utils) == 0 {
+		return
+	}
+
 	indices := []int{}
 	factors := []*Factor{}
 
