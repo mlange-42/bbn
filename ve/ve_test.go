@@ -36,10 +36,10 @@ func TestEliminate(t *testing.T) {
 	}
 	fmt.Println("----------------")
 
-	_ = ve.Eliminate([]Evidence{{Variable: grass, Value: 0}, {Variable: sprinkler, Value: 1}}, []Variable{rain})
+	query := []Variable{rain, grass}
+	result := ve.Eliminate([]Evidence{{Variable: sprinkler, Value: 0}}, query)
 
-	for k, f := range ve.factors {
-		fmt.Println(k)
-		fmt.Println(f)
+	for _, q := range query {
+		fmt.Println(vars.Marginal(result, q))
 	}
 }

@@ -172,6 +172,33 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 	return f
 }
 
+func (v *Variables) Marginal(f *Factor, variable Variable) Factor {
+	idx := -1
+	for i := range f.variables {
+		if f.variables[i].id == variable.id {
+			idx = i
+			break
+		}
+	}
+
+	if idx < 0 {
+		panic(fmt.Sprintf("variable %d not in this factor", variable.id))
+	}
+
+	newVars := []Variable{variable}
+	fNew := v.CreateFactor(newVars, nil)
+
+	oldIndex := make([]int, len(f.variables))
+
+	for i, v := range f.data {
+		f.Outcomes(i, oldIndex)
+		fNew.data[oldIndex[idx]] += v
+	}
+
+	fNew.Normalize()
+	return fNew
+}
+
 type variables []Variable
 
 func (v variables) Index(indices []int) int {

@@ -47,7 +47,10 @@ func (ve *VE) Eliminate(evidence []Evidence, query []Variable) *Factor {
 
 	result := ve.multiplyAll()
 	resultCopy := *result
-	resultCopy.Normalize()
+
+	if len(resultCopy.variables) == 1 {
+		resultCopy.Normalize()
+	}
 
 	return &resultCopy
 }
