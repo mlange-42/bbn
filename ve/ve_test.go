@@ -30,7 +30,7 @@ func TestEliminate(t *testing.T) {
 		0.0, 1.0, // rain- sprinkler-
 	})
 
-	evidence := []Evidence{{Variable: sprinkler, Value: 1}}
+	evidence := []Evidence{{Variable: sprinkler, Value: 1}, {Variable: grass, Value: 0}}
 	query := []Variable{rain}
 	ve := New(vars, []Factor{fRain, fSprinkler, fGrass}, evidence, query)
 	result := ve.Eliminate()
