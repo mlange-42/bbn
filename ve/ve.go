@@ -10,23 +10,33 @@ type Evidence struct {
 	Value    int
 }
 
-type VE struct {
-	variables *Variables
-	factors   map[int]*Factor
-	evidence  []Evidence
-	query     []Variable
+type Dependencies struct {
+	Decision Variable
+	Parents  []Variable
 }
 
-func New(variables *Variables, factors []Factor, evidence []Evidence, query []Variable) VE {
+type VE struct {
+	variables    *Variables
+	eliminated   []bool
+	dependencies []Dependencies
+	factors      map[int]*Factor
+	evidence     []Evidence
+	query        []Variable
+}
+
+func New(variables *Variables, factors []Factor, dependencies []Dependencies, evidence []Evidence, query []Variable) VE {
 	fac := map[int]*Factor{}
 	for _, f := range factors {
 		fac[f.id] = &f
 	}
+
 	return VE{
-		variables: variables,
-		factors:   fac,
-		evidence:  evidence,
-		query:     query,
+		variables:    variables,
+		eliminated:   make([]bool, len(variables.variables)),
+		dependencies: dependencies,
+		factors:      fac,
+		evidence:     evidence,
+		query:        query,
 	}
 }
 
@@ -36,9 +46,19 @@ func (ve *VE) eliminateEvidence() {
 	}
 }
 func (ve *VE) eliminateHidden() {
+	isDecisionParent := make([]bool, len(ve.variables.variables))
+	for _, dep := range ve.dependencies {
+		if ve.eliminated[dep.Decision.id] {
+			continue
+		}
+		for _, v := range dep.Parents {
+			isDecisionParent[v.id] = true
+		}
+	}
+
 	hidden := map[uint16]Variable{}
 	for _, v := range ve.variables.variables {
-		if v.nodeType == UtilityNode {
+		if v.nodeType != ChanceNode || isDecisionParent[v.id] {
 			continue
 		}
 		hidden[v.id] = v
@@ -108,6 +128,7 @@ func (ve *VE) removeHidden(variable Variable) {
 		delete(ve.factors, idx)
 	}
 
+	ve.eliminated[variable.id] = true
 	ve.factors[prod.id] = &prod
 }
 

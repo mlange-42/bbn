@@ -142,6 +142,10 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 }
 
 func (v *Variables) Product(factors ...*Factor) Factor {
+	if len(factors) == 1 {
+		return *factors[0]
+	}
+
 	newVars := []Variable{}
 	maps := make([][]int, len(factors))
 	for i, f := range factors {

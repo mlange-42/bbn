@@ -33,7 +33,10 @@ func TestEliminate(t *testing.T) {
 
 	evidence := []Evidence{{Variable: sprinkler, Value: 1}, {Variable: grass, Value: 0}}
 	query := []Variable{rain}
-	ve := New(vars, []Factor{fRain, fSprinkler, fGrass}, evidence, query)
+	ve := New(vars,
+		[]Factor{fRain, fSprinkler, fGrass},
+		nil,
+		evidence, query)
 	result := ve.Eliminate()
 
 	for _, q := range query {
@@ -73,8 +76,11 @@ func TestEliminateDecision(t *testing.T) {
 	})
 
 	evidence := []Evidence{}
-	query := []Variable{forecast, umbrella}
-	ve := New(v, []Factor{fWeather, fForecast, fUtility}, evidence, query)
+	query := []Variable{}
+	ve := New(v,
+		[]Factor{fWeather, fForecast, fUtility},
+		[]Dependencies{{Decision: umbrella, Parents: []Variable{forecast}}},
+		evidence, query)
 
 	ve.eliminateEvidence()
 	fmt.Println("Eliminate evidence")
