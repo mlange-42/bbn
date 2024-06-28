@@ -68,7 +68,7 @@ func TestDecisionUmbrella(t *testing.T) {
 		0.7, 0.2, 0.1, // rain-
 	})
 
-	fUtility := v.CreateFactor([]Variable{weather, umbrella}, []float64{
+	fUtility := v.CreateFactor([]Variable{weather, umbrella, utility}, []float64{
 		70,  // rain+, umbrella+
 		0,   // rain+, umbrella-
 		20,  // rain-, umbrella+
@@ -161,10 +161,10 @@ func TestDecisionEvacuate(t *testing.T) {
 	fMaintenance := v.CreateFactor([]Variable{maintenance}, []float64{
 		0.5, 0.5,
 	})
-	fMaterialDamage := v.CreateFactor([]Variable{earthquake}, []float64{
-		1000, 250, 0,
+	fMaterialDamage := v.CreateFactor([]Variable{earthquake, materialDamage}, []float64{
+		-1000, -250, 0,
 	})
-	fHumanDamage := v.CreateFactor([]Variable{evacuate, earthquake}, []float64{
+	fHumanDamage := v.CreateFactor([]Variable{evacuate, earthquake, humanDamage}, []float64{
 		-100,  // strong, e+
 		-20,   // slight, e+
 		0,     // none, e+
@@ -172,18 +172,25 @@ func TestDecisionEvacuate(t *testing.T) {
 		-250,  // slight, e-
 		0,     // none, e-
 	})
-	fEvacCost := v.CreateFactor([]Variable{evacuate}, []float64{
+	fEvacCost := v.CreateFactor([]Variable{evacuate, evacCost}, []float64{
 		-100, 0,
 	})
 
-	query := []Variable{}
+	query := []Variable{evacuate}
+	evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fEarthquake, fSensor, fMaintenance, fMaterialDamage, fHumanDamage, fEvacCost},
 		[]Dependencies{{Decision: evacuate, Parents: []Variable{sensor}}},
-		[]Evidence{}, query)
+		evidence, query)
 
 	ve.eliminateEvidence()
 	fmt.Println("Eliminate evidence")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	ve.sumUtilities()
+	fmt.Println("Sum utilities")
 	for k, v := range ve.factors {
 		fmt.Printf("%d %v\n", k, v)
 	}
@@ -208,6 +215,9 @@ func TestDecisionEvacuate(t *testing.T) {
 		}
 		fmt.Println(marg)
 	}
+
+	expectedUtility := v.Marginal(result, evacuate)
+	assert.Equal(t, []float64{-124.5, -85.0}, expectedUtility.data)
 }
 
 func TestSortDecisions(t *testing.T) {

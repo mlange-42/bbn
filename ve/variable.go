@@ -187,6 +187,52 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 	return f
 }
 
+func (v *Variables) Sum(factors ...*Factor) Factor {
+	if len(factors) == 1 {
+		return *factors[0]
+	}
+
+	newVars := []Variable{}
+	maps := make([][]int, len(factors))
+	for i, f := range factors {
+		m := make([]int, len(f.variables))
+		for j, v := range f.variables {
+			idx := slices.Index(newVars, v)
+			if idx < 0 {
+				idx = len(newVars)
+				newVars = append(newVars, v)
+			}
+			m[j] = idx
+		}
+		maps[i] = m
+	}
+
+	f := v.CreateFactor(newVars, nil)
+
+	oldIndex := make([][]int, len(factors))
+	for i, f := range factors {
+		oldIndex[i] = make([]int, len(f.variables))
+	}
+
+	newIndex := make([]int, len(f.variables))
+	for i := range f.data {
+		f.Outcomes(i, newIndex)
+
+		sum := 0.0
+		for j, fOld := range factors {
+			m := maps[j]
+			oldIdx := oldIndex[j]
+			for k, idx := range m {
+				oldIdx[k] = newIndex[idx]
+			}
+			sum += fOld.Get(oldIdx)
+		}
+		f.data[i] = sum
+	}
+
+	return f
+}
+
 func (v *Variables) Marginal(f *Factor, variable Variable) Factor {
 	idx := -1
 	for i := range f.variables {

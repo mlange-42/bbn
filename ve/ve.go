@@ -69,6 +69,47 @@ func (ve *VE) eliminateDecisions() {
 	ve.eliminateHidden()
 }
 
+func (ve *VE) sumUtilities() {
+	utils := []Variable{}
+	for _, u := range ve.variables.variables {
+		if u.nodeType == UtilityNode {
+			utils = append(utils, u)
+		}
+	}
+
+	indices := []int{}
+	factors := []*Factor{}
+
+	for k, f := range ve.factors {
+		for _, u := range utils {
+			if slices.Contains(f.variables, u) {
+				indices = append(indices, k)
+				factors = append(factors, f)
+				break
+			}
+		}
+	}
+
+	sum := ve.variables.Sum(factors...)
+	for _, u := range utils {
+		sum = ve.variables.SumOut(&sum, u)
+		ve.eliminated[u.id] = true
+	}
+
+	fIDs := []int{}
+	for _, f := range factors {
+		fIDs = append(fIDs, f.id)
+	}
+	fmt.Println("Sum for utilities", fIDs)
+	fmt.Println(sum)
+
+	for _, idx := range indices {
+		delete(ve.factors, idx)
+	}
+
+	ve.factors[sum.id] = &sum
+}
+
 func (ve *VE) eliminateHidden() {
 	isDecisionParent := make([]bool, len(ve.variables.variables))
 	for _, dep := range ve.dependencies {
@@ -109,6 +150,7 @@ func (ve *VE) summarize() *Factor {
 
 func (ve *VE) Eliminate() *Factor {
 	ve.eliminateEvidence()
+	ve.sumUtilities()
 	ve.eliminateDecisions()
 	return ve.summarize()
 }
@@ -142,11 +184,16 @@ func (ve *VE) removeHidden(variable Variable) {
 	}
 
 	prod := ve.variables.Product(factors...)
-	fmt.Println("Product:")
+
+	fIDs := []int{}
+	for _, f := range factors {
+		fIDs = append(fIDs, f.id)
+	}
+	fmt.Println("Product for var", variable.id, fIDs)
 	fmt.Println(prod)
 
 	prod = ve.variables.SumOut(&prod, variable)
-	fmt.Println("SumOut:")
+	fmt.Println("SumOut var", variable.id)
 	fmt.Println(prod)
 
 	for _, idx := range indices {
