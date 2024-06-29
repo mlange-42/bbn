@@ -152,27 +152,21 @@ func (ve *VE) SolveQuery(evidence []Evidence, query []Variable, verbose bool) *F
 	ve.eliminateEvidence(evidence)
 
 	if verbose {
-		for k, v := range ve.factors {
-			fmt.Printf("%d %v\n", k, v)
-		}
+		ve.printFactors()
 		fmt.Println("Sum utilities")
 	}
 
 	ve.sumUtilities()
 
 	if verbose {
-		for k, v := range ve.factors {
-			fmt.Printf("%d %v\n", k, v)
-		}
+		ve.printFactors()
 		fmt.Println("Eliminate hidden")
 	}
 
 	ve.eliminateHidden(evidence, query, verbose)
 
 	if verbose {
-		for k, v := range ve.factors {
-			fmt.Printf("%d %v\n", k, v)
-		}
+		ve.printFactors()
 	}
 
 	return ve.summarize()
@@ -186,18 +180,14 @@ func (ve *VE) SolvePolicies(verbose bool) map[Variable]*Factor {
 	ve.sumUtilities()
 
 	if verbose {
-		for k, v := range ve.factors {
-			fmt.Printf("%d %v\n", k, v)
-		}
+		ve.printFactors()
 		fmt.Println("Eliminate hidden")
 	}
 
 	ve.eliminateHidden(nil, nil, verbose)
 
 	if verbose {
-		for k, v := range ve.factors {
-			fmt.Printf("%d %v\n", k, v)
-		}
+		ve.printFactors()
 		fmt.Println("Policies")
 	}
 
@@ -211,6 +201,10 @@ func (ve *VE) SolvePolicies(verbose bool) map[Variable]*Factor {
 		fmt.Println(decisions)
 	}
 
+	return ve.solvePolicies(decisions, verbose)
+}
+
+func (ve *VE) solvePolicies(decisions []Variable, verbose bool) map[Variable]*Factor {
 	policies := map[Variable]*Factor{}
 	for i := len(decisions) - 1; i >= 0; i-- {
 		dec := decisions[i]
@@ -258,18 +252,14 @@ func (ve *VE) SolvePolicies(verbose bool) map[Variable]*Factor {
 
 		if verbose {
 			fmt.Println("Added policy", dec)
-			for k, v := range ve.factors {
-				fmt.Printf("%d %v\n", k, v)
-			}
+			ve.printFactors()
 			fmt.Println("Eliminate hidden", dec)
 		}
 
 		ve.eliminateHidden(nil, nil, verbose)
 
 		if verbose {
-			for k, v := range ve.factors {
-				fmt.Printf("%d %v\n", k, v)
-			}
+			ve.printFactors()
 		}
 	}
 
@@ -327,6 +317,12 @@ func (ve *VE) multiplyAll() *Factor {
 	ve.factors[f.id] = &f
 
 	return &f
+}
+
+func (ve *VE) printFactors() {
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
 }
 
 func sortTopological(dec []Variable, deps map[Variable][]Variable) []Variable {
