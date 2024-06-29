@@ -329,6 +329,79 @@ func TestDecisionOil(t *testing.T) {
 	assert.Equal(t, expPolicy, policy.data)
 }
 
+func TestDecisionRobot(t *testing.T) {
+	v := NewVariables()
+
+	accidentProb := 0.1
+
+	short := v.Add(DecisionNode, 2)
+	pads := v.Add(DecisionNode, 2)
+
+	accident := v.Add(ChanceNode, 2)
+
+	utility := v.Add(UtilityNode, 1)
+
+	fAccident := v.CreateFactor([]Variable{short, accident}, []float64{
+		accidentProb, 1 - accidentProb, // short
+		0, 1, // long
+	})
+
+	fUtility := v.CreateFactor([]Variable{pads, short, accident, utility}, []float64{
+		2,  // pads+ short accident+
+		8,  // pads+ short accident-
+		0,  // pads+ long accident+
+		4,  // pads+ long accident-
+		0,  // pads- short accident+
+		10, // pads- short accident-
+		0,  // pads- long accident+
+		6,  // pads- long accident-
+	})
+
+	query := []Variable{}
+	evidence := []Evidence{}
+	ve := New(v,
+		[]Factor{fAccident, fUtility},
+		[]Dependencies{},
+		evidence, query)
+
+	ve.eliminateEvidence()
+	fmt.Println("Eliminate evidence")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	ve.sumUtilities()
+	fmt.Println("Sum utilities")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	ve.eliminateDecisions()
+
+	fmt.Println("Eliminate hidden")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	result1 := ve.summarize()
+	result := v.Rearrange(result1, []Variable{short, pads})
+
+	fmt.Println("Summarize")
+	fmt.Println(result)
+
+	fmt.Println("Marginalize")
+	for _, q := range query {
+		marg := v.Marginal(&result, q)
+		if q.nodeType == ChanceNode {
+			marg.Normalize()
+		}
+		fmt.Println(marg)
+	}
+
+	expected := []float64{8 - 6*accidentProb, 10 - 10*accidentProb, 4, 6}
+	assert.Equal(t, expected, result.data)
+}
+
 func TestSortDecisions(t *testing.T) {
 	v := NewVariables()
 
