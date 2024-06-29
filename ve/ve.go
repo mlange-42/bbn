@@ -10,63 +10,46 @@ type Evidence struct {
 	Value    int
 }
 
-type Dependencies struct {
-	Decision Variable
-	Parents  []Variable
-}
-
 type Policy struct {
 	Decision Variable
 	Factor   *Factor
 }
 
 type VE struct {
-	variables          *Variables
-	eliminated         []bool
-	decisions          []Variable
-	unhandledDecisions []Variable
-	//policies           []Policy
-	dependencies []Dependencies
+	variables    *Variables
+	eliminated   []bool
+	dependencies map[Variable][]Variable
 	factors      map[int]*Factor
-	evidence     []Evidence
-	query        []Variable
 }
 
-func New(variables *Variables, factors []Factor, dependencies []Dependencies, evidence []Evidence, query []Variable) VE {
+func New(variables *Variables, factors []Factor, dependencies map[Variable][]Variable) VE {
 	fac := map[int]*Factor{}
 	for _, f := range factors {
 		fac[f.id] = &f
 	}
 
+	return VE{
+		variables:    variables,
+		eliminated:   make([]bool, len(variables.variables)),
+		dependencies: dependencies,
+		factors:      fac,
+	}
+}
+
+func (ve *VE) getDecisions() []Variable {
 	dec := []Variable{}
-	for _, v := range variables.variables {
+	for _, v := range ve.variables.variables {
 		if v.nodeType == DecisionNode {
 			dec = append(dec, v)
 		}
 	}
-
-	dec = sortTopological(dec, dependencies)
-
-	return VE{
-		variables:          variables,
-		decisions:          dec,
-		unhandledDecisions: append([]Variable{}, dec...),
-		eliminated:         make([]bool, len(variables.variables)),
-		dependencies:       dependencies,
-		factors:            fac,
-		evidence:           evidence,
-		query:              query,
-	}
+	return sortTopological(dec, ve.dependencies)
 }
 
-func (ve *VE) eliminateEvidence() {
-	for _, ev := range ve.evidence {
+func (ve *VE) eliminateEvidence(evidence []Evidence) {
+	for _, ev := range evidence {
 		ve.restrictEvidence(ev)
 	}
-}
-
-func (ve *VE) eliminateDecisions() {
-	ve.eliminateHidden()
 }
 
 func (ve *VE) sumUtilities() {
@@ -114,33 +97,41 @@ func (ve *VE) sumUtilities() {
 	ve.factors[sum.id] = &sum
 }
 
-func (ve *VE) eliminateHidden() {
+func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, verbose bool) {
 	isDecisionParent := make([]bool, len(ve.variables.variables))
-	for _, dep := range ve.dependencies {
-		if ve.eliminated[dep.Decision.id] {
+	for _, v := range ve.variables.variables {
+		if ve.eliminated[v.id] || v.nodeType != DecisionNode {
 			continue
 		}
-		for _, v := range dep.Parents {
-			isDecisionParent[v.id] = true
+		if vars, ok := ve.dependencies[v]; ok {
+			for _, v := range vars {
+				isDecisionParent[v.id] = true
+			}
 		}
 	}
 
 	hidden := map[uint16]Variable{}
-	for _, v := range ve.variables.variables {
-		if v.nodeType != ChanceNode || isDecisionParent[v.id] {
+	for i, v := range ve.variables.variables {
+		if v.nodeType != ChanceNode || ve.eliminated[i] || isDecisionParent[v.id] {
 			continue
 		}
 		hidden[v.id] = v
 	}
 	// TODO: really exclude evidence variables?
-	for _, ev := range ve.evidence {
+	for _, ev := range evidence {
 		delete(hidden, ev.Variable.id)
 	}
-	for _, v := range ve.query {
+	for _, v := range query {
 		delete(hidden, v.id)
 	}
 
+	if verbose {
+		fmt.Println("Hidden variables: ", hidden)
+	}
 	for _, v := range hidden {
+		if verbose {
+			fmt.Println("Eliminate", v)
+		}
 		ve.removeHidden(v)
 	}
 }
@@ -152,11 +143,137 @@ func (ve *VE) summarize() *Factor {
 	return &resultCopy
 }
 
-func (ve *VE) Eliminate() *Factor {
-	ve.eliminateEvidence()
+func (ve *VE) SolveQuery(evidence []Evidence, query []Variable, verbose bool) *Factor {
+
+	if verbose {
+		fmt.Println("Eliminate evidence")
+	}
+
+	ve.eliminateEvidence(evidence)
+
+	if verbose {
+		for k, v := range ve.factors {
+			fmt.Printf("%d %v\n", k, v)
+		}
+		fmt.Println("Sum utilities")
+	}
+
 	ve.sumUtilities()
-	ve.eliminateDecisions()
+
+	if verbose {
+		for k, v := range ve.factors {
+			fmt.Printf("%d %v\n", k, v)
+		}
+		fmt.Println("Eliminate hidden")
+	}
+
+	ve.eliminateHidden(evidence, query, verbose)
+
+	if verbose {
+		for k, v := range ve.factors {
+			fmt.Printf("%d %v\n", k, v)
+		}
+	}
+
 	return ve.summarize()
+}
+
+func (ve *VE) SolvePolicies(verbose bool) map[Variable]*Factor {
+	if verbose {
+		fmt.Println("Sum utilities")
+	}
+
+	ve.sumUtilities()
+
+	if verbose {
+		for k, v := range ve.factors {
+			fmt.Printf("%d %v\n", k, v)
+		}
+		fmt.Println("Eliminate hidden")
+	}
+
+	ve.eliminateHidden(nil, nil, verbose)
+
+	if verbose {
+		for k, v := range ve.factors {
+			fmt.Printf("%d %v\n", k, v)
+		}
+		fmt.Println("Policies")
+	}
+
+	decisions := ve.getDecisions()
+	if len(decisions) == 0 {
+		return nil
+	}
+
+	if verbose {
+		fmt.Println("Collecting decisions")
+		fmt.Println(decisions)
+	}
+
+	policies := map[Variable]*Factor{}
+	for i := len(decisions) - 1; i >= 0; i-- {
+		dec := decisions[i]
+		if verbose {
+			fmt.Println("Solving decision", dec)
+		}
+
+		deps := ve.dependencies[dec]
+		factorIdx := -1
+		for i, f := range ve.factors {
+			if !slices.Contains(f.variables, dec) {
+				continue
+			}
+			if len(deps) == 0 {
+				if factorIdx >= 0 {
+					panic(fmt.Sprintf("found multiple factors containing variable %d and its parents", dec.id))
+				}
+				factorIdx = i
+				continue
+			}
+			for _, v := range deps {
+				if slices.Contains(f.variables, v) {
+					if factorIdx >= 0 {
+						panic(fmt.Sprintf("found multiple factors containing variable %d and its parents", dec.id))
+					}
+					factorIdx = i
+					break
+				}
+			}
+		}
+
+		if factorIdx < 0 {
+			panic(fmt.Sprintf("found no factors containing variable %d and its parents", dec.id))
+		}
+
+		policy := ve.variables.Policy(ve.factors[factorIdx], dec)
+		if verbose {
+			fmt.Println("Policy")
+			fmt.Println(policy)
+		}
+
+		policies[dec] = &policy
+		ve.factors[policy.id] = &policy
+		ve.variables.variables[dec.id].nodeType = ChanceNode
+
+		if verbose {
+			fmt.Println("Added policy", dec)
+			for k, v := range ve.factors {
+				fmt.Printf("%d %v\n", k, v)
+			}
+			fmt.Println("Eliminate hidden", dec)
+		}
+
+		ve.eliminateHidden(nil, nil, verbose)
+
+		if verbose {
+			for k, v := range ve.factors {
+				fmt.Printf("%d %v\n", k, v)
+			}
+		}
+	}
+
+	return policies
 }
 
 func (ve *VE) restrictEvidence(evidence Evidence) {
@@ -181,24 +298,14 @@ func (ve *VE) removeHidden(variable Variable) {
 	factors := []*Factor{}
 
 	for k, f := range ve.factors {
-		if slices.Contains(f.variables, variable) {
+		if slices.ContainsFunc(f.variables, func(v Variable) bool { return v.id == variable.id }) {
 			indices = append(indices, k)
 			factors = append(factors, f)
 		}
 	}
 
 	prod := ve.variables.Product(factors...)
-
-	fIDs := []int{}
-	for _, f := range factors {
-		fIDs = append(fIDs, f.id)
-	}
-	fmt.Println("Product for var", variable.id, fIDs)
-	fmt.Println(prod)
-
 	prod = ve.variables.SumOut(&prod, variable)
-	fmt.Println("SumOut var", variable.id)
-	fmt.Println(prod)
 
 	for _, idx := range indices {
 		delete(ve.factors, idx)
@@ -222,7 +329,7 @@ func (ve *VE) multiplyAll() *Factor {
 	return &f
 }
 
-func sortTopological(dec []Variable, deps []Dependencies) []Variable {
+func sortTopological(dec []Variable, deps map[Variable][]Variable) []Variable {
 	result := []Variable{}
 	visited := make([]bool, len(dec))
 
@@ -233,7 +340,7 @@ func sortTopological(dec []Variable, deps []Dependencies) []Variable {
 	return result
 }
 
-func sortTopologicalRecursive(dec []Variable, index int, deps []Dependencies, visited []bool, result []Variable) []Variable {
+func sortTopologicalRecursive(dec []Variable, index int, deps map[Variable][]Variable, visited []bool, result []Variable) []Variable {
 	if visited[index] {
 		return result
 	}
@@ -241,9 +348,9 @@ func sortTopologicalRecursive(dec []Variable, index int, deps []Dependencies, vi
 	visited[index] = true
 
 	v := dec[index]
-	for _, dep := range deps {
-		if dep.Decision.id == v.id {
-			for _, p := range dep.Parents {
+	for id, vars := range deps {
+		if id.id == v.id {
+			for _, p := range vars {
 				if p.nodeType != DecisionNode {
 					continue
 				}
