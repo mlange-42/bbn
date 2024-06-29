@@ -195,47 +195,32 @@ func (ve *VE) summarize() *Factor {
 }
 
 func (ve *VE) SolveQuery(evidence []Evidence, query []Variable, verbose bool) *Factor {
-
-	if verbose {
-		fmt.Println("Eliminate evidence")
-	}
-
-	ve.eliminateEvidence(evidence)
-
-	if verbose {
-		ve.printFactors()
-		fmt.Println("Remove utilities")
-	}
-
-	ve.removeUtilities()
-
-	if verbose {
-		ve.printFactors()
-		fmt.Println("Eliminate hidden")
-	}
-
-	ve.eliminateHidden(evidence, query, verbose)
-
-	if verbose {
-		ve.printFactors()
-	}
-
-	return ve.summarize()
+	return ve.solve(evidence, query, false, verbose)
 }
 
 func (ve *VE) SolveUtility(evidence []Evidence, query []Variable, verbose bool) *Factor {
+	return ve.solve(evidence, query, true, verbose)
+}
 
+func (ve *VE) solve(evidence []Evidence, query []Variable, utility bool, verbose bool) *Factor {
 	if verbose {
 		fmt.Println("Eliminate evidence")
 	}
 
 	ve.eliminateEvidence(evidence)
 
-	if verbose {
-		fmt.Println("Sum utilities")
+	if utility {
+		if verbose {
+			fmt.Println("Sum utilities")
+		}
+		ve.sumUtilities()
+	} else {
+		if verbose {
+			ve.printFactors()
+			fmt.Println("Remove utilities")
+		}
+		ve.removeUtilities()
 	}
-
-	ve.sumUtilities()
 
 	if verbose {
 		ve.printFactors()
