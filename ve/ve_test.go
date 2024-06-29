@@ -80,7 +80,7 @@ func TestDecisionUmbrella(t *testing.T) {
 		[]Factor{fWeather, fForecast, fUtility},
 		map[Variable][]Variable{umbrella: {forecast}})
 
-	result := ve.SolveQuery(evidence, query, true)
+	result := ve.SolveUtility(evidence, query, true)
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
@@ -161,13 +161,13 @@ func TestDecisionEvacuate(t *testing.T) {
 		-100, 0,
 	})
 
-	query := []Variable{evacuate}
+	query := []Variable{}
 	evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fEarthquake, fSensor, fMaintenance, fMaterialDamage, fHumanDamage, fEvacCost},
 		map[Variable][]Variable{evacuate: {sensor}})
 
-	result := ve.SolveQuery(evidence, query, true)
+	result := ve.SolveUtility(evidence, query, true)
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
@@ -290,7 +290,7 @@ func TestDecisionRobot(t *testing.T) {
 		[]Factor{fAccident, fUtility},
 		map[Variable][]Variable{})
 
-	result1 := ve.SolveQuery(evidence, query, true)
+	result1 := ve.SolveUtility(evidence, query, true)
 	result := v.Rearrange(result1, []Variable{short, pads})
 
 	fmt.Println("Summarize")

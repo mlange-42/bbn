@@ -52,6 +52,57 @@ func (ve *VE) eliminateEvidence(evidence []Evidence) {
 	}
 }
 
+/*
+func (ve *VE) cleanupUtilities() {
+	utils := []Variable{}
+	for _, u := range ve.variables.variables {
+		if u.nodeType == UtilityNode {
+			utils = append(utils, u)
+		}
+	}
+
+	if len(utils) == 0 {
+		return
+	}
+
+	for _, f := range ve.factors {
+		for _, u := range utils {
+			if idx := slices.Index(f.variables, u); idx >= 0 {
+				f.variables = slices.Delete(f.variables, idx, idx+1)
+			}
+		}
+	}
+}
+*/
+
+func (ve *VE) removeUtilities() {
+	utils := []Variable{}
+	for _, u := range ve.variables.variables {
+		if u.nodeType == UtilityNode {
+			utils = append(utils, u)
+		}
+	}
+
+	if len(utils) == 0 {
+		return
+	}
+
+	indices := []int{}
+
+	for k, f := range ve.factors {
+		for _, u := range utils {
+			if slices.Contains(f.variables, u) {
+				indices = append(indices, k)
+				break
+			}
+		}
+	}
+
+	for _, idx := range indices {
+		delete(ve.factors, idx)
+	}
+}
+
 func (ve *VE) sumUtilities() {
 	utils := []Variable{}
 	for _, u := range ve.variables.variables {
@@ -153,6 +204,34 @@ func (ve *VE) SolveQuery(evidence []Evidence, query []Variable, verbose bool) *F
 
 	if verbose {
 		ve.printFactors()
+		fmt.Println("Remove utilities")
+	}
+
+	ve.removeUtilities()
+
+	if verbose {
+		ve.printFactors()
+		fmt.Println("Eliminate hidden")
+	}
+
+	ve.eliminateHidden(evidence, query, verbose)
+
+	if verbose {
+		ve.printFactors()
+	}
+
+	return ve.summarize()
+}
+
+func (ve *VE) SolveUtility(evidence []Evidence, query []Variable, verbose bool) *Factor {
+
+	if verbose {
+		fmt.Println("Eliminate evidence")
+	}
+
+	ve.eliminateEvidence(evidence)
+
+	if verbose {
 		fmt.Println("Sum utilities")
 	}
 
