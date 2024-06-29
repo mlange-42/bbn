@@ -189,8 +189,11 @@ func TestVariablesProductMulti3(t *testing.T) {
 func TestVariablesProductScalar(t *testing.T) {
 	v := NewVariables()
 
+	_ = v.Add(ChanceNode, 3)
 	v1 := v.Add(ChanceNode, 3)
+	_ = v.Add(ChanceNode, 3)
 	v2 := v.Add(ChanceNode, 2)
+	_ = v.Add(ChanceNode, 3)
 
 	f1 := v.CreateFactor([]Variable{v1, v2}, []float64{
 		1, 9,
@@ -212,8 +215,11 @@ func TestVariablesProductScalar(t *testing.T) {
 func TestVariablesPolicy(t *testing.T) {
 	v := NewVariables()
 
+	_ = v.Add(ChanceNode, 3)
 	v1 := v.Add(ChanceNode, 3)
+	_ = v.Add(ChanceNode, 3)
 	v2 := v.Add(ChanceNode, 2)
+	_ = v.Add(ChanceNode, 3)
 
 	f1 := v.CreateFactor([]Variable{v1, v2}, []float64{
 		0.4, 0.6,
@@ -235,4 +241,36 @@ func TestVariablesPolicy(t *testing.T) {
 		0, 1, 0,
 		0, 0, 1,
 	}, p.data)
+}
+
+func TestRearrange(t *testing.T) {
+	v := NewVariables()
+
+	_ = v.Add(ChanceNode, 3)
+	v1 := v.Add(ChanceNode, 3)
+	_ = v.Add(ChanceNode, 3)
+	v2 := v.Add(ChanceNode, 2)
+	_ = v.Add(ChanceNode, 3)
+
+	original := []float64{
+		0.4, 0.6,
+		0.9, 0.1,
+		0.2, 0.8,
+	}
+	rearranged := []float64{
+		0.4, 0.9, 0.2,
+		0.6, 0.1, 0.8,
+	}
+
+	f1 := v.CreateFactor([]Variable{v1, v2}, original)
+	assert.Equal(t, variables{v1, v2}, f1.variables)
+
+	f2 := v.Rearrange(&f1, []Variable{v2, v1})
+	assert.Equal(t, variables{v2, v1}, f2.variables)
+	assert.Equal(t, rearranged, f2.data)
+
+	f3 := v.Rearrange(&f2, []Variable{v1, v2})
+	assert.Equal(t, variables{v1, v2}, f3.variables)
+	assert.Equal(t, original, f3.data)
+
 }

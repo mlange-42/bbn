@@ -209,6 +209,45 @@ func (v *Variables) Policy(f *Factor, variable Variable) Factor {
 	return fNew
 }
 
+func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
+	if len(f.variables) != len(variables) {
+		panic("number of old and new variables doesn't match")
+	}
+	varsEqual := true
+	for i, vv := range variables {
+		if vv != f.variables[i] {
+			varsEqual = false
+			break
+		}
+	}
+	if varsEqual {
+		return *f
+	}
+
+	indices := make([]int, len(variables))
+	for i, vv := range variables {
+		idx := slices.Index(f.variables, vv)
+		if idx < 0 {
+			panic(fmt.Sprintf("variable %d not in original factor", vv.id))
+		}
+		indices[i] = idx
+	}
+
+	fNew := v.CreateFactor(variables, nil)
+	newIndex := make([]int, len(variables))
+	oldIndex := make([]int, len(f.variables))
+
+	for i := range fNew.data {
+		fNew.Outcomes(i, newIndex)
+		for j, idx := range newIndex {
+			oldIndex[indices[j]] = idx
+		}
+		fNew.data[i] = f.Get(oldIndex)
+	}
+
+	return fNew
+}
+
 func (v *Variables) Product(factors ...*Factor) Factor {
 	if len(factors) == 1 {
 		return *factors[0]

@@ -220,6 +220,115 @@ func TestDecisionEvacuate(t *testing.T) {
 	assert.Equal(t, []float64{-124.5, -85.0}, expectedUtility.data)
 }
 
+func TestDecisionOil(t *testing.T) {
+	v := NewVariables()
+
+	oil := v.Add(ChanceNode, 3)
+	test := v.Add(DecisionNode, 2)
+	testResult := v.Add(ChanceNode, 3)
+	drill := v.Add(DecisionNode, 2)
+
+	utilityDrill := v.Add(UtilityNode, 1)
+	utilityTest := v.Add(UtilityNode, 1)
+
+	fOil := v.CreateFactor([]Variable{oil}, []float64{
+		0.5, 0.3, 0.2,
+	})
+
+	fResult := v.CreateFactor([]Variable{oil, test, testResult}, []float64{
+		// closed, open, diffuse
+		0.1, 0.3, 0.6, // dry, test+
+		0.333, 0.333, 0.333, // dry, test-
+		0.3, 0.4, 0.3, // wet, test+
+		0.333, 0.333, 0.333, // wet, test-
+		0.5, 0.4, 0.1, // soaking, test+
+		0.333, 0.333, 0.333, // soaking, test-
+	})
+
+	fUtilityDrill := v.CreateFactor([]Variable{oil, drill, utilityDrill}, []float64{
+		-70, // dry, drill+
+		0,   // dry, drill-
+		50,  // wet, test+
+		0,   // wet, drill-
+		200, // soaking, test+
+		0,   // soaking, drill-
+	})
+
+	fUtilityTest := v.CreateFactor([]Variable{test, utilityTest}, []float64{
+		-10, // drill+
+		0,   // drill-
+	})
+
+	query := []Variable{}
+	evidence := []Evidence{}
+	ve := New(v,
+		[]Factor{fOil, fResult, fUtilityTest, fUtilityDrill},
+		[]Dependencies{{Decision: drill, Parents: []Variable{test, testResult}}},
+		evidence, query)
+
+	ve.eliminateEvidence()
+	fmt.Println("Eliminate evidence")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	ve.sumUtilities()
+	fmt.Println("Sum utilities")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	ve.eliminateDecisions()
+
+	fmt.Println("Eliminate hidden")
+	for k, v := range ve.factors {
+		fmt.Printf("%d %v\n", k, v)
+	}
+
+	result1 := ve.summarize()
+	result := v.Rearrange(result1, []Variable{test, testResult, drill})
+
+	fmt.Println("Summarize")
+	fmt.Println(result)
+
+	fmt.Println("Marginalize")
+	for _, q := range query {
+		marg := v.Marginal(&result, q)
+		if q.nodeType == ChanceNode {
+			marg.Normalize()
+		}
+		fmt.Println(marg)
+	}
+
+	exp := []float64{
+		// drill + -
+		18.6, -2.4, // test+, closed
+		8.0, -3.5, // test+, open
+		-16.6, -4.1, // test+, diffuse
+		6.66, 0.0, // test+, closed
+		6.66, 0.0, // test+, open
+		6.66, 0.0, // test+, diffuse
+	}
+	assert.Equal(t, variables{test, testResult, drill}, result.variables)
+	assert.Equal(t, len(exp), len(result.data))
+
+	for i := range exp {
+		assert.Less(t, math.Abs(exp[i]-result.data[i]), 0.00001)
+	}
+	expPolicy := []float64{
+		// drill + -
+		1, 0, // test+, closed
+		1, 0, // test+, open
+		0, 1, // test+, diffuse
+		1, 0, // test+, closed
+		1, 0, // test+, open
+		1, 0, // test+, diffuse
+	}
+	policy := v.Policy(&result, drill)
+	assert.Equal(t, variables{test, testResult, drill}, policy.variables)
+	assert.Equal(t, expPolicy, policy.data)
+}
+
 func TestSortDecisions(t *testing.T) {
 	v := NewVariables()
 
