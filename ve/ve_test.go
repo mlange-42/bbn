@@ -35,9 +35,8 @@ func TestEliminate(t *testing.T) {
 	query := []Variable{rain}
 	ve := New(vars,
 		[]Factor{fRain, fSprinkler, fGrass},
-		nil,
-		evidence, query)
-	result := ve.Eliminate()
+		nil)
+	result := ve.SolveQuery(evidence, query, true)
 
 	for _, q := range query {
 		fmt.Println(vars.Marginal(result, q))
@@ -79,23 +78,9 @@ func TestDecisionUmbrella(t *testing.T) {
 	query := []Variable{}
 	ve := New(v,
 		[]Factor{fWeather, fForecast, fUtility},
-		[]Dependencies{{Decision: umbrella, Parents: []Variable{forecast}}},
-		evidence, query)
+		map[Variable][]Variable{umbrella: {forecast}})
 
-	ve.eliminateEvidence()
-	fmt.Println("Eliminate evidence")
-	for k, v := range ve.factors {
-		fmt.Printf("%d %v\n", k, v)
-	}
-
-	ve.eliminateDecisions()
-
-	fmt.Println("Eliminate hidden")
-	for k, v := range ve.factors {
-		fmt.Printf("%d %v\n", k, v)
-	}
-
-	result := ve.summarize()
+	result := ve.SolveQuery(evidence, query, true)
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
@@ -180,29 +165,9 @@ func TestDecisionEvacuate(t *testing.T) {
 	evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fEarthquake, fSensor, fMaintenance, fMaterialDamage, fHumanDamage, fEvacCost},
-		[]Dependencies{{Decision: evacuate, Parents: []Variable{sensor}}},
-		evidence, query)
+		map[Variable][]Variable{evacuate: {sensor}})
 
-	ve.eliminateEvidence()
-	fmt.Println("Eliminate evidence")
-	for k, v := range ve.factors {
-		fmt.Printf("%d %v\n", k, v)
-	}
-
-	ve.sumUtilities()
-	fmt.Println("Sum utilities")
-	for k, v := range ve.factors {
-		fmt.Printf("%d %v\n", k, v)
-	}
-
-	ve.eliminateDecisions()
-
-	fmt.Println("Eliminate hidden")
-	for k, v := range ve.factors {
-		fmt.Printf("%d %v\n", k, v)
-	}
-
-	result := ve.summarize()
+	result := ve.SolveQuery(evidence, query, true)
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
@@ -220,6 +185,130 @@ func TestDecisionEvacuate(t *testing.T) {
 	assert.Equal(t, []float64{-124.5, -85.0}, expectedUtility.data)
 }
 
+func TestDecisionOil(t *testing.T) {
+	v := NewVariables()
+
+	oil := v.Add(ChanceNode, 3)
+	test := v.Add(DecisionNode, 2)
+	testResult := v.Add(ChanceNode, 3)
+	drill := v.Add(DecisionNode, 2)
+
+	utilityDrill := v.Add(UtilityNode, 1)
+	utilityTest := v.Add(UtilityNode, 1)
+
+	fOil := v.CreateFactor([]Variable{oil}, []float64{
+		0.5, 0.3, 0.2,
+	})
+
+	fResult := v.CreateFactor([]Variable{oil, test, testResult}, []float64{
+		// closed, open, diffuse
+		0.1, 0.3, 0.6, // dry, test+
+		0.333, 0.333, 0.333, // dry, test-
+		0.3, 0.4, 0.3, // wet, test+
+		0.333, 0.333, 0.333, // wet, test-
+		0.5, 0.4, 0.1, // soaking, test+
+		0.333, 0.333, 0.333, // soaking, test-
+	})
+
+	fUtilityDrill := v.CreateFactor([]Variable{oil, drill, utilityDrill}, []float64{
+		-70, // dry, drill+
+		0,   // dry, drill-
+		50,  // wet, test+
+		0,   // wet, drill-
+		200, // soaking, test+
+		0,   // soaking, drill-
+	})
+
+	fUtilityTest := v.CreateFactor([]Variable{test, utilityTest}, []float64{
+		-10, // drill+
+		0,   // drill-
+	})
+
+	//query := []Variable{}
+	//evidence := []Evidence{}
+	ve := New(v,
+		[]Factor{fOil, fResult, fUtilityTest, fUtilityDrill},
+		map[Variable][]Variable{drill: {test, testResult}})
+
+	policies := ve.SolvePolicies(true)
+
+	testPolicy := policies[test]
+	drillPolicy := v.Rearrange(policies[drill], []Variable{test, testResult, drill})
+
+	fmt.Println("Test policy:", testPolicy)
+	fmt.Println("Drill policy:", drillPolicy)
+
+	expTest := []float64{
+		1, 0,
+	}
+	assert.Equal(t, expTest, testPolicy.data)
+
+	expDrill := []float64{
+		// drill + -
+		1, 0, // test+, closed
+		1, 0, // test+, open
+		0, 1, // test+, diffuse
+		1, 0, // test+, closed
+		1, 0, // test+, open
+		1, 0, // test+, diffuse
+	}
+	assert.Equal(t, expDrill, drillPolicy.data)
+
+}
+
+func TestDecisionRobot(t *testing.T) {
+	v := NewVariables()
+
+	accidentProb := 0.1
+
+	short := v.Add(DecisionNode, 2)
+	pads := v.Add(DecisionNode, 2)
+
+	accident := v.Add(ChanceNode, 2)
+
+	utility := v.Add(UtilityNode, 1)
+
+	fAccident := v.CreateFactor([]Variable{short, accident}, []float64{
+		accidentProb, 1 - accidentProb, // short
+		0, 1, // long
+	})
+
+	fUtility := v.CreateFactor([]Variable{pads, short, accident, utility}, []float64{
+		2,  // pads+ short accident+
+		8,  // pads+ short accident-
+		0,  // pads+ long accident+
+		4,  // pads+ long accident-
+		0,  // pads- short accident+
+		10, // pads- short accident-
+		0,  // pads- long accident+
+		6,  // pads- long accident-
+	})
+
+	query := []Variable{}
+	evidence := []Evidence{}
+	ve := New(v,
+		[]Factor{fAccident, fUtility},
+		map[Variable][]Variable{})
+
+	result1 := ve.SolveQuery(evidence, query, true)
+	result := v.Rearrange(result1, []Variable{short, pads})
+
+	fmt.Println("Summarize")
+	fmt.Println(result)
+
+	fmt.Println("Marginalize")
+	for _, q := range query {
+		marg := v.Marginal(&result, q)
+		if q.nodeType == ChanceNode {
+			marg.Normalize()
+		}
+		fmt.Println(marg)
+	}
+
+	expected := []float64{8 - 6*accidentProb, 10 - 10*accidentProb, 4, 6}
+	assert.Equal(t, expected, result.data)
+}
+
 func TestSortDecisions(t *testing.T) {
 	v := NewVariables()
 
@@ -227,15 +316,14 @@ func TestSortDecisions(t *testing.T) {
 	d2 := v.Add(DecisionNode, 2)
 	d1 := v.Add(DecisionNode, 2)
 
-	deps := []Dependencies{
-		{Decision: d2, Parents: []Variable{d1}},
-		{Decision: d3, Parents: []Variable{d2}},
+	deps := map[Variable][]Variable{
+		d2: {d1},
+		d3: {d2},
 	}
 
 	ve := New(v,
 		[]Factor{},
-		deps,
-		[]Evidence{}, []Variable{})
+		deps)
 
-	assert.Equal(t, []Variable{d1, d2, d3}, ve.decisions)
+	assert.Equal(t, []Variable{d1, d2, d3}, ve.getDecisions())
 }
