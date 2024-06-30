@@ -52,29 +52,6 @@ func (ve *VE) eliminateEvidence(evidence []Evidence) {
 	}
 }
 
-/*
-func (ve *VE) cleanupUtilities() {
-	utils := []Variable{}
-	for _, u := range ve.variables.variables {
-		if u.nodeType == UtilityNode {
-			utils = append(utils, u)
-		}
-	}
-
-	if len(utils) == 0 {
-		return
-	}
-
-	for _, f := range ve.factors {
-		for _, u := range utils {
-			if idx := slices.Index(f.variables, u); idx >= 0 {
-				f.variables = slices.Delete(f.variables, idx, idx+1)
-			}
-		}
-	}
-}
-*/
-
 func (ve *VE) removeUtilities() {
 	utils := []Variable{}
 	for _, u := range ve.variables.variables {
