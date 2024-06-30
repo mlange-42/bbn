@@ -62,7 +62,26 @@ func (n *Network) SolvePolicies(verbose bool) error {
 	return nil
 }
 
-func (n *Network) SolveQuery(evidence map[string]string, query []string, utility bool, verbose bool) (*ve.Factor, error) {
+func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose bool) (map[string][]float64, error) {
+	f, err := n.solve(evidence, query, false, verbose)
+	if err != nil {
+		return nil, err
+	}
+
+	result := map[string][]float64{}
+	for _, q := range query {
+		m := n.Marginal(f, q)
+		result[q] = n.Normalize(&m).Data
+	}
+
+	return result, nil
+}
+
+func (n *Network) SolveUtility(evidence map[string]string, query []string, verbose bool) (*ve.Factor, error) {
+	return n.solve(evidence, query, true, verbose)
+}
+
+func (n *Network) solve(evidence map[string]string, query []string, utility bool, verbose bool) (*ve.Factor, error) {
 	var err error
 	n.ve, n.variableNames, err = n.ToVE()
 	if err != nil {

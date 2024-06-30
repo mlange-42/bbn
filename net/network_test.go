@@ -91,15 +91,21 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 	err := n.SolvePolicies(true)
 	assert.Nil(t, err)
 
-	result, err := n.SolveQuery(map[string]string{}, []string{"umbrella"}, false, true)
+	query := []string{"weather", "forecast", "umbrella"}
+	result, err := n.SolveQuery(map[string]string{}, query, true)
 	assert.Nil(t, err)
 
-	fmt.Println("--> Query", n.Normalize(result))
+	fmt.Println("--> Query", result)
+	for q, v := range result {
+		fmt.Println("--> Query", q, v)
+	}
 
-	result, err = n.SolveQuery(map[string]string{}, []string{"weather", "umbrella"}, true, true)
+	query = []string{"forecast", "umbrella"}
+	utility, err := n.SolveUtility(map[string]string{}, query, true)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Utility", result)
-	fmt.Println("--> Utility", n.Marginal(result, "weather"))
-	fmt.Println("--> Utility", n.Marginal(result, "umbrella"))
+	for _, v := range query {
+		fmt.Println("--> Utility", n.Marginal(utility, v))
+	}
 }
