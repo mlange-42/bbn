@@ -29,7 +29,7 @@ type Network struct {
 	factors       []Factor
 	policies      map[string]ve.Factor
 	ve            *ve.VE
-	variableNames map[string]variable
+	variableNames map[string]*variable
 }
 
 func New(variables []Variable, factors []Factor) *Network {
@@ -62,10 +62,10 @@ func (n *Network) SolvePolicies(verbose bool) error {
 	return nil
 }
 
-func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose bool) (map[string][]float64, error) {
+func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose bool) (map[string][]float64, *ve.Factor, error) {
 	f, err := n.solve(evidence, query, false, verbose)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	result := map[string][]float64{}
@@ -74,7 +74,7 @@ func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose
 		result[q] = n.Normalize(&m).Data
 	}
 
-	return result, nil
+	return result, f, nil
 }
 
 func (n *Network) SolveUtility(evidence map[string]string, query []string, verbose bool) (*ve.Factor, error) {
@@ -117,25 +117,28 @@ func (n *Network) solve(evidence map[string]string, query []string, utility bool
 	}
 }
 
-func (n *Network) ToVE() (*ve.VE, map[string]variable, error) {
+func (n *Network) ToVE() (*ve.VE, map[string]*variable, error) {
 	vars := ve.NewVariables()
-	varNames := map[string]variable{}
+	varNames := map[string]*variable{}
+	varIDs := make([]variable, len(n.variables))
 	dependencies := map[ve.Variable][]ve.Variable{}
 
-	for _, v := range n.variables {
+	for i, v := range n.variables {
 		if v.Type == ve.DecisionNode {
 			if _, ok := n.policies[v.Name]; ok {
-				varNames[v.Name] = variable{
+				varIDs[i] = variable{
 					Variable:   v,
 					VeVariable: vars.Add(ve.ChanceNode, uint16(len(v.Outcomes))),
 				}
+				varNames[v.Name] = &varIDs[i]
 				continue
 			}
 		}
-		varNames[v.Name] = variable{
+		varIDs[i] = variable{
 			Variable:   v,
 			VeVariable: vars.Add(v.Type, uint16(len(v.Outcomes))),
 		}
+		varNames[v.Name] = &varIDs[i]
 	}
 
 	factors := []ve.Factor{}
@@ -166,14 +169,18 @@ func (n *Network) ToVE() (*ve.VE, map[string]variable, error) {
 		factors = append(factors, vars.CreateFactor(variables, f.Table))
 	}
 
-	fmt.Println("Solved policies", n.policies)
-	for k, f := range n.policies {
-		variable := varNames[k]
+	for _, f := range n.policies {
 		variables := make([]ve.Variable, len(f.Variables))
 		for i, v := range f.Variables {
-			if v.Id == variable.VeVariable.Id {
-				v.NodeType = ve.ChanceNode
+			if v.NodeType == ve.DecisionNode {
+				vv := varIDs[v.Id]
+				if _, ok := n.policies[vv.Variable.Name]; ok {
+					v.NodeType = ve.ChanceNode
+				}
 			}
+			/*if v.Id == variable.VeVariable.Id {
+				v.NodeType = ve.ChanceNode
+			}*/
 			variables[i] = v
 		}
 		factors = append(factors, vars.CreateFactor(variables, f.Data))
@@ -184,6 +191,11 @@ func (n *Network) ToVE() (*ve.VE, map[string]variable, error) {
 
 func (n *Network) Normalize(f *ve.Factor) ve.Factor {
 	return n.ve.Variables.Normalize(f)
+}
+
+func (n *Network) NormalizeUtility(utility *ve.Factor, probs *ve.Factor) ve.Factor {
+	inv := n.ve.Variables.Invert(probs)
+	return n.ve.Variables.Product(utility, &inv)
 }
 
 func (n *Network) Marginal(f *ve.Factor, v string) ve.Factor {

@@ -232,8 +232,8 @@ func TestDecisionOil(t *testing.T) {
 	})
 
 	fUtilityTest := v.CreateFactor([]Variable{test, utilityTest}, []float64{
-		-10, // drill+
-		0,   // drill-
+		-10, // test+
+		0,   // test-
 	})
 
 	//query := []Variable{}

@@ -127,6 +127,7 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 
 	oldIndex := make([]int, len(f.Variables))
 	newIndex := make([]int, len(newVars))
+
 	for i, v := range f.Data {
 		f.Outcomes(i, oldIndex)
 		for j := 0; j < idx; j++ {
@@ -378,6 +379,18 @@ func (v *Variables) Normalize(f *Factor) Factor {
 
 	for i := range fNew.Data {
 		fNew.Data[i] /= sum
+	}
+
+	return fNew
+}
+
+func (v *Variables) Invert(f *Factor) Factor {
+	fNew := v.CreateFactor(f.Variables, append([]float64{}, f.Data...))
+
+	for i, v := range fNew.Data {
+		if v != 0 {
+			fNew.Data[i] = 1.0 / v
+		}
 	}
 
 	return fNew

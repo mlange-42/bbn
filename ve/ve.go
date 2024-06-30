@@ -111,13 +111,6 @@ func (ve *VE) sumUtilities() {
 		ve.eliminated[u.Id] = true
 	}
 
-	fIDs := []int{}
-	for _, f := range factors {
-		fIDs = append(fIDs, f.id)
-	}
-	fmt.Println("Sum for utilities", fIDs)
-	fmt.Println(sum)
-
 	for _, idx := range indices {
 		delete(ve.factors, idx)
 	}
