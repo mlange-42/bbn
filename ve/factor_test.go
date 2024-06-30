@@ -8,11 +8,11 @@ import (
 
 func TestFactorIndex(t *testing.T) {
 	f := Factor{
-		variables: []Variable{
-			{id: 0, outcomes: 3},
-			{id: 1, outcomes: 2},
+		Variables: []Variable{
+			{Id: 0, outcomes: 3},
+			{Id: 1, outcomes: 2},
 		},
-		data: make([]float64, 6),
+		Data: make([]float64, 6),
 	}
 
 	assert.Equal(t, 0, f.Index([]int{0, 0}))
@@ -23,12 +23,12 @@ func TestFactorIndex(t *testing.T) {
 
 func TestFactorRowIndex(t *testing.T) {
 	f := Factor{
-		variables: []Variable{
-			{id: 0, outcomes: 3},
-			{id: 1, outcomes: 2},
-			{id: 2, outcomes: 4},
+		Variables: []Variable{
+			{Id: 0, outcomes: 3},
+			{Id: 1, outcomes: 2},
+			{Id: 2, outcomes: 4},
 		},
-		data: make([]float64, 24),
+		Data: make([]float64, 24),
 	}
 
 	idx, ln := f.RowIndex([]int{0, 0})
@@ -50,11 +50,11 @@ func TestFactorRowIndex(t *testing.T) {
 
 func TestFactorOutcomes(t *testing.T) {
 	f := Factor{
-		variables: []Variable{
-			{id: 0, outcomes: 3},
-			{id: 1, outcomes: 2},
+		Variables: []Variable{
+			{Id: 0, outcomes: 3},
+			{Id: 1, outcomes: 2},
 		},
-		data: make([]float64, 6),
+		Data: make([]float64, 6),
 	}
 
 	result := []int{0, 0}
