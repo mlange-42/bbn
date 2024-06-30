@@ -91,8 +91,10 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 	err := n.SolvePolicies(false)
 	assert.Nil(t, err)
 
-	query := []string{"forecast"}
-	result, f, err := n.SolveQuery(map[string]string{}, query, false)
+	query := []string{"weather"}
+	evidence := map[string]string{"forecast": "rainy"}
+
+	result, f, err := n.SolveQuery(evidence, query, false)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Query", f)
@@ -100,8 +102,7 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 		fmt.Println("--> Query", q, v)
 	}
 
-	query = []string{"forecast"}
-	utility, err := n.SolveUtility(map[string]string{}, query, false)
+	utility, err := n.SolveUtility(evidence, query, false)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Utility", utility)
@@ -161,7 +162,9 @@ func TestNetworkSolveOil(t *testing.T) {
 	assert.Nil(t, err)
 
 	query := []string{"test-result"}
-	result, f, err := n.SolveQuery(map[string]string{}, query, false)
+	evidence := map[string]string{}
+
+	result, f, err := n.SolveQuery(evidence, query, false)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Query", f)
@@ -169,8 +172,7 @@ func TestNetworkSolveOil(t *testing.T) {
 		fmt.Println("--> Query", q, v)
 	}
 
-	query = []string{"test-result"}
-	utility, err := n.SolveUtility(map[string]string{}, query, false)
+	utility, err := n.SolveUtility(evidence, query, false)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Utility", utility)
