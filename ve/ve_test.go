@@ -75,24 +75,14 @@ func TestDecisionUmbrella(t *testing.T) {
 	})
 
 	evidence := []Evidence{}
-	query := []Variable{}
 	ve := New(v,
 		[]Factor{fWeather, fForecast, fUtility},
 		map[Variable][]Variable{umbrella: {forecast}})
 
-	result := ve.SolveUtility(evidence, query, true)
+	result := ve.SolveUtility(evidence, true)
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
-
-	fmt.Println("Marginalize")
-	for _, q := range query {
-		marg := v.Marginal(result, q)
-		if q.nodeType == ChanceNode {
-			marg.Normalize()
-		}
-		fmt.Println(marg)
-	}
 
 	var expected []float64
 	if result.variables[0].id == 1 {
@@ -161,25 +151,15 @@ func TestDecisionEvacuate(t *testing.T) {
 		-100, 0,
 	})
 
-	query := []Variable{}
 	evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fEarthquake, fSensor, fMaintenance, fMaterialDamage, fHumanDamage, fEvacCost},
 		map[Variable][]Variable{evacuate: {sensor}})
 
-	result := ve.SolveUtility(evidence, query, true)
+	result := ve.SolveUtility(evidence, true)
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
-
-	fmt.Println("Marginalize")
-	for _, q := range query {
-		marg := v.Marginal(result, q)
-		if q.nodeType == ChanceNode {
-			marg.Normalize()
-		}
-		fmt.Println(marg)
-	}
 
 	expectedUtility := v.Marginal(result, evacuate)
 	assert.Equal(t, []float64{-124.5, -85.0}, expectedUtility.data)
@@ -284,26 +264,16 @@ func TestDecisionRobot(t *testing.T) {
 		6,  // pads- long accident-
 	})
 
-	query := []Variable{}
 	evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fAccident, fUtility},
 		map[Variable][]Variable{})
 
-	result1 := ve.SolveUtility(evidence, query, true)
+	result1 := ve.SolveUtility(evidence, true)
 	result := v.Rearrange(result1, []Variable{short, pads})
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
-
-	fmt.Println("Marginalize")
-	for _, q := range query {
-		marg := v.Marginal(&result, q)
-		if q.nodeType == ChanceNode {
-			marg.Normalize()
-		}
-		fmt.Println(marg)
-	}
 
 	expected := []float64{8 - 6*accidentProb, 10 - 10*accidentProb, 4, 6}
 	assert.Equal(t, expected, result.data)
