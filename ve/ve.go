@@ -52,6 +52,34 @@ func (ve *VE) eliminateEvidence(evidence []Evidence) {
 	}
 }
 
+func (ve *VE) removeUtilities() {
+	utils := []Variable{}
+	for _, u := range ve.variables.variables {
+		if u.nodeType == UtilityNode {
+			utils = append(utils, u)
+		}
+	}
+
+	if len(utils) == 0 {
+		return
+	}
+
+	indices := []int{}
+
+	for k, f := range ve.factors {
+		for _, u := range utils {
+			if slices.Contains(f.variables, u) {
+				indices = append(indices, k)
+				break
+			}
+		}
+	}
+
+	for _, idx := range indices {
+		delete(ve.factors, idx)
+	}
+}
+
 func (ve *VE) sumUtilities() {
 	utils := []Variable{}
 	for _, u := range ve.variables.variables {
@@ -98,17 +126,7 @@ func (ve *VE) sumUtilities() {
 }
 
 func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, verbose bool) {
-	isDecisionParent := make([]bool, len(ve.variables.variables))
-	for _, v := range ve.variables.variables {
-		if ve.eliminated[v.id] || v.nodeType != DecisionNode {
-			continue
-		}
-		if vars, ok := ve.dependencies[v]; ok {
-			for _, v := range vars {
-				isDecisionParent[v.id] = true
-			}
-		}
-	}
+	isDecisionParent := ve.getDecisionParents()
 
 	hidden := map[uint16]Variable{}
 	for i, v := range ve.variables.variables {
@@ -136,6 +154,21 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, verbose boo
 	}
 }
 
+func (ve *VE) getDecisionParents() []bool {
+	isDecisionParent := make([]bool, len(ve.variables.variables))
+	for _, v := range ve.variables.variables {
+		if ve.eliminated[v.id] || v.nodeType != DecisionNode {
+			continue
+		}
+		if vars, ok := ve.dependencies[v]; ok {
+			for _, v := range vars {
+				isDecisionParent[v.id] = true
+			}
+		}
+	}
+	return isDecisionParent
+}
+
 func (ve *VE) summarize() *Factor {
 	result := ve.multiplyAll()
 	resultCopy := *result
@@ -144,19 +177,32 @@ func (ve *VE) summarize() *Factor {
 }
 
 func (ve *VE) SolveQuery(evidence []Evidence, query []Variable, verbose bool) *Factor {
+	return ve.solve(evidence, query, false, verbose)
+}
 
+func (ve *VE) SolveUtility(evidence []Evidence, verbose bool) *Factor {
+	return ve.solve(evidence, nil, true, verbose)
+}
+
+func (ve *VE) solve(evidence []Evidence, query []Variable, utility bool, verbose bool) *Factor {
 	if verbose {
 		fmt.Println("Eliminate evidence")
 	}
 
 	ve.eliminateEvidence(evidence)
 
-	if verbose {
-		ve.printFactors()
-		fmt.Println("Sum utilities")
+	if utility {
+		if verbose {
+			fmt.Println("Sum utilities")
+		}
+		ve.sumUtilities()
+	} else {
+		if verbose {
+			ve.printFactors()
+			fmt.Println("Remove utilities")
+		}
+		ve.removeUtilities()
 	}
-
-	ve.sumUtilities()
 
 	if verbose {
 		ve.printFactors()
@@ -172,7 +218,7 @@ func (ve *VE) SolveQuery(evidence []Evidence, query []Variable, verbose bool) *F
 	return ve.summarize()
 }
 
-func (ve *VE) SolvePolicies(verbose bool) map[Variable]*Factor {
+func (ve *VE) SolvePolicies(verbose bool) map[Variable][2]*Factor {
 	if verbose {
 		fmt.Println("Sum utilities")
 	}
@@ -204,8 +250,8 @@ func (ve *VE) SolvePolicies(verbose bool) map[Variable]*Factor {
 	return ve.solvePolicies(decisions, verbose)
 }
 
-func (ve *VE) solvePolicies(decisions []Variable, verbose bool) map[Variable]*Factor {
-	policies := map[Variable]*Factor{}
+func (ve *VE) solvePolicies(decisions []Variable, verbose bool) map[Variable][2]*Factor {
+	policies := map[Variable][2]*Factor{}
 	for i := len(decisions) - 1; i >= 0; i-- {
 		dec := decisions[i]
 		if verbose {
@@ -242,11 +288,13 @@ func (ve *VE) solvePolicies(decisions []Variable, verbose bool) map[Variable]*Fa
 
 		policy := ve.variables.Policy(ve.factors[factorIdx], dec)
 		if verbose {
+			fmt.Println("Utility")
+			fmt.Println(ve.factors[factorIdx])
 			fmt.Println("Policy")
 			fmt.Println(policy)
 		}
 
-		policies[dec] = &policy
+		policies[dec] = [2]*Factor{ve.factors[factorIdx], &policy}
 		ve.factors[policy.id] = &policy
 		ve.variables.variables[dec.id].nodeType = ChanceNode
 

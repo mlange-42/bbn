@@ -43,7 +43,7 @@ func TestEliminate(t *testing.T) {
 	}
 
 	pRain := vars.Marginal(result, rain)
-	pRain.Normalize()
+	pRain = vars.Normalize(&pRain)
 	assert.Equal(t, []float64{1, 0}, pRain.data)
 }
 
@@ -75,40 +75,20 @@ func TestDecisionUmbrella(t *testing.T) {
 	})
 
 	evidence := []Evidence{}
-	query := []Variable{}
 	ve := New(v,
 		[]Factor{fWeather, fForecast, fUtility},
 		map[Variable][]Variable{umbrella: {forecast}})
 
-	result := ve.SolveQuery(evidence, query, true)
+	result1 := ve.SolveUtility(evidence, true)
 
 	fmt.Println("Summarize")
-	fmt.Println(result)
+	fmt.Println(result1)
 
-	fmt.Println("Marginalize")
-	for _, q := range query {
-		marg := v.Marginal(result, q)
-		if q.nodeType == ChanceNode {
-			marg.Normalize()
-		}
-		fmt.Println(marg)
-	}
-
-	var expected []float64
-	if result.variables[0].id == 1 {
-		expected = []float64{
-			12.95, 49, // sunny
-			8.05, 14, // cloudy
-			14, 7, // rainy
-		}
-	} else if result.variables[0].id == 2 {
-		expected = []float64{
-			// sunny, cloudy, rainy
-			12.95, 8.05, 14, // umbrella+
-			49, 14, 7, // umbrella-
-		}
-	} else {
-		panic("unexpected variable order")
+	result := ve.variables.Rearrange(result1, []Variable{forecast, umbrella})
+	expected := []float64{
+		12.95, 49, // sunny
+		8.05, 14, // cloudy
+		14, 7, // rainy
 	}
 
 	assert.Equal(t, len(expected), len(result.data))
@@ -116,6 +96,48 @@ func TestDecisionUmbrella(t *testing.T) {
 	for i := range expected {
 		assert.Less(t, math.Abs(expected[i]-result.data[i]), 0.0001)
 	}
+}
+
+func TestDecisionUmbrella2(t *testing.T) {
+	v := NewVariables()
+
+	weather := v.Add(ChanceNode, 2)
+	forecast := v.Add(ChanceNode, 3)
+	umbrella := v.Add(DecisionNode, 2)
+	utility := v.Add(UtilityNode, 1)
+	_ = utility
+
+	fWeather := v.CreateFactor([]Variable{weather}, []float64{
+		// rain+, rain-
+		0.3, 0.7,
+	})
+
+	fForecast := v.CreateFactor([]Variable{weather, forecast}, []float64{
+		// sunny, cloudy, rainy
+		0.15, 0.25, 0.6, // rain+
+		0.7, 0.2, 0.1, // rain-
+	})
+
+	fUtility := v.CreateFactor([]Variable{weather, umbrella, utility}, []float64{
+		70,  // rain+, umbrella+
+		0,   // rain+, umbrella-
+		20,  // rain-, umbrella+
+		100, // rain-, umbrella-
+	})
+
+	ve := New(v,
+		[]Factor{fWeather, fForecast, fUtility},
+		map[Variable][]Variable{umbrella: {weather, forecast}})
+
+	result := ve.SolvePolicies(true)
+
+	fmt.Println("Summarize")
+	for k, v := range result {
+		fmt.Println(k, v[0], v[1])
+	}
+
+	policy := result[umbrella][1]
+	assert.Equal(t, variables{weather, umbrella}, policy.variables)
 }
 
 func TestDecisionEvacuate(t *testing.T) {
@@ -161,25 +183,15 @@ func TestDecisionEvacuate(t *testing.T) {
 		-100, 0,
 	})
 
-	query := []Variable{evacuate}
 	evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fEarthquake, fSensor, fMaintenance, fMaterialDamage, fHumanDamage, fEvacCost},
 		map[Variable][]Variable{evacuate: {sensor}})
 
-	result := ve.SolveQuery(evidence, query, true)
+	result := ve.SolveUtility(evidence, true)
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
-
-	fmt.Println("Marginalize")
-	for _, q := range query {
-		marg := v.Marginal(result, q)
-		if q.nodeType == ChanceNode {
-			marg.Normalize()
-		}
-		fmt.Println(marg)
-	}
 
 	expectedUtility := v.Marginal(result, evacuate)
 	assert.Equal(t, []float64{-124.5, -85.0}, expectedUtility.data)
@@ -232,8 +244,8 @@ func TestDecisionOil(t *testing.T) {
 
 	policies := ve.SolvePolicies(true)
 
-	testPolicy := policies[test]
-	drillPolicy := v.Rearrange(policies[drill], []Variable{test, testResult, drill})
+	testPolicy := policies[test][1]
+	drillPolicy := v.Rearrange(policies[drill][1], []Variable{test, testResult, drill})
 
 	fmt.Println("Test policy:", testPolicy)
 	fmt.Println("Drill policy:", drillPolicy)
@@ -284,26 +296,16 @@ func TestDecisionRobot(t *testing.T) {
 		6,  // pads- long accident-
 	})
 
-	query := []Variable{}
 	evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fAccident, fUtility},
 		map[Variable][]Variable{})
 
-	result1 := ve.SolveQuery(evidence, query, true)
+	result1 := ve.SolveUtility(evidence, true)
 	result := v.Rearrange(result1, []Variable{short, pads})
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
-
-	fmt.Println("Marginalize")
-	for _, q := range query {
-		marg := v.Marginal(&result, q)
-		if q.nodeType == ChanceNode {
-			marg.Normalize()
-		}
-		fmt.Println(marg)
-	}
 
 	expected := []float64{8 - 6*accidentProb, 10 - 10*accidentProb, 4, 6}
 	assert.Equal(t, expected, result.data)

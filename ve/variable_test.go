@@ -19,6 +19,22 @@ func TestVariablesCreateFactor(t *testing.T) {
 	assert.Equal(t, 0.2, f.Get([]int{1, 2}))
 }
 
+func TestVariablesNormalize(t *testing.T) {
+	v := NewVariables()
+	f := Factor{
+		variables: []Variable{
+			{id: 0, outcomes: 3},
+		},
+		data: []float64{
+			2, 1, 1,
+		},
+	}
+
+	f2 := v.Normalize(&f)
+
+	assert.Equal(t, []float64{0.5, 0.25, 0.25}, f2.data)
+}
+
 func TestVariablesRestrict(t *testing.T) {
 	v := NewVariables()
 
