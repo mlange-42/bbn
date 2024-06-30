@@ -5,7 +5,7 @@ variables:
   position: [16, 0]
   outcomes: [Sunny, Rainy]
   table: 
-  - [30, 70]
+  - [70, 30]
 
 - variable: Forecast
   position: [1, 8]

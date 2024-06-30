@@ -44,7 +44,7 @@ func TestEliminate(t *testing.T) {
 
 	pRain := vars.Marginal(result, rain)
 	pRain = vars.Normalize(&pRain)
-	assert.Equal(t, []float64{1, 0}, pRain.data)
+	assert.Equal(t, []float64{1, 0}, pRain.Data)
 }
 
 func TestDecisionUmbrella(t *testing.T) {
@@ -79,22 +79,22 @@ func TestDecisionUmbrella(t *testing.T) {
 		[]Factor{fWeather, fForecast, fUtility},
 		map[Variable][]Variable{umbrella: {forecast}})
 
-	result1 := ve.SolveUtility(evidence, true)
+	result1 := ve.SolveUtility(evidence, nil, true)
 
 	fmt.Println("Summarize")
 	fmt.Println(result1)
 
-	result := ve.variables.Rearrange(result1, []Variable{forecast, umbrella})
+	result := ve.Variables.Rearrange(result1, []Variable{forecast, umbrella})
 	expected := []float64{
 		12.95, 49, // sunny
 		8.05, 14, // cloudy
 		14, 7, // rainy
 	}
 
-	assert.Equal(t, len(expected), len(result.data))
+	assert.Equal(t, len(expected), len(result.Data))
 
 	for i := range expected {
-		assert.Less(t, math.Abs(expected[i]-result.data[i]), 0.0001)
+		assert.Less(t, math.Abs(expected[i]-result.Data[i]), 0.0001)
 	}
 }
 
@@ -137,7 +137,7 @@ func TestDecisionUmbrella2(t *testing.T) {
 	}
 
 	policy := result[umbrella][1]
-	assert.Equal(t, variables{weather, umbrella}, policy.variables)
+	assert.Equal(t, variables{weather, umbrella}, policy.Variables)
 }
 
 func TestDecisionEvacuate(t *testing.T) {
@@ -188,13 +188,13 @@ func TestDecisionEvacuate(t *testing.T) {
 		[]Factor{fEarthquake, fSensor, fMaintenance, fMaterialDamage, fHumanDamage, fEvacCost},
 		map[Variable][]Variable{evacuate: {sensor}})
 
-	result := ve.SolveUtility(evidence, true)
+	result := ve.SolveUtility(evidence, nil, true)
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
 
 	expectedUtility := v.Marginal(result, evacuate)
-	assert.Equal(t, []float64{-124.5, -85.0}, expectedUtility.data)
+	assert.Equal(t, []float64{-124.5, -85.0}, expectedUtility.Data)
 }
 
 func TestDecisionOil(t *testing.T) {
@@ -232,8 +232,8 @@ func TestDecisionOil(t *testing.T) {
 	})
 
 	fUtilityTest := v.CreateFactor([]Variable{test, utilityTest}, []float64{
-		-10, // drill+
-		0,   // drill-
+		-10, // test+
+		0,   // test-
 	})
 
 	//query := []Variable{}
@@ -253,7 +253,7 @@ func TestDecisionOil(t *testing.T) {
 	expTest := []float64{
 		1, 0,
 	}
-	assert.Equal(t, expTest, testPolicy.data)
+	assert.Equal(t, expTest, testPolicy.Data)
 
 	expDrill := []float64{
 		// drill + -
@@ -264,7 +264,7 @@ func TestDecisionOil(t *testing.T) {
 		1, 0, // test+, open
 		1, 0, // test+, diffuse
 	}
-	assert.Equal(t, expDrill, drillPolicy.data)
+	assert.Equal(t, expDrill, drillPolicy.Data)
 
 }
 
@@ -301,14 +301,14 @@ func TestDecisionRobot(t *testing.T) {
 		[]Factor{fAccident, fUtility},
 		map[Variable][]Variable{})
 
-	result1 := ve.SolveUtility(evidence, true)
+	result1 := ve.SolveUtility(evidence, nil, true)
 	result := v.Rearrange(result1, []Variable{short, pads})
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
 
 	expected := []float64{8 - 6*accidentProb, 10 - 10*accidentProb, 4, 6}
-	assert.Equal(t, expected, result.data)
+	assert.Equal(t, expected, result.Data)
 }
 
 func TestSortDecisions(t *testing.T) {

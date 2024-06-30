@@ -4,28 +4,28 @@ import "fmt"
 
 type Factor struct {
 	id        int
-	data      []float64
-	variables variables
+	Data      []float64
+	Variables variables
 }
 
 func (f *Factor) Index(indices []int) int {
-	return f.variables.Index(indices)
+	return f.Variables.Index(indices)
 }
 
 func (f *Factor) Outcomes(index int, indices []int) {
-	f.variables.Outcomes(index, indices)
+	f.Variables.Outcomes(index, indices)
 }
 
 func (f *Factor) RowIndex(indices []int) (int, int) {
-	if len(indices) != len(f.variables)-1 {
-		panic(fmt.Sprintf("factor with %d variables can't use %d row indices", len(f.variables), len(indices)))
+	if len(indices) != len(f.Variables)-1 {
+		panic(fmt.Sprintf("factor with %d variables can't use %d row indices", len(f.Variables), len(indices)))
 	}
-	cols := int(f.variables[len(f.variables)-1].outcomes)
+	cols := int(f.Variables[len(f.Variables)-1].outcomes)
 	idx := 0
 	stride := 1
-	curr := len(f.variables) - 2
+	curr := len(f.Variables) - 2
 	for curr >= 0 {
-		stride *= int(f.variables[curr+1].outcomes)
+		stride *= int(f.Variables[curr+1].outcomes)
 		idx += indices[curr] * stride
 		curr--
 	}
@@ -34,15 +34,15 @@ func (f *Factor) RowIndex(indices []int) (int, int) {
 
 func (f *Factor) Get(indices []int) float64 {
 	idx := f.Index(indices)
-	return f.data[idx]
+	return f.Data[idx]
 }
 
 func (f *Factor) Set(indices []int, value float64) {
 	idx := f.Index(indices)
-	f.data[idx] = value
+	f.Data[idx] = value
 }
 
 func (f *Factor) GetRow(indices []int) []float64 {
 	idx, ln := f.RowIndex(indices)
-	return f.data[idx : idx+ln]
+	return f.Data[idx : idx+ln]
 }
