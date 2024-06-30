@@ -365,6 +365,24 @@ func (v *Variables) Marginal(f *Factor, variable Variable) Factor {
 	return fNew
 }
 
+func (v *Variables) Normalize(f *Factor) Factor {
+	fNew := v.CreateFactor(f.variables, append([]float64{}, f.data...))
+
+	sum := 0.0
+	for _, v := range fNew.data {
+		sum += v
+	}
+	if sum == 0 {
+		return fNew
+	}
+
+	for i := range fNew.data {
+		fNew.data[i] /= sum
+	}
+
+	return fNew
+}
+
 type variables []Variable
 
 func (v variables) Index(indices []int) int {

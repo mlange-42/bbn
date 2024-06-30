@@ -43,7 +43,7 @@ func TestEliminate(t *testing.T) {
 	}
 
 	pRain := vars.Marginal(result, rain)
-	pRain.Normalize()
+	pRain = vars.Normalize(&pRain)
 	assert.Equal(t, []float64{1, 0}, pRain.data)
 }
 
