@@ -46,7 +46,7 @@ func TestNetworkToVE(t *testing.T) {
 	fmt.Println("Summarize")
 	fmt.Println(result1)
 
-	result := v.Variables.Rearrange(result1, []ve.Variable{variables["forecast"], variables["umbrella"]})
+	result := v.Variables.Rearrange(result1, []ve.Variable{variables["forecast"].VeVariable, variables["umbrella"].VeVariable})
 	expected := []float64{
 		12.95, 49, // sunny
 		8.05, 14, // cloudy
@@ -91,12 +91,12 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 	err := n.SolvePolicies(true)
 	assert.Nil(t, err)
 
-	result, err := n.SolveQuery(map[string]int{}, []string{"umbrella"}, false, true)
+	result, err := n.SolveQuery(map[string]string{}, []string{"umbrella"}, false, true)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Query", n.Normalize(result))
 
-	result, err = n.SolveQuery(map[string]int{}, []string{"weather", "umbrella"}, true, true)
+	result, err = n.SolveQuery(map[string]string{}, []string{"weather", "umbrella"}, true, true)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Utility", result)

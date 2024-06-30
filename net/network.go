@@ -2,6 +2,7 @@ package net
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/mlange-42/bbn/ve"
 )
@@ -18,12 +19,17 @@ type Factor struct {
 	Table []float64
 }
 
+type variable struct {
+	Variable   Variable
+	VeVariable ve.Variable
+}
+
 type Network struct {
 	variables     []Variable
 	factors       []Factor
 	policies      map[string]ve.Factor
 	ve            *ve.VE
-	variableNames map[string]ve.Variable
+	variableNames map[string]variable
 }
 
 func New(variables []Variable, factors []Factor) *Network {
@@ -45,10 +51,10 @@ func (n *Network) SolvePolicies(verbose bool) error {
 
 	policies := n.ve.SolvePolicies(verbose)
 	for name, v := range n.variableNames {
-		if v.NodeType != ve.DecisionNode {
+		if v.VeVariable.NodeType != ve.DecisionNode {
 			continue
 		}
-		if p, ok := policies[v]; ok {
+		if p, ok := policies[v.VeVariable]; ok {
 			n.policies[name] = *p[1]
 		}
 	}
@@ -56,7 +62,7 @@ func (n *Network) SolvePolicies(verbose bool) error {
 	return nil
 }
 
-func (n *Network) SolveQuery(evidence map[string]int, query []string, utility bool, verbose bool) (*ve.Factor, error) {
+func (n *Network) SolveQuery(evidence map[string]string, query []string, utility bool, verbose bool) (*ve.Factor, error) {
 	var err error
 	n.ve, n.variableNames, err = n.ToVE()
 	if err != nil {
@@ -69,7 +75,11 @@ func (n *Network) SolveQuery(evidence map[string]int, query []string, utility bo
 		if !ok {
 			return nil, fmt.Errorf("evidence variable %s not found", name)
 		}
-		ev = append(ev, ve.Evidence{Variable: vv, Value: value})
+		idx := slices.Index(vv.Variable.Outcomes, value)
+		if idx < 0 {
+			return nil, fmt.Errorf("outcome %s for evidence variable %s not found", value, name)
+		}
+		ev = append(ev, ve.Evidence{Variable: vv.VeVariable, Value: idx})
 	}
 
 	q := make([]ve.Variable, len(query))
@@ -78,7 +88,7 @@ func (n *Network) SolveQuery(evidence map[string]int, query []string, utility bo
 		if !ok {
 			return nil, fmt.Errorf("query variable %s not found", name)
 		}
-		q[i] = vv
+		q[i] = vv.VeVariable
 	}
 
 	if utility {
@@ -88,19 +98,25 @@ func (n *Network) SolveQuery(evidence map[string]int, query []string, utility bo
 	}
 }
 
-func (n *Network) ToVE() (*ve.VE, map[string]ve.Variable, error) {
+func (n *Network) ToVE() (*ve.VE, map[string]variable, error) {
 	vars := ve.NewVariables()
-	varNames := map[string]ve.Variable{}
+	varNames := map[string]variable{}
 	dependencies := map[ve.Variable][]ve.Variable{}
 
 	for _, v := range n.variables {
 		if v.Type == ve.DecisionNode {
 			if _, ok := n.policies[v.Name]; ok {
-				varNames[v.Name] = vars.Add(ve.ChanceNode, uint16(len(v.Outcomes)))
+				varNames[v.Name] = variable{
+					Variable:   v,
+					VeVariable: vars.Add(ve.ChanceNode, uint16(len(v.Outcomes))),
+				}
 				continue
 			}
 		}
-		varNames[v.Name] = vars.Add(v.Type, uint16(len(v.Outcomes)))
+		varNames[v.Name] = variable{
+			Variable:   v,
+			VeVariable: vars.Add(v.Type, uint16(len(v.Outcomes))),
+		}
 	}
 
 	factors := []ve.Factor{}
@@ -116,18 +132,18 @@ func (n *Network) ToVE() (*ve.VE, map[string]ve.Variable, error) {
 			if !ok {
 				return nil, nil, fmt.Errorf("variable %s in factor for %s not found", v, f.For)
 			}
-			variables[j] = vv
+			variables[j] = vv.VeVariable
 		}
 
-		if forVar.NodeType == ve.DecisionNode {
-			dependencies[forVar] = variables
+		if forVar.VeVariable.NodeType == ve.DecisionNode {
+			dependencies[forVar.VeVariable] = variables
 			continue
 		}
-		if n.variables[forVar.Id].Type == ve.DecisionNode {
+		if forVar.Variable.Type == ve.DecisionNode {
 			continue
 		}
 
-		variables = append(variables, forVar)
+		variables = append(variables, forVar.VeVariable)
 		factors = append(factors, vars.CreateFactor(variables, f.Table))
 	}
 
@@ -136,7 +152,7 @@ func (n *Network) ToVE() (*ve.VE, map[string]ve.Variable, error) {
 		variable := varNames[k]
 		variables := make([]ve.Variable, len(f.Variables))
 		for i, v := range f.Variables {
-			if v.Id == variable.Id {
+			if v.Id == variable.VeVariable.Id {
 				v.NodeType = ve.ChanceNode
 			}
 			variables[i] = v
@@ -156,5 +172,5 @@ func (n *Network) Marginal(f *ve.Factor, v string) ve.Factor {
 	if !ok {
 		panic(fmt.Sprintf("marginal: variable %s not found", v))
 	}
-	return n.ve.Variables.Marginal(f, vv)
+	return n.ve.Variables.Marginal(f, vv.VeVariable)
 }
