@@ -19,9 +19,11 @@ type Factor struct {
 }
 
 type Network struct {
-	variables []Variable
-	factors   []Factor
-	policies  map[string]ve.Factor
+	variables     []Variable
+	factors       []Factor
+	policies      map[string]ve.Factor
+	ve            *ve.VE
+	variableNames map[string]ve.Variable
 }
 
 func New(variables []Variable, factors []Factor) *Network {
@@ -35,13 +37,14 @@ func New(variables []Variable, factors []Factor) *Network {
 func (n *Network) SolvePolicies(verbose bool) error {
 	clear(n.policies)
 
-	varElim, variables, err := n.ToVE()
+	var err error
+	n.ve, n.variableNames, err = n.ToVE()
 	if err != nil {
 		return err
 	}
 
-	policies := varElim.SolvePolicies(verbose)
-	for name, v := range variables {
+	policies := n.ve.SolvePolicies(verbose)
+	for name, v := range n.variableNames {
 		if v.NodeType != ve.DecisionNode {
 			continue
 		}
@@ -53,34 +56,35 @@ func (n *Network) SolvePolicies(verbose bool) error {
 	return nil
 }
 
-func (n *Network) SolveQuery(evidence map[string]int, query []string, utility bool, verbose bool) (*ve.Factor, *ve.Variables, error) {
-	varElim, variables, err := n.ToVE()
+func (n *Network) SolveQuery(evidence map[string]int, query []string, utility bool, verbose bool) (*ve.Factor, error) {
+	var err error
+	n.ve, n.variableNames, err = n.ToVE()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	ev := []ve.Evidence{}
 	for name, value := range evidence {
-		vv, ok := variables[name]
+		vv, ok := n.variableNames[name]
 		if !ok {
-			return nil, nil, fmt.Errorf("evidence variable %s not found", name)
+			return nil, fmt.Errorf("evidence variable %s not found", name)
 		}
 		ev = append(ev, ve.Evidence{Variable: vv, Value: value})
 	}
 
 	q := make([]ve.Variable, len(query))
 	for i, name := range query {
-		vv, ok := variables[name]
+		vv, ok := n.variableNames[name]
 		if !ok {
-			return nil, nil, fmt.Errorf("query variable %s not found", name)
+			return nil, fmt.Errorf("query variable %s not found", name)
 		}
 		q[i] = vv
 	}
 
 	if utility {
-		return varElim.SolveUtility(ev, q, verbose), varElim.Variables, nil
+		return n.ve.SolveUtility(ev, q, verbose), nil
 	} else {
-		return varElim.SolveQuery(ev, q, verbose), varElim.Variables, nil
+		return n.ve.SolveQuery(ev, q, verbose), nil
 	}
 }
 
@@ -141,4 +145,16 @@ func (n *Network) ToVE() (*ve.VE, map[string]ve.Variable, error) {
 	}
 
 	return ve.New(vars, factors, dependencies), varNames, nil
+}
+
+func (n *Network) Normalize(f *ve.Factor) ve.Factor {
+	return n.ve.Variables.Normalize(f)
+}
+
+func (n *Network) Marginal(f *ve.Factor, v string) ve.Factor {
+	vv, ok := n.variableNames[v]
+	if !ok {
+		panic(fmt.Sprintf("marginal: variable %s not found", v))
+	}
+	return n.ve.Variables.Marginal(f, vv)
 }
