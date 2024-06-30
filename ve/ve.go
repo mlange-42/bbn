@@ -241,7 +241,7 @@ func (ve *VE) solve(evidence []Evidence, query []Variable, utility bool, verbose
 	return ve.summarize()
 }
 
-func (ve *VE) SolvePolicies(verbose bool) map[Variable]*Factor {
+func (ve *VE) SolvePolicies(verbose bool) map[Variable][2]*Factor {
 	if verbose {
 		fmt.Println("Sum utilities")
 	}
@@ -273,8 +273,8 @@ func (ve *VE) SolvePolicies(verbose bool) map[Variable]*Factor {
 	return ve.solvePolicies(decisions, verbose)
 }
 
-func (ve *VE) solvePolicies(decisions []Variable, verbose bool) map[Variable]*Factor {
-	policies := map[Variable]*Factor{}
+func (ve *VE) solvePolicies(decisions []Variable, verbose bool) map[Variable][2]*Factor {
+	policies := map[Variable][2]*Factor{}
 	for i := len(decisions) - 1; i >= 0; i-- {
 		dec := decisions[i]
 		if verbose {
@@ -311,11 +311,13 @@ func (ve *VE) solvePolicies(decisions []Variable, verbose bool) map[Variable]*Fa
 
 		policy := ve.variables.Policy(ve.factors[factorIdx], dec)
 		if verbose {
+			fmt.Println("Utility")
+			fmt.Println(ve.factors[factorIdx])
 			fmt.Println("Policy")
 			fmt.Println(policy)
 		}
 
-		policies[dec] = &policy
+		policies[dec] = [2]*Factor{ve.factors[factorIdx], &policy}
 		ve.factors[policy.id] = &policy
 		ve.variables.variables[dec.id].nodeType = ChanceNode
 
