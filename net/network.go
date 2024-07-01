@@ -15,8 +15,8 @@ type Variable struct {
 
 type Factor struct {
 	For   string
-	Given []string
-	Table []float64
+	Given []string  `yaml:",omitempty"`
+	Table []float64 `yaml:",omitempty"`
 }
 
 type variable struct {
