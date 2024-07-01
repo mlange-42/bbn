@@ -355,15 +355,6 @@ func (ve *VE) restrictEvidence(evidence Evidence) {
 
 		fac2 := ve.Variables.Restrict(fac, evidence.Variable, evidence.Value)
 
-		// TODO: do we need these two steps?
-		/*if len(fac2.Variables) == 0 {
-			continue
-		}
-		if len(fac2.Variables) == 1 {
-			fac2 = ve.Variables.Normalize(&fac2)
-		}*/
-		// end TODO
-
 		ve.factors[fac2.id] = &fac2
 	}
 }
@@ -412,11 +403,30 @@ func (ve *VE) removeHidden(variable Variable) {
 
 func (ve *VE) multiplyAll() *Factor {
 	factors := []*Factor{}
+	//utilityFactors := []*Factor{}
 	for _, f := range ve.factors {
+		/*hasUtility := false
+		for _, v := range f.Variables {
+			if v.NodeType == UtilityNode {
+				hasUtility = true
+				break
+			}
+		}
+		if hasUtility {
+			utilityFactors = append(utilityFactors, f)
+		} else {*/
 		factors = append(factors, f)
+		//}
 	}
 
 	clear(ve.factors)
+
+	/*if len(utilityFactors) > 1 {
+		sum := ve.Variables.Sum(utilityFactors...)
+		factors = append(factors, &sum)
+	} else if len(utilityFactors) == 1 {
+		factors = append(factors, utilityFactors[0])
+	}*/
 
 	f := ve.Variables.Product(factors...)
 	ve.factors[f.id] = &f

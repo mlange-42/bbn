@@ -56,6 +56,7 @@ func (n *Network) Name() string {
 	return n.name
 }
 
+// SolvePolicies solves and inserts policies for decisions, using Variable Elimination.
 func (n *Network) SolvePolicies(verbose bool) (map[string]Factor, error) {
 	clear(n.policies)
 
@@ -106,6 +107,7 @@ func (n *Network) SolvePolicies(verbose bool) (map[string]Factor, error) {
 	return result, nil
 }
 
+// SolveQuery solves a query, using Variable Elimination.
 func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose bool) (map[string][]float64, *ve.Factor, error) {
 	f, err := n.solve(evidence, query, false, verbose)
 	if err != nil {
@@ -121,10 +123,12 @@ func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose
 	return result, f, nil
 }
 
+// SolveUtility solves utility, using Variable Elimination.
 func (n *Network) SolveUtility(evidence map[string]string, query []string, verbose bool) (*ve.Factor, error) {
 	return n.solve(evidence, query, true, verbose)
 }
 
+// solve solves a query or utility, using Variable Elimination.
 func (n *Network) solve(evidence map[string]string, query []string, utility bool, verbose bool) (*ve.Factor, error) {
 	var err error
 	n.ve, n.variableNames, err = n.toVE()
@@ -161,6 +165,7 @@ func (n *Network) solve(evidence map[string]string, query []string, utility bool
 	}
 }
 
+// ToEvidence converts a string variable/value pair to probabilities.
 func (n *Network) ToEvidence(variable string, value string) ([]float64, error) {
 	vv, ok := n.variableNames[variable]
 	if !ok {
@@ -175,6 +180,7 @@ func (n *Network) ToEvidence(variable string, value string) ([]float64, error) {
 	return probs, nil
 }
 
+// toVE creates a Variable Elimination solver from the network.
 func (n *Network) toVE() (*ve.VE, map[string]*variable, error) {
 	vars := ve.NewVariables()
 	varNames := map[string]*variable{}
@@ -186,7 +192,7 @@ func (n *Network) toVE() (*ve.VE, map[string]*variable, error) {
 			if _, ok := n.policies[v.Name]; ok {
 				varIDs[i] = variable{
 					Variable:   v,
-					VeVariable: vars.Add(ve.ChanceNode, uint16(len(v.Outcomes))),
+					VeVariable: vars.AddVariable(ve.ChanceNode, uint16(len(v.Outcomes))),
 				}
 				varNames[v.Name] = &varIDs[i]
 				continue
@@ -194,7 +200,7 @@ func (n *Network) toVE() (*ve.VE, map[string]*variable, error) {
 		}
 		varIDs[i] = variable{
 			Variable:   v,
-			VeVariable: vars.Add(v.Type, uint16(len(v.Outcomes))),
+			VeVariable: vars.AddVariable(v.Type, uint16(len(v.Outcomes))),
 		}
 		varNames[v.Name] = &varIDs[i]
 	}
@@ -252,10 +258,12 @@ func (n *Network) toVE() (*ve.VE, map[string]*variable, error) {
 	return ve.New(vars, factors, dependencies), varNames, nil
 }
 
+// Normalize a factor.
 func (n *Network) Normalize(f *ve.Factor) ve.Factor {
 	return n.ve.Variables.Normalize(f)
 }
 
+// NormalizeUtility normalizes utility factor by dividing it by a probability factor.
 func (n *Network) NormalizeUtility(utility *ve.Factor, probs *ve.Factor) ve.Factor {
 	inv := n.ve.Variables.Invert(probs)
 	return n.ve.Variables.Product(utility, &inv)
