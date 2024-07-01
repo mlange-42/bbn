@@ -41,7 +41,7 @@ func TestNetworkToVE(t *testing.T) {
 	v, variables, err := n.toVE()
 	assert.Nil(t, err)
 
-	result1 := v.SolveUtility(nil, nil, true)
+	result1 := v.SolveUtility(nil, nil, nil, true)
 
 	fmt.Println("Summarize")
 	fmt.Println(result1)
@@ -111,7 +111,7 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 		fmt.Println("--> Query", q, v)
 	}
 
-	utility, err := n.SolveUtility(evidence, query, false)
+	utility, err := n.SolveUtility(evidence, query, "", false)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Utility", utility)
@@ -195,7 +195,7 @@ func TestNetworkSolveOil(t *testing.T) {
 		fmt.Println("--> Query", q, v)
 	}
 
-	utility, err := n.SolveUtility(evidence, query, false)
+	utility, err := n.SolveUtility(evidence, query, "", false)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Utility", utility)
@@ -205,4 +205,14 @@ func TestNetworkSolveOil(t *testing.T) {
 
 	normUtil := n.NormalizeUtility(utility, f)
 	fmt.Println("--> NormalizeUtility", normUtil)
+
+	utility, err = n.SolveUtility(evidence, query, "test-utility", false)
+	assert.Nil(t, err)
+	normUtil = n.NormalizeUtility(utility, f)
+	fmt.Println("--> NormalizeUtility test-utility", normUtil)
+
+	utility, err = n.SolveUtility(evidence, query, "drill-utility", false)
+	assert.Nil(t, err)
+	normUtil = n.NormalizeUtility(utility, f)
+	fmt.Println("--> NormalizeUtility drill-utility", normUtil)
 }

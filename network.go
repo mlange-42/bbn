@@ -109,7 +109,7 @@ func (n *Network) SolvePolicies(verbose bool) (map[string]Factor, error) {
 
 // SolveQuery solves a query, using Variable Elimination.
 func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose bool) (map[string][]float64, *ve.Factor, error) {
-	f, err := n.solve(evidence, query, false, verbose)
+	f, err := n.solve(evidence, query, false, "", verbose)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -124,12 +124,12 @@ func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose
 }
 
 // SolveUtility solves utility, using Variable Elimination.
-func (n *Network) SolveUtility(evidence map[string]string, query []string, verbose bool) (*ve.Factor, error) {
-	return n.solve(evidence, query, true, verbose)
+func (n *Network) SolveUtility(evidence map[string]string, query []string, utilityVar string, verbose bool) (*ve.Factor, error) {
+	return n.solve(evidence, query, true, utilityVar, verbose)
 }
 
 // solve solves a query or utility, using Variable Elimination.
-func (n *Network) solve(evidence map[string]string, query []string, utility bool, verbose bool) (*ve.Factor, error) {
+func (n *Network) solve(evidence map[string]string, query []string, utility bool, utilityVar string, verbose bool) (*ve.Factor, error) {
 	var err error
 	n.ve, n.variableNames, err = n.toVE()
 	if err != nil {
@@ -159,7 +159,15 @@ func (n *Network) solve(evidence map[string]string, query []string, utility bool
 	}
 
 	if utility {
-		return n.ve.SolveUtility(ev, q, verbose), nil
+		var util *ve.Variable
+		if utilityVar != "" {
+			u, ok := n.variableNames[utilityVar]
+			if !ok {
+				return nil, fmt.Errorf("utility query variable %s not found", utilityVar)
+			}
+			util = &u.VeVariable
+		}
+		return n.ve.SolveUtility(ev, q, util, verbose), nil
 	} else {
 		return n.ve.SolveQuery(ev, q, verbose), nil
 	}
