@@ -50,7 +50,7 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node) (map[
 		}
 	}
 
-	f, err = network.SolveUtility(evidence, []string{}, false)
+	f, err = network.SolveUtility(evidence, []string{}, "", false)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,16 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node) (map[
 	}
 
 	for _, n := range utilities {
-		result[n] = []float64{totalUtility}
+		f, err = network.SolveUtility(evidence, []string{}, n, false)
+		if err != nil {
+			return nil, err
+		}
+		nodeUtility := f.Data[0]
+		if totalProb != 0 {
+			nodeUtility /= totalProb
+		}
+
+		result[n] = []float64{nodeUtility, totalUtility}
 	}
 
 	return result, nil

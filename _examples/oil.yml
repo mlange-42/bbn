@@ -22,18 +22,18 @@ variables:
   - [0.333, 0.333, 0.333] # soaking, test-
 
 - variable: Do test
-  position: [1, 16]
+  position: [38, 15]
   outcomes: ["yes", "no"]
   type: decision
 
 - variable: Do drill
-  position: [64, 16]
+  position: [38, 8]
   outcomes: ["yes", "no"]
   type: decision
   given: [Do test, Test result]
 
 - variable: Drill utility
-  position: [64, 0]
+  position: [36, 0]
   outcomes: ["expected"]
   type: utility
   given: [Oil, Do drill]
@@ -46,7 +46,7 @@ variables:
   - [  0] # soaking, drill-
 
 - variable: Test utility
-  position: [38, 8]
+  position: [0, 17]
   outcomes: ["expected"]
   type: utility
   given: [Do test]

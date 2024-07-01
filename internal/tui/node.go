@@ -46,6 +46,10 @@ func NewNode(n bbn.Variable) Node {
 		H: len(n.Outcomes) + 3,
 	}
 
+	if n.Type == ve.UtilityNode {
+		bounds.H++
+	}
+
 	var color Color
 	switch n.Type {
 	case ve.ChanceNode:
@@ -148,6 +152,9 @@ func (n *node) drawTitle() {
 func (n *node) drawStateLabels() {
 	for i, label := range n.node.Outcomes {
 		copy(n.runes[i+2][2:n.barsX-1], []rune(label))
+	}
+	if n.node.Type == ve.UtilityNode {
+		copy(n.runes[1+2][2:n.barsX-1], []rune("total"))
 	}
 }
 

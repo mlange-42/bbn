@@ -53,10 +53,10 @@ func (ve *VE) eliminateEvidence(evidence []Evidence) {
 	}
 }
 
-func (ve *VE) removeUtilities() {
+func (ve *VE) removeUtilities(except *Variable) {
 	utils := []Variable{}
 	for _, u := range ve.Variables.variables {
-		if u.NodeType == UtilityNode {
+		if u.NodeType == UtilityNode && (except == nil || u.Id != except.Id) {
 			utils = append(utils, u)
 		}
 	}
@@ -202,14 +202,14 @@ func (ve *VE) summarize() *Factor {
 }
 
 func (ve *VE) SolveQuery(evidence []Evidence, query []Variable, verbose bool) *Factor {
-	return ve.solve(evidence, query, false, verbose)
+	return ve.solve(evidence, query, false, nil, verbose)
 }
 
-func (ve *VE) SolveUtility(evidence []Evidence, query []Variable, verbose bool) *Factor {
-	return ve.solve(evidence, query, true, verbose)
+func (ve *VE) SolveUtility(evidence []Evidence, query []Variable, utilityVar *Variable, verbose bool) *Factor {
+	return ve.solve(evidence, query, true, utilityVar, verbose)
 }
 
-func (ve *VE) solve(evidence []Evidence, query []Variable, utility bool, verbose bool) *Factor {
+func (ve *VE) solve(evidence []Evidence, query []Variable, utility bool, utilityVar *Variable, verbose bool) *Factor {
 	if verbose {
 		ve.printFactors()
 		fmt.Println("Eliminate evidence")
@@ -222,13 +222,17 @@ func (ve *VE) solve(evidence []Evidence, query []Variable, utility bool, verbose
 			ve.printFactors()
 			fmt.Println("Sum utilities")
 		}
-		ve.sumUtilities()
+		if utilityVar == nil {
+			ve.sumUtilities()
+		} else {
+			ve.removeUtilities(utilityVar)
+		}
 	} else {
 		if verbose {
 			ve.printFactors()
 			fmt.Println("Remove utilities")
 		}
-		ve.removeUtilities()
+		ve.removeUtilities(nil)
 	}
 
 	if verbose {

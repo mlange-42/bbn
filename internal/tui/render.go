@@ -79,7 +79,7 @@ func (a *App) renderEdgeHorizontal(b1, b2 *Bounds) {
 		for x := b2.X + b2.W; x < b1.X; x++ {
 			a.canvas[yMid][x] = BorderH[0]
 		}
-		a.canvas[yMid][b1.X-1] = ArrowLeft
+		a.canvas[yMid][b2.X+b2.W] = ArrowLeft
 	}
 }
 

@@ -179,6 +179,7 @@ func (v *Variables) Policy(f *Factor, variable Variable) Factor {
 	rows := len(f.Data) / cols
 
 	rowData := make([]float64, cols)
+	maxIndices := make([]int, 0, 8)
 	for row := 0; row < rows; row++ {
 		fNew.Outcomes(row*cols, newIndex)
 		for c := 0; c < cols; c++ {
@@ -194,26 +195,27 @@ func (v *Variables) Policy(f *Factor, variable Variable) Factor {
 			rowData[c] = f.Get(oldIndex)
 		}
 		maxUtility := math.Inf(-1)
-		maxIdx := -1
 		for c, u := range rowData {
 			if u > maxUtility {
 				maxUtility = u
-				maxIdx = c
+				maxIndices = maxIndices[:1]
+				maxIndices[0] = c
+			} else if u == maxUtility {
+				maxIndices = append(maxIndices, c)
 			}
 		}
 
-		if maxIdx < 0 {
+		if len(maxIndices) == 0 {
 			panic("no utility values to derive policy")
 		}
 
-		for c := 0; c < cols; c++ {
-			newIndex[idxNew] = c
-			if c == maxIdx {
-				fNew.Set(newIndex, 1)
-			} else {
-				fNew.Set(newIndex, 0)
-			}
+		probValue := 1.0 / float64(len(maxIndices))
+		for _, idx := range maxIndices {
+			newIndex[idxNew] = idx
+			fNew.Set(newIndex, probValue)
 		}
+
+		maxIndices = maxIndices[:0]
 	}
 
 	return fNew
