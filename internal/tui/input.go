@@ -68,10 +68,31 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 		a.updateMarginals()
 		a.render(true)
 		return nil
+	} else {
+		return a.inputMove(event)
+	}
+}
+
+func (a *App) inputMove(event *tcell.EventKey) *tcell.EventKey {
+	dx, dy := 0, 0
+	if event.Rune() == 'w' {
+		dy--
+	} else if event.Rune() == 'a' {
+		dx--
+	} else if event.Rune() == 's' {
+		dy++
+	} else if event.Rune() == 'd' {
+		dx++
+	}
+	if dx != 0 || dy != 0 {
+		b := a.nodes[a.selectedNode].Bounds()
+		b.X += dx
+		b.Y += dy
+		a.render(false)
+		return nil
 	}
 	return event
 }
-
 func (a *App) inputTable(event *tcell.EventKey) *tcell.EventKey {
 	if event.Key() == tcell.KeyEsc {
 		a.pages.HidePage("Table")
