@@ -222,7 +222,7 @@ func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
 		}
 	}
 	if varsEqual {
-		return *f
+		return v.CreateFactor(f.Variables, append([]float64{}, f.Data...))
 	}
 
 	indices := make([]int, len(variables))
@@ -251,7 +251,7 @@ func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
 
 func (v *Variables) Product(factors ...*Factor) Factor {
 	if len(factors) == 1 {
-		return *factors[0]
+		return v.CreateFactor(factors[0].Variables, append([]float64{}, factors[0].Data...))
 	}
 
 	newVars := []Variable{}
@@ -297,7 +297,7 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 
 func (v *Variables) Sum(factors ...*Factor) Factor {
 	if len(factors) == 1 {
-		return *factors[0]
+		return v.CreateFactor(factors[0].Variables, append([]float64{}, factors[0].Data...))
 	}
 
 	newVars := []Variable{}
@@ -379,6 +379,48 @@ func (v *Variables) Normalize(f *Factor) Factor {
 
 	for i := range fNew.Data {
 		fNew.Data[i] /= sum
+	}
+
+	return fNew
+}
+
+func (v *Variables) NormalizeFor(f *Factor, variable Variable) Factor {
+	idx := -1
+	for i := range f.Variables {
+		if f.Variables[i].Id == variable.Id {
+			idx = i
+			break
+		}
+	}
+
+	if idx < 0 {
+		panic(fmt.Sprintf("variable %d not in this factor", variable.Id))
+	}
+
+	newVars := make([]Variable, len(f.Variables))
+	for i := 0; i < idx; i++ {
+		newVars[i] = f.Variables[i]
+	}
+	for i := idx + 1; i < len(f.Variables); i++ {
+		newVars[i-1] = f.Variables[i]
+	}
+	newVars[len(newVars)-1] = f.Variables[idx]
+
+	fNew := v.Rearrange(f, newVars)
+	values := int(variable.outcomes)
+	bins := len(fNew.Data) / values
+
+	for i := 0; i < bins; i++ {
+		sum := 0.0
+		for j := 0; j < values; j++ {
+			sum += fNew.Data[i*values+j]
+		}
+		if sum == 0 {
+			continue
+		}
+		for j := 0; j < values; j++ {
+			fNew.Data[i*values+j] /= sum
+		}
 	}
 
 	return fNew

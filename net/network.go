@@ -15,8 +15,8 @@ type Variable struct {
 
 type Factor struct {
 	For   string
-	Given []string
-	Table []float64
+	Given []string  `yaml:",omitempty"`
+	Table []float64 `yaml:",omitempty"`
 }
 
 type variable struct {
@@ -166,7 +166,12 @@ func (n *Network) ToVE() (*ve.VE, map[string]*variable, error) {
 		}
 
 		variables = append(variables, forVar.VeVariable)
-		factors = append(factors, vars.CreateFactor(variables, f.Table))
+
+		factor := vars.CreateFactor(variables, f.Table)
+		if forVar.Variable.Type == ve.ChanceNode {
+			factor = vars.NormalizeFor(&factor, variables[len(variables)-1])
+		}
+		factors = append(factors, factor)
 	}
 
 	for _, f := range n.policies {
