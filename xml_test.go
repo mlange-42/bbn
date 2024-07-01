@@ -9,11 +9,11 @@ import (
 )
 
 func TestFromBIFXML(t *testing.T) {
-	xmlData, err := os.ReadFile("_examples/dog-problem.xml")
+	xmlData, err := os.ReadFile("../_examples/dog-problem.xml")
 	assert.Nil(t, err)
 
-	net, nodes, err := bbn.FromBIFXML(xmlData)
+	net, err := bbn.FromBIFXML(xmlData)
 	assert.Nil(t, err)
 
-	_, _ = net, nodes
+	_ = net
 }

@@ -1,4 +1,4 @@
-package net
+package bbn
 
 import (
 	"fmt"
@@ -38,7 +38,7 @@ func TestNetworkToVE(t *testing.T) {
 
 	n := New("umbrella", vars, factors)
 
-	v, variables, err := n.ToVE()
+	v, variables, err := n.toVE()
 	assert.Nil(t, err)
 
 	result1 := v.SolveUtility(nil, nil, true)

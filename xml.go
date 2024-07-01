@@ -32,71 +32,72 @@ type definitionXml struct {
 }
 
 // FromBIFXML creates a [Network] from XML. See also [FromFile].
-func FromBIFXML(content []byte) (*Network, []*Node, error) {
+func FromBIFXML(content []byte) (*Network, error) {
 	reader := bytes.NewReader(content)
 	decoder := xml.NewDecoder(reader)
 
-	net := bifXmlWrapper{}
+	bifNet := bifXmlWrapper{}
 
-	err := decoder.Decode(&net)
+	err := decoder.Decode(&bifNet)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	defs := map[string]*definitionXml{}
-	for i := range net.Network.Definitions {
-		def := &net.Network.Definitions[i]
+	for i := range bifNet.Network.Definitions {
+		def := &bifNet.Network.Definitions[i]
 		defs[def.For] = def
 	}
 
-	nodes := make([]*Node, len(net.Network.Variables))
-	for i, variable := range net.Network.Variables {
+	variables := make([]Variable, len(bifNet.Network.Variables))
+	factors := []Factor{}
+	for i, variable := range bifNet.Network.Variables {
 		def := defs[variable.Name]
 
 		columns := len(variable.Outcomes)
-		rows := 1
 		tableValues := strings.Fields(def.Table)
 		if columns > 0 {
 			if len(tableValues)%columns != 0 {
-				return nil, nil, fmt.Errorf("number of values in table for node '%s' does not match expected number", variable.Name)
+				return nil, fmt.Errorf("number of values in table for node '%s' does not match expected number", variable.Name)
 			}
-			rows = len(tableValues) / columns
 		}
-		table := make([][]float64, rows)
 
-		for i := range table {
-			row := make([]float64, columns)
-			for j := 0; j < columns; j++ {
-				v, err := strconv.ParseFloat(tableValues[i*columns+j], 64)
-				if err != nil {
-					return nil, nil, fmt.Errorf("error parsing table value in node '%s' to float", variable.Name)
-				}
-				row[j] = v
-			}
-			table[i] = row
-		}
 		position, err := parsePosition(&variable)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
+		}
+		tp, ok := nodeTypes[variable.Type]
+		if !ok {
+			return nil, fmt.Errorf("unknown node type %s", variable.Type)
 		}
 
-		node := Node{
-			Variable: variable.Name,
-			Type:     variable.Type,
-			Given:    def.Given,
+		variables[i] = Variable{
+			Name:     variable.Name,
+			Type:     tp,
 			Outcomes: variable.Outcomes,
-			Table:    table,
 			Position: position,
 		}
-		nodes[i] = &node
+
+		var table []float64
+		if len(tableValues) > 0 {
+			table = make([]float64, len(tableValues))
+			for i := range table {
+				v, err := strconv.ParseFloat(tableValues[i], 64)
+				if err != nil {
+					return nil, fmt.Errorf("error parsing table value in node '%s' to float", variable.Name)
+				}
+				table[i] = v
+			}
+		}
+		factors = append(factors, Factor{
+			For:   variable.Name,
+			Given: def.Given,
+			Table: table,
+		})
 	}
 
-	n, err := New(net.Network.Name, nodes...)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return n, nodes, nil
+	n := New(bifNet.Network.Name, variables, factors)
+	return n, nil
 }
 
 // Search and parse position property in format `position = (x, y)`

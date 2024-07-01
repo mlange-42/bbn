@@ -5,7 +5,7 @@ import (
 	"math"
 	"unicode/utf8"
 
-	"github.com/mlange-42/bbn/net"
+	"github.com/mlange-42/bbn"
 	"github.com/mlange-42/bbn/ve"
 )
 
@@ -13,21 +13,21 @@ const maxStateLabelWidth = 8
 const maxBars = 10
 
 type Node interface {
-	Node() *net.Variable
+	Node() *bbn.Variable
 	Bounds() *Bounds
 	Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color)
 	SelectedOutcome(x, y int) (int, bool)
 }
 
 type node struct {
-	node   net.Variable
+	node   bbn.Variable
 	bounds Bounds
 	runes  [][]rune
 	colors [][]Color
 	barsX  int
 }
 
-func NewNode(n net.Variable) Node {
+func NewNode(n bbn.Variable) Node {
 	maxStateLen := 0
 	for _, state := range n.Outcomes {
 		cnt := utf8.RuneCountInString(state)
@@ -84,7 +84,7 @@ func NewNode(n net.Variable) Node {
 	return &node
 }
 
-func (n *node) Node() *net.Variable {
+func (n *node) Node() *bbn.Variable {
 	return &n.node
 }
 
