@@ -1,5 +1,16 @@
 # Changelog
 
+## [[unpublished]](https://github.com/mlange-42/bbn/compare/v0.4.0...main)
+
+### Features
+
+* Reworked library and apps to use Variable Elimination for inference (#42, #43, #44, #45, #46, #47, #48)
+* Implement multi-stage decision networks (#45)
+
+### Removed
+
+* Removed training command from CLI app (#47)
+
 ## [[v0.4.0]](https://github.com/mlange-42/bbn/compare/v0.3.0...v0.4.0)
 
 ### Features
