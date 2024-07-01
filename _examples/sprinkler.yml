@@ -4,23 +4,31 @@ variables:
 - variable: Rain
   outcomes: [yes, no]
   position: [20, 0]
+
+- variable: Sprinkler
+  outcomes: [yes, no]
+  position: [1, 7]
+
+- variable: GrassWet
+  outcomes: [yes, no]
+  position: [36, 10]
+
+factors:
+
+- for: Rain
   table:
   #  yes   no
   - [0.2, 0.8]
 
-- variable: Sprinkler
+- for: Sprinkler
   given: [Rain]
-  outcomes: [yes, no]
-  position: [1, 7]
   table:
   #   yes   no
   - [0.01, 0.99] # rain yes
   - [0.2,  0.8 ] # rain no
 
-- variable: GrassWet
+- for: GrassWet
   given: [Rain, Sprinkler]
-  outcomes: [yes, no]
-  position: [36, 10]
   table:
   #   yes   no
   - [0.99, 0.01] # rain yes, sprikler yes
