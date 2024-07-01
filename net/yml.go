@@ -61,19 +61,18 @@ func FromYAML(content []byte) (*Network, error) {
 			Position: v.Position,
 		}
 
+		var table []float64
 		if len(v.Table) > 0 {
-			var table []float64
 			table = make([]float64, 0, len(v.Table)*len(v.Table[0]))
 			for _, row := range v.Table {
 				table = append(table, row...)
 			}
-			factors = append(factors, Factor{
-				For:   v.Variable,
-				Given: v.Given,
-				Table: table,
-			})
 		}
-
+		factors = append(factors, Factor{
+			For:   v.Variable,
+			Given: v.Given,
+			Table: table,
+		})
 	}
 
 	n := New(net.Name, variables, factors)

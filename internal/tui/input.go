@@ -6,6 +6,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/mlange-42/bbn"
+	"github.com/mlange-42/bbn/ve"
 	"github.com/rivo/tview"
 )
 
@@ -70,6 +71,10 @@ func (a *App) inputTable(event *tcell.EventKey) *tcell.EventKey {
 // inputEnter adds the currently selected node and state to the evidence.
 func (a *App) inputEnter() error {
 	node := a.nodes[a.selectedNode]
+	if node.Node().Type == ve.UtilityNode {
+		return nil
+	}
+
 	value := node.Node().Outcomes[a.selectedState]
 
 	// Store old evidence in case of fail/error.
