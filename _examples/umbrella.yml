@@ -17,10 +17,9 @@ variables:
 
 - variable: Umbrella
   position: [16, 16]
+  given: [Forecast]
   type: decision
   outcomes: [Take, Leave]
-  table: 
-  - [1, 1]
 
 - variable: Utility
   position: [31, 8]

@@ -36,7 +36,7 @@ func TestNetworkToVE(t *testing.T) {
 		}},
 	}
 
-	n := New(vars, factors)
+	n := New("umbrella", vars, factors)
 
 	v, variables, err := n.ToVE()
 	assert.Nil(t, err)
@@ -87,9 +87,18 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 		}},
 	}
 
-	n := New(vars, factors)
-	err := n.SolvePolicies(false)
+	n := New("umbrella", vars, factors)
+	policy, err := n.SolvePolicies(false)
 	assert.Nil(t, err)
+
+	assert.Equal(t,
+		map[string]Factor{
+			"umbrella": {
+				For:   "umbrella",
+				Given: []string{"forecast"},
+				Table: []float64{0, 1, 0, 1, 1, 0},
+			}},
+		policy)
 
 	query := []string{"weather"}
 	evidence := map[string]string{"forecast": "rainy"}
@@ -157,9 +166,23 @@ func TestNetworkSolveOil(t *testing.T) {
 		}},
 	}
 
-	n := New(vars, factors)
-	err := n.SolvePolicies(false)
+	n := New("oil", vars, factors)
+	policy, err := n.SolvePolicies(false)
 	assert.Nil(t, err)
+
+	assert.Equal(t,
+		map[string]Factor{
+			"drill": {
+				For:   "drill",
+				Given: []string{"test", "test-result"},
+				Table: []float64{1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0},
+			},
+			"test": {
+				For:   "test",
+				Given: []string{},
+				Table: []float64{1, 0},
+			},
+		}, policy)
 
 	query := []string{"test-result"}
 	evidence := map[string]string{}

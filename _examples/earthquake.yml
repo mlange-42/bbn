@@ -29,8 +29,7 @@ variables:
   position: [48, 10]
   type: decision
   outcomes: [yes, no]
-  table: 
-  - [1, 1]
+  given: [Sensor maintenance, Sensor warning]
 
 - variable: Material damage
   position: [32, 0]

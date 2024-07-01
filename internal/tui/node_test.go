@@ -4,14 +4,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mlange-42/bbn"
 	"github.com/mlange-42/bbn/internal/tui"
+	"github.com/mlange-42/bbn/net"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNodeRender(t *testing.T) {
-	node := &bbn.Node{
-		Variable: "TestNode with a very long name",
+	node := net.Variable{
+		Name:     "TestNode with a very long name",
 		Outcomes: []string{"yes", "no", "maybe"},
 		Position: [2]int{0, 0},
 	}

@@ -2,9 +2,8 @@ package tui
 
 import (
 	"fmt"
-	"math/rand"
 
-	"github.com/mlange-42/bbn"
+	"github.com/mlange-42/bbn/net"
 	"github.com/rivo/tview"
 )
 
@@ -19,9 +18,7 @@ type App struct {
 	table       *tview.Table
 	canvas      [][]rune
 	colors      [][]Color
-	network     *bbn.Network
-	rng         *rand.Rand
-	samples     int
+	network     *net.Network
 
 	evidence      map[string]string
 	marginals     map[string][]float64
@@ -29,20 +26,18 @@ type App struct {
 	selectedState int
 }
 
-func New(path string, evidence map[string]string, samples int, seed int64) *App {
+func New(path string, evidence map[string]string) *App {
 	if evidence == nil {
 		evidence = map[string]string{}
 	}
 	return &App{
 		file:     path,
-		samples:  samples,
-		rng:      rand.New(rand.NewSource(seed)),
 		evidence: evidence,
 	}
 }
 
 func (a *App) Run() error {
-	net, nodes, err := bbn.FromFile(a.file)
+	net, nodes, err := net.FromFile(a.file)
 	if err != nil {
 		return err
 	}
@@ -52,10 +47,21 @@ func (a *App) Run() error {
 	a.nodesByName = make(map[string]int, len(nodes))
 	for i, n := range nodes {
 		a.nodes[i] = NewNode(n)
-		a.nodesByName[n.Variable] = i
+		a.nodesByName[n.Name] = i
 	}
 
-	a.marginals, err = a.network.Sample(a.evidence, a.samples, a.rng)
+	policy, err := a.network.SolvePolicies(false)
+	if err != nil {
+		return err
+	}
+
+	for name, f := range policy {
+		idx := a.nodesByName[name]
+		node := a.nodes[idx]
+		node.Node().Factor = f
+	}
+
+	a.marginals, err = Solve(a.network, a.evidence, a.nodes)
 	if err != nil {
 		return err
 	}

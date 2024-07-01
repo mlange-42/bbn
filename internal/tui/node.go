@@ -5,28 +5,29 @@ import (
 	"math"
 	"unicode/utf8"
 
-	"github.com/mlange-42/bbn"
+	"github.com/mlange-42/bbn/net"
+	"github.com/mlange-42/bbn/ve"
 )
 
 const maxStateLabelWidth = 8
 const maxBars = 10
 
 type Node interface {
-	Node() *bbn.Node
+	Node() *net.Variable
 	Bounds() *Bounds
 	Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color)
 	SelectedOutcome(x, y int) (int, bool)
 }
 
 type node struct {
-	node   *bbn.Node
+	node   net.Variable
 	bounds Bounds
 	runes  [][]rune
 	colors [][]Color
 	barsX  int
 }
 
-func NewNode(n *bbn.Node) Node {
+func NewNode(n net.Variable) Node {
 	maxStateLen := 0
 	for _, state := range n.Outcomes {
 		cnt := utf8.RuneCountInString(state)
@@ -47,11 +48,11 @@ func NewNode(n *bbn.Node) Node {
 
 	var color Color
 	switch n.Type {
-	case bbn.NatureNodeType:
+	case ve.ChanceNode:
 		color = White
-	case bbn.UtilityNodeType:
+	case ve.UtilityNode:
 		color = Green
-	case bbn.DecisionNodeType:
+	case ve.DecisionNode:
 		color = Blue
 	}
 
@@ -83,8 +84,8 @@ func NewNode(n *bbn.Node) Node {
 	return &node
 }
 
-func (n *node) Node() *bbn.Node {
-	return n.node
+func (n *node) Node() *net.Variable {
+	return &n.node
 }
 
 func (n *node) Bounds() *Bounds {
@@ -93,7 +94,7 @@ func (n *node) Bounds() *Bounds {
 
 func (n *node) Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color) {
 	n.drawBorder(selected)
-	if n.node.Type == bbn.UtilityNodeType { // TODO: use enumeration values!
+	if n.node.Type == ve.UtilityNode {
 		n.drawUtility(probs)
 	} else {
 		n.drawBars(probs, selected, state, evidence)
@@ -134,12 +135,12 @@ func (n *node) drawBorder(selected bool) {
 }
 
 func (n *node) drawTitle() {
-	runes := []rune(n.node.Variable)
+	runes := []rune(n.node.Name)
 	copy(n.runes[1][2:n.bounds.W-2], runes)
 
-	if n.node.Type == bbn.DecisionNodeType {
+	if n.node.Type == ve.DecisionNode {
 		n.runes[1][n.bounds.W-3] = '!'
-	} else if n.node.Type == bbn.UtilityNodeType {
+	} else if n.node.Type == ve.UtilityNode {
 		n.runes[1][n.bounds.W-3] = '$'
 	}
 }

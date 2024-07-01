@@ -51,10 +51,10 @@ bbni _examples/sprinkler.yml
 Same example with the command line tool, given some evidence:
 
 ```
-bbn sample _examples/sprinkler.yml -e Rain=no,GrassWet=yes
+bbn inference _examples/sprinkler.yml -e Rain=no,GrassWet=yes
 ```
 
-Train a network from data:
+~~Train a network from data:~~ (currently not functional)
 
 ```
 bbn train _examples/fruits-untrained.yml _examples/fruits.csv

@@ -11,6 +11,8 @@ type Variable struct {
 	Name     string
 	Type     ve.NodeType
 	Outcomes []string
+	Position [2]int
+	Factor   Factor
 }
 
 type Factor struct {
@@ -25,6 +27,7 @@ type variable struct {
 }
 
 type Network struct {
+	name          string
 	variables     []Variable
 	factors       []Factor
 	policies      map[string]ve.Factor
@@ -32,21 +35,34 @@ type Network struct {
 	variableNames map[string]*variable
 }
 
-func New(variables []Variable, factors []Factor) *Network {
+func New(name string, variables []Variable, factors []Factor) *Network {
+	for i := range variables {
+		v := &variables[i]
+		idx := slices.IndexFunc(factors, func(f Factor) bool { return f.For == v.Name })
+		if idx < 0 {
+			continue
+		}
+		v.Factor = factors[idx]
+	}
 	return &Network{
+		name:      name,
 		variables: variables,
 		factors:   factors,
 		policies:  map[string]ve.Factor{},
 	}
 }
 
-func (n *Network) SolvePolicies(verbose bool) error {
+func (n *Network) Name() string {
+	return n.name
+}
+
+func (n *Network) SolvePolicies(verbose bool) (map[string]Factor, error) {
 	clear(n.policies)
 
 	var err error
 	n.ve, n.variableNames, err = n.ToVE()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	policies := n.ve.SolvePolicies(verbose)
@@ -59,7 +75,35 @@ func (n *Network) SolvePolicies(verbose bool) error {
 		}
 	}
 
-	return nil
+	result := map[string]Factor{}
+	for name, f := range n.policies {
+		forVar := n.variableNames[name]
+		newVars := make([]ve.Variable, len(f.Variables))
+		idx := slices.Index(f.Variables, forVar.VeVariable)
+		for i := 0; i < idx; i++ {
+			newVars[i] = f.Variables[i]
+		}
+		for i := idx + 1; i < len(f.Variables); i++ {
+			newVars[i-1] = f.Variables[i]
+		}
+		newVars[len(newVars)-1] = f.Variables[idx]
+
+		f := n.ve.Variables.Rearrange(&f, newVars)
+
+		given := make([]string, len(newVars)-1)
+		for i := 0; i < len(newVars)-1; i++ {
+			given[i] = n.variables[newVars[i].Id].Name
+		}
+
+		ff := Factor{
+			For:   name,
+			Given: given,
+			Table: f.Data,
+		}
+		result[name] = ff
+	}
+
+	return result, nil
 }
 
 func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose bool) (map[string][]float64, *ve.Factor, error) {
@@ -115,6 +159,20 @@ func (n *Network) solve(evidence map[string]string, query []string, utility bool
 	} else {
 		return n.ve.SolveQuery(ev, q, verbose), nil
 	}
+}
+
+func (n *Network) ToEvidence(variable string, value string) ([]float64, error) {
+	vv, ok := n.variableNames[variable]
+	if !ok {
+		return nil, fmt.Errorf("evidence variable %s not found", variable)
+	}
+	idx := slices.Index(vv.Variable.Outcomes, value)
+	if idx < 0 {
+		return nil, fmt.Errorf("outcome %s for evidence variable %s not found", value, variable)
+	}
+	probs := make([]float64, len(vv.Variable.Outcomes))
+	probs[idx] = 1.0
+	return probs, nil
 }
 
 func (n *Network) ToVE() (*ve.VE, map[string]*variable, error) {

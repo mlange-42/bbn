@@ -19,8 +19,6 @@ func main() {
 // rootCommand sets up the CLI for the TUI.
 func rootCommand() *cobra.Command {
 	evidence := []string{}
-	var seed int64
-	var samples int
 
 	root := cobra.Command{
 		Use:           "bbni [file]",
@@ -38,13 +36,11 @@ func rootCommand() *cobra.Command {
 				return err
 			}
 
-			a := tui.New(args[0], ev, samples, seed)
+			a := tui.New(args[0], ev)
 			return a.Run()
 		},
 	}
 	root.Flags().StringSliceVarP(&evidence, "evidence", "e", []string{}, "Evidence in the format:\n    k1=v1,k2=v2,k3=v3")
-	root.Flags().Int64Var(&seed, "seed", 0, "Random seed. Seeded with time by default")
-	root.Flags().IntVarP(&samples, "samples", "n", 1_000_000, "Number of samples to take")
 
 	root.Flags().SortFlags = false
 
