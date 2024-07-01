@@ -1,10 +1,10 @@
-package net
+package bbn
 
 import (
 	"fmt"
 	"slices"
 
-	"github.com/mlange-42/bbn/ve"
+	"github.com/mlange-42/bbn/internal/ve"
 )
 
 type Variable struct {
@@ -60,7 +60,7 @@ func (n *Network) SolvePolicies(verbose bool) (map[string]Factor, error) {
 	clear(n.policies)
 
 	var err error
-	n.ve, n.variableNames, err = n.ToVE()
+	n.ve, n.variableNames, err = n.toVE()
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func (n *Network) SolveUtility(evidence map[string]string, query []string, verbo
 
 func (n *Network) solve(evidence map[string]string, query []string, utility bool, verbose bool) (*ve.Factor, error) {
 	var err error
-	n.ve, n.variableNames, err = n.ToVE()
+	n.ve, n.variableNames, err = n.toVE()
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func (n *Network) ToEvidence(variable string, value string) ([]float64, error) {
 	return probs, nil
 }
 
-func (n *Network) ToVE() (*ve.VE, map[string]*variable, error) {
+func (n *Network) toVE() (*ve.VE, map[string]*variable, error) {
 	vars := ve.NewVariables()
 	varNames := map[string]*variable{}
 	varIDs := make([]variable, len(n.variables))

@@ -3,7 +3,7 @@ package tui
 import (
 	"fmt"
 
-	"github.com/mlange-42/bbn/net"
+	"github.com/mlange-42/bbn"
 	"github.com/rivo/tview"
 )
 
@@ -18,7 +18,7 @@ type App struct {
 	table       *tview.Table
 	canvas      [][]rune
 	colors      [][]Color
-	network     *net.Network
+	network     *bbn.Network
 
 	evidence      map[string]string
 	marginals     map[string][]float64
@@ -37,7 +37,7 @@ func New(path string, evidence map[string]string) *App {
 }
 
 func (a *App) Run() error {
-	net, nodes, err := net.FromFile(a.file)
+	net, nodes, err := bbn.FromFile(a.file)
 	if err != nil {
 		return err
 	}

@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
+	"github.com/mlange-42/bbn"
 	"github.com/mlange-42/bbn/internal/tui"
-	"github.com/mlange-42/bbn/net"
-	"github.com/mlange-42/bbn/ve"
+	"github.com/mlange-42/bbn/internal/ve"
 	"github.com/spf13/cobra"
 )
 
@@ -60,8 +60,8 @@ func inferCommand() *cobra.Command {
 	return &root
 }
 
-func runInferenceCommand(path string, evidence []string) ([]net.Variable, map[string]string, map[string][]float64, error) {
-	net, nodes, err := net.FromFile(path)
+func runInferenceCommand(path string, evidence []string) ([]bbn.Variable, map[string]string, map[string][]float64, error) {
+	net, nodes, err := bbn.FromFile(path)
 	if err != nil {
 		return nil, nil, nil, err
 	}

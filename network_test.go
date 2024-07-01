@@ -1,11 +1,11 @@
-package net
+package bbn
 
 import (
 	"fmt"
 	"math"
 	"testing"
 
-	"github.com/mlange-42/bbn/ve"
+	"github.com/mlange-42/bbn/internal/ve"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,7 +38,7 @@ func TestNetworkToVE(t *testing.T) {
 
 	n := New("umbrella", vars, factors)
 
-	v, variables, err := n.ToVE()
+	v, variables, err := n.toVE()
 	assert.Nil(t, err)
 
 	result1 := v.SolveUtility(nil, nil, true)

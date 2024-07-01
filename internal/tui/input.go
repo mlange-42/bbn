@@ -6,7 +6,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/mlange-42/bbn"
-	"github.com/mlange-42/bbn/ve"
+	"github.com/mlange-42/bbn/internal/ve"
 	"github.com/rivo/tview"
 )
 
