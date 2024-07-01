@@ -1,5 +1,6 @@
 package main
 
+/*
 import (
 	"encoding/csv"
 	"fmt"
@@ -150,3 +151,4 @@ func prepare(nodes []*bbn.Node, header []string, noData string) (indices []int, 
 	}
 	return
 }
+*/

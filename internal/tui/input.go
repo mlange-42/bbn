@@ -99,7 +99,7 @@ func (a *App) inputEnter() error {
 
 	// Perform sampling
 	var err error
-	a.marginals, err = a.solve()
+	a.marginals, err = Solve(a.network, a.evidence, a.nodes)
 	if err != nil {
 		if _, ok := err.(*bbn.ConflictingEvidenceError); ok {
 			// Rollback on error

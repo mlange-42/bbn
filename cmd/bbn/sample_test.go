@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRunSampleCommand(t *testing.T) {
-	_, _, _, err := runSampleCommand("../../_examples/sprinkler.yml", []string{"Rain=no"}, 100_000, 0)
+func TestRunInferenceCommand(t *testing.T) {
+	_, _, _, err := runInferenceCommand("../../_examples/sprinkler.yml", []string{"Rain=no"})
 	assert.Nil(t, err)
 }

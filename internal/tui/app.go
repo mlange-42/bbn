@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/mlange-42/bbn/net"
-	"github.com/mlange-42/bbn/ve"
 	"github.com/rivo/tview"
 )
 
@@ -62,7 +61,7 @@ func (a *App) Run() error {
 		node.Node().Factor = f
 	}
 
-	a.marginals, err = a.solve()
+	a.marginals, err = Solve(a.network, a.evidence, a.nodes)
 	if err != nil {
 		return err
 	}
@@ -93,65 +92,6 @@ func (a *App) Run() error {
 		return err
 	}
 	return nil
-}
-
-func (a *App) solve() (map[string][]float64, error) {
-	queries := []string{}
-	utilities := []string{}
-
-	for _, n := range a.nodes {
-		if n.Node().Type == ve.UtilityNode {
-			utilities = append(utilities, n.Node().Name)
-			continue
-		}
-		if _, ok := a.evidence[n.Node().Name]; ok {
-			continue
-		}
-		queries = append(queries, n.Node().Name)
-
-	}
-
-	result := map[string][]float64{}
-	for variable, value := range a.evidence {
-		p, err := a.network.ToEvidence(variable, value)
-		if err != nil {
-			return nil, err
-		}
-		result[variable] = p
-	}
-
-	_, f, err := a.network.SolveQuery(a.evidence, []string{}, false)
-	if err != nil {
-		return nil, err
-	}
-	totalProb := f.Data[0]
-
-	for _, q := range queries {
-		r, _, err := a.network.SolveQuery(a.evidence, []string{q}, false)
-		if err != nil {
-			return nil, err
-		}
-		var ok bool
-		result[q], ok = r[q]
-		if !ok {
-			panic(fmt.Sprintf("query variable %s not in result", q))
-		}
-	}
-
-	f, err = a.network.SolveUtility(a.evidence, []string{}, false)
-	if err != nil {
-		return nil, err
-	}
-	totalUtility := f.Data[0]
-	if totalProb != 0 {
-		totalUtility /= totalProb
-	}
-
-	for _, n := range utilities {
-		result[n] = []float64{totalUtility}
-	}
-
-	return result, nil
 }
 
 func (a *App) createCanvas() {

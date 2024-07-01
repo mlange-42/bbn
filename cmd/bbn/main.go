@@ -30,8 +30,8 @@ func rootCommand() *cobra.Command {
 			_ = cmd.Help()
 		},
 	}
-	root.AddCommand(sampleCommand())
-	root.AddCommand(trainCommand())
+	root.AddCommand(inferCommand())
+	//root.AddCommand(trainCommand())
 
 	return &root
 }
