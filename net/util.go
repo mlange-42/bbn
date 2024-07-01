@@ -22,8 +22,12 @@ func FromFile(path string) (*Network, []Variable, error) {
 			return nil, nil, err
 		}
 		return n, n.variables, nil
-	//case ".xml", ".bifxml":
-	//	return FromBIFXML(data)
+	case ".xml", ".bifxml":
+		n, err := FromBIFXML(data)
+		if err != nil {
+			return nil, nil, err
+		}
+		return n, n.variables, nil
 	default:
 		return nil, nil, fmt.Errorf("unsupported file format '%s'", ext)
 	}
