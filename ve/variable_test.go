@@ -35,6 +35,37 @@ func TestVariablesNormalize(t *testing.T) {
 	assert.Equal(t, []float64{0.5, 0.25, 0.25}, f2.Data)
 }
 
+func TestVariablesNormalizeFor(t *testing.T) {
+	v := NewVariables()
+	f := Factor{
+		Variables: []Variable{
+			{Id: 0, outcomes: 2},
+			{Id: 1, outcomes: 3},
+		},
+		Data: []float64{
+			2, 1, 1,
+			6, 4, 0,
+		},
+	}
+
+	f2 := v.NormalizeFor(&f, Variable{Id: 1, outcomes: 3})
+
+	assert.Equal(t, variables{
+		{Id: 0, outcomes: 2},
+		{Id: 1, outcomes: 3},
+	}, f2.Variables)
+	assert.Equal(t, []float64{0.5, 0.25, 0.25, 0.6, 0.4, 0.0}, f2.Data)
+
+	f2 = v.NormalizeFor(&f, Variable{Id: 0, outcomes: 2})
+
+	assert.Equal(t, variables{
+		{Id: 1, outcomes: 3},
+		{Id: 0, outcomes: 2},
+	}, f2.Variables)
+	assert.Equal(t, []float64{0.25, 0.75, 0.2, 0.8, 1.0, 0.0}, f2.Data)
+
+}
+
 func TestVariablesRestrict(t *testing.T) {
 	v := NewVariables()
 
