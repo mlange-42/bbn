@@ -56,13 +56,13 @@ func (n *Network) Name() string {
 	return n.name
 }
 
-func (n *Network) SolvePolicies(verbose bool) error {
+func (n *Network) SolvePolicies(verbose bool) (map[string]Factor, error) {
 	clear(n.policies)
 
 	var err error
 	n.ve, n.variableNames, err = n.ToVE()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	policies := n.ve.SolvePolicies(verbose)
@@ -75,7 +75,35 @@ func (n *Network) SolvePolicies(verbose bool) error {
 		}
 	}
 
-	return nil
+	result := map[string]Factor{}
+	for name, f := range n.policies {
+		forVar := n.variableNames[name]
+		newVars := make([]ve.Variable, len(f.Variables))
+		idx := slices.Index(f.Variables, forVar.VeVariable)
+		for i := 0; i < idx; i++ {
+			newVars[i] = f.Variables[i]
+		}
+		for i := idx + 1; i < len(f.Variables); i++ {
+			newVars[i-1] = f.Variables[i]
+		}
+		newVars[len(newVars)-1] = f.Variables[idx]
+
+		f := n.ve.Variables.Rearrange(&f, newVars)
+
+		given := make([]string, len(newVars)-1)
+		for i := 0; i < len(newVars)-1; i++ {
+			given[i] = n.variables[newVars[i].Id].Name
+		}
+
+		ff := Factor{
+			For:   name,
+			Given: given,
+			Table: f.Data,
+		}
+		result[name] = ff
+	}
+
+	return result, nil
 }
 
 func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose bool) (map[string][]float64, *ve.Factor, error) {

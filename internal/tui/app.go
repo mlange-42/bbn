@@ -51,9 +51,15 @@ func (a *App) Run() error {
 		a.nodesByName[n.Name] = i
 	}
 
-	err = a.network.SolvePolicies(false)
+	policy, err := a.network.SolvePolicies(false)
 	if err != nil {
 		return err
+	}
+
+	for name, f := range policy {
+		idx := a.nodesByName[name]
+		node := a.nodes[idx]
+		node.Node().Factor = f
 	}
 
 	a.marginals, err = a.solve()

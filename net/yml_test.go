@@ -1,6 +1,7 @@
 package net
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -54,6 +55,8 @@ factors:
 	n, err := FromYAML([]byte(yml))
 	assert.Nil(t, err)
 
-	err = n.SolvePolicies(true)
+	policy, err := n.SolvePolicies(true)
 	assert.Nil(t, err)
+
+	fmt.Println(policy)
 }

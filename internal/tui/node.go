@@ -13,7 +13,7 @@ const maxStateLabelWidth = 8
 const maxBars = 10
 
 type Node interface {
-	Node() net.Variable
+	Node() *net.Variable
 	Bounds() *Bounds
 	Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color)
 	SelectedOutcome(x, y int) (int, bool)
@@ -84,8 +84,8 @@ func NewNode(n net.Variable) Node {
 	return &node
 }
 
-func (n *node) Node() net.Variable {
-	return n.node
+func (n *node) Node() *net.Variable {
+	return &n.node
 }
 
 func (n *node) Bounds() *Bounds {
