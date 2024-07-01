@@ -79,14 +79,14 @@ func (a *App) inputEnter() error {
 	}
 
 	// Add/clear selected state
-	if oldValue, ok := a.evidence[node.Node().Variable]; ok {
+	if oldValue, ok := a.evidence[node.Node().Name]; ok {
 		if oldValue == value {
-			delete(a.evidence, node.Node().Variable)
+			delete(a.evidence, node.Node().Name)
 		} else {
-			a.evidence[node.Node().Variable] = value
+			a.evidence[node.Node().Name] = value
 		}
 	} else {
-		a.evidence[node.Node().Variable] = value
+		a.evidence[node.Node().Name] = value
 	}
 
 	// Store old marginals in case of fail/error.
@@ -94,7 +94,7 @@ func (a *App) inputEnter() error {
 
 	// Perform sampling
 	var err error
-	a.marginals, err = a.network.Sample(a.evidence, a.samples, a.rng)
+	a.marginals, err = a.solve()
 	if err != nil {
 		if _, ok := err.(*bbn.ConflictingEvidenceError); ok {
 			// Rollback on error
@@ -113,9 +113,9 @@ func (a *App) showTable() {
 
 	data := NewTable(a.nodes, a.selectedNode, a.nodesByName)
 
-	a.tableDialog.SetRows(0, len(node.Table)+6, 0)
+	a.tableDialog.SetRows(0, data.GetRowCount()+5, 0)
 	a.table.SetContent(&data)
-	a.table.SetTitle(" " + node.Variable + " ")
+	a.table.SetTitle(" " + node.Name + " ")
 	a.pages.ShowPage("Table")
 
 	a.app.SetFocus(a.table)

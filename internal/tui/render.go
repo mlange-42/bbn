@@ -14,8 +14,8 @@ func (a *App) render(isUpdate bool) {
 
 func (a *App) renderNodes() {
 	for i, node := range a.nodes {
-		data := a.marginals[node.Node().Variable]
-		_, hasEvidence := a.evidence[node.Node().Variable]
+		data := a.marginals[node.Node().Name]
+		_, hasEvidence := a.evidence[node.Node().Name]
 		runes, colors := node.Render(data, i == a.selectedNode, a.selectedState, hasEvidence)
 		b := node.Bounds()
 		for i, line := range runes {
@@ -27,7 +27,7 @@ func (a *App) renderNodes() {
 
 func (a *App) renderEdges() {
 	for i, node := range a.nodes {
-		for _, p := range node.Node().Given {
+		for _, p := range node.Node().Factor.Given {
 			pid := a.nodesByName[p]
 			a.renderEdge(pid, i)
 		}

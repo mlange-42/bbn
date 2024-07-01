@@ -63,6 +63,7 @@ func FromYAML(content []byte) (*Network, error) {
 			Name:     v.Variable,
 			Type:     tp,
 			Outcomes: v.Outcomes,
+			Position: v.Position,
 		}
 	}
 	for i, f := range net.Factors {
@@ -80,7 +81,7 @@ func FromYAML(content []byte) (*Network, error) {
 		}
 	}
 
-	n := New(variables, factors)
+	n := New(net.Name, variables, factors)
 
 	return n, nil
 }

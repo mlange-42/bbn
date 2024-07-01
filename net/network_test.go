@@ -36,7 +36,7 @@ func TestNetworkToVE(t *testing.T) {
 		}},
 	}
 
-	n := New(vars, factors)
+	n := New("umbrella", vars, factors)
 
 	v, variables, err := n.ToVE()
 	assert.Nil(t, err)
@@ -87,7 +87,7 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 		}},
 	}
 
-	n := New(vars, factors)
+	n := New("umbrella", vars, factors)
 	err := n.SolvePolicies(false)
 	assert.Nil(t, err)
 
@@ -157,7 +157,7 @@ func TestNetworkSolveOil(t *testing.T) {
 		}},
 	}
 
-	n := New(vars, factors)
+	n := New("oil", vars, factors)
 	err := n.SolvePolicies(false)
 	assert.Nil(t, err)
 
