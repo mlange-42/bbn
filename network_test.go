@@ -121,6 +121,8 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 
 	normUtil := n.NormalizeUtility(utility, f)
 	fmt.Println("--> NormalizeUtility", normUtil)
+
+	assert.Equal(t, []float64{70, 20}, normUtil.Data)
 }
 
 func TestNetworkSolveOil(t *testing.T) {
