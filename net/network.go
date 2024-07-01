@@ -166,7 +166,12 @@ func (n *Network) ToVE() (*ve.VE, map[string]*variable, error) {
 		}
 
 		variables = append(variables, forVar.VeVariable)
-		factors = append(factors, vars.CreateFactor(variables, f.Table))
+
+		factor := vars.CreateFactor(variables, f.Table)
+		if forVar.Variable.Type == ve.ChanceNode {
+			factor = vars.NormalizeFor(&factor, variables[len(variables)-1])
+		}
+		factors = append(factors, factor)
 	}
 
 	for _, f := range n.policies {
