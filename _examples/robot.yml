@@ -1,0 +1,36 @@
+name: Robot Decision
+
+variables:
+
+- variable: Short path
+  outcomes: [short, long]
+  type: decision
+  position: [1, 4]
+  
+- variable: Wear pads
+  outcomes: [pads, no pads]
+  type: decision
+  position: [1, 11]
+
+- variable: Accident
+  outcomes: [yes, no]
+  position: [40, 0]
+  given: [Short path]
+  table:
+  - [0.1, 0.9] # short path
+  - [0.0, 1.0] # long path
+
+- variable: Utility
+  outcomes: [expected]
+  type: utility
+  given: [Wear pads, Short path, Accident]
+  position: [48, 8]
+  table:
+  - [2] # pads+ short accident+
+  - [8] # pads+ short accident-
+  - [0] # pads+ long accident+
+  - [4] # pads+ long accident-
+  - [0] # pads- short accident+
+  - [10] # pads- short accident-
+  - [0] # pads- long accident+
+  - [6] # pads- long accident-
