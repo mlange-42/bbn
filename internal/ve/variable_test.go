@@ -10,8 +10,8 @@ import (
 func TestVariablesCreateFactor(t *testing.T) {
 	v := NewVariables()
 
-	v1 := v.Add(ChanceNode, 2)
-	v2 := v.Add(ChanceNode, 3)
+	v1 := v.AddVariable(ChanceNode, 2)
+	v2 := v.AddVariable(ChanceNode, 3)
 
 	f := v.CreateFactor([]Variable{v1, v2}, []float64{0.1, 0.2, 0.7, 0.6, 0.2, 0.2})
 
@@ -69,8 +69,8 @@ func TestVariablesNormalizeFor(t *testing.T) {
 func TestVariablesRestrict(t *testing.T) {
 	v := NewVariables()
 
-	v1 := v.Add(ChanceNode, 2)
-	v2 := v.Add(ChanceNode, 3)
+	v1 := v.AddVariable(ChanceNode, 2)
+	v2 := v.AddVariable(ChanceNode, 3)
 
 	f := v.CreateFactor([]Variable{v1, v2}, []float64{0.1, 0.2, 0.7, 0.6, 0.2, 0.2})
 
@@ -86,8 +86,8 @@ func TestVariablesRestrict(t *testing.T) {
 func TestVariablesSumOut(t *testing.T) {
 	v := NewVariables()
 
-	v1 := v.Add(ChanceNode, 2)
-	v2 := v.Add(ChanceNode, 3)
+	v1 := v.AddVariable(ChanceNode, 2)
+	v2 := v.AddVariable(ChanceNode, 3)
 
 	f := v.CreateFactor([]Variable{v1, v2}, []float64{
 		1, 2, 7,
@@ -106,9 +106,9 @@ func TestVariablesSumOut(t *testing.T) {
 func TestVariablesProduct(t *testing.T) {
 	v := NewVariables()
 
-	v1 := v.Add(ChanceNode, 3)
-	v3 := v.Add(ChanceNode, 2)
-	v2 := v.Add(ChanceNode, 2)
+	v1 := v.AddVariable(ChanceNode, 3)
+	v3 := v.AddVariable(ChanceNode, 2)
+	v2 := v.AddVariable(ChanceNode, 2)
 
 	f1 := v.CreateFactor([]Variable{v1, v2}, []float64{
 		0.1, 0.9,
@@ -137,9 +137,9 @@ func TestVariablesProduct(t *testing.T) {
 func TestVariablesProductMulti1(t *testing.T) {
 	v := NewVariables()
 
-	a := v.Add(ChanceNode, 2)
-	b := v.Add(ChanceNode, 2)
-	c := v.Add(ChanceNode, 2)
+	a := v.AddVariable(ChanceNode, 2)
+	b := v.AddVariable(ChanceNode, 2)
+	c := v.AddVariable(ChanceNode, 2)
 
 	fA := v.CreateFactor([]Variable{a}, []float64{
 		1, 2,
@@ -166,8 +166,8 @@ func TestVariablesProductMulti1(t *testing.T) {
 func TestVariablesProductMulti2(t *testing.T) {
 	v := NewVariables()
 
-	a := v.Add(ChanceNode, 2)
-	b := v.Add(ChanceNode, 2)
+	a := v.AddVariable(ChanceNode, 2)
+	b := v.AddVariable(ChanceNode, 2)
 
 	fA := v.CreateFactor([]Variable{a}, []float64{
 		1, 2,
@@ -192,10 +192,10 @@ func TestVariablesProductMulti2(t *testing.T) {
 func TestVariablesProductMulti3(t *testing.T) {
 	v := NewVariables()
 
-	weather := v.Add(ChanceNode, 2)
-	forecast := v.Add(ChanceNode, 3)
-	umbrella := v.Add(DecisionNode, 2)
-	utility := v.Add(UtilityNode, 1)
+	weather := v.AddVariable(ChanceNode, 2)
+	forecast := v.AddVariable(ChanceNode, 3)
+	umbrella := v.AddVariable(DecisionNode, 2)
+	utility := v.AddVariable(UtilityNode, 1)
 	_ = utility
 
 	fWeather := v.CreateFactor([]Variable{weather}, []float64{
@@ -236,11 +236,11 @@ func TestVariablesProductMulti3(t *testing.T) {
 func TestVariablesProductScalar(t *testing.T) {
 	v := NewVariables()
 
-	_ = v.Add(ChanceNode, 3)
-	v1 := v.Add(ChanceNode, 3)
-	_ = v.Add(ChanceNode, 3)
-	v2 := v.Add(ChanceNode, 2)
-	_ = v.Add(ChanceNode, 3)
+	_ = v.AddVariable(ChanceNode, 3)
+	v1 := v.AddVariable(ChanceNode, 3)
+	_ = v.AddVariable(ChanceNode, 3)
+	v2 := v.AddVariable(ChanceNode, 2)
+	_ = v.AddVariable(ChanceNode, 3)
 
 	f1 := v.CreateFactor([]Variable{v1, v2}, []float64{
 		1, 9,
@@ -262,11 +262,11 @@ func TestVariablesProductScalar(t *testing.T) {
 func TestVariablesPolicy(t *testing.T) {
 	v := NewVariables()
 
-	_ = v.Add(ChanceNode, 3)
-	v1 := v.Add(ChanceNode, 3)
-	_ = v.Add(ChanceNode, 3)
-	v2 := v.Add(ChanceNode, 2)
-	_ = v.Add(ChanceNode, 3)
+	_ = v.AddVariable(ChanceNode, 3)
+	v1 := v.AddVariable(ChanceNode, 3)
+	_ = v.AddVariable(ChanceNode, 3)
+	v2 := v.AddVariable(ChanceNode, 2)
+	_ = v.AddVariable(ChanceNode, 3)
 
 	f1 := v.CreateFactor([]Variable{v1, v2}, []float64{
 		0.4, 0.6,
@@ -293,11 +293,11 @@ func TestVariablesPolicy(t *testing.T) {
 func TestRearrange(t *testing.T) {
 	v := NewVariables()
 
-	_ = v.Add(ChanceNode, 3)
-	v1 := v.Add(ChanceNode, 3)
-	_ = v.Add(ChanceNode, 3)
-	v2 := v.Add(ChanceNode, 2)
-	_ = v.Add(ChanceNode, 3)
+	_ = v.AddVariable(ChanceNode, 3)
+	v1 := v.AddVariable(ChanceNode, 3)
+	_ = v.AddVariable(ChanceNode, 3)
+	v2 := v.AddVariable(ChanceNode, 2)
+	_ = v.AddVariable(ChanceNode, 3)
 
 	original := []float64{
 		0.4, 0.6,

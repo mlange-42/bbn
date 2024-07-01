@@ -11,9 +11,9 @@ import (
 func TestEliminate(t *testing.T) {
 	vars := NewVariables()
 
-	rain := vars.Add(ChanceNode, 2)
-	sprinkler := vars.Add(ChanceNode, 2)
-	grass := vars.Add(ChanceNode, 2)
+	rain := vars.AddVariable(ChanceNode, 2)
+	sprinkler := vars.AddVariable(ChanceNode, 2)
+	grass := vars.AddVariable(ChanceNode, 2)
 
 	fRain := vars.CreateFactor([]Variable{rain}, []float64{
 		0.2, 0.8,
@@ -50,10 +50,10 @@ func TestEliminate(t *testing.T) {
 func TestDecisionUmbrella(t *testing.T) {
 	v := NewVariables()
 
-	weather := v.Add(ChanceNode, 2)
-	forecast := v.Add(ChanceNode, 3)
-	umbrella := v.Add(DecisionNode, 2)
-	utility := v.Add(UtilityNode, 1)
+	weather := v.AddVariable(ChanceNode, 2)
+	forecast := v.AddVariable(ChanceNode, 3)
+	umbrella := v.AddVariable(DecisionNode, 2)
+	utility := v.AddVariable(UtilityNode, 1)
 	_ = utility
 
 	fWeather := v.CreateFactor([]Variable{weather}, []float64{
@@ -101,10 +101,10 @@ func TestDecisionUmbrella(t *testing.T) {
 func TestDecisionUmbrella2(t *testing.T) {
 	v := NewVariables()
 
-	weather := v.Add(ChanceNode, 2)
-	forecast := v.Add(ChanceNode, 3)
-	umbrella := v.Add(DecisionNode, 2)
-	utility := v.Add(UtilityNode, 1)
+	weather := v.AddVariable(ChanceNode, 2)
+	forecast := v.AddVariable(ChanceNode, 3)
+	umbrella := v.AddVariable(DecisionNode, 2)
+	utility := v.AddVariable(UtilityNode, 1)
 	_ = utility
 
 	fWeather := v.CreateFactor([]Variable{weather}, []float64{
@@ -143,14 +143,14 @@ func TestDecisionUmbrella2(t *testing.T) {
 func TestDecisionEvacuate(t *testing.T) {
 	v := NewVariables()
 
-	earthquake := v.Add(ChanceNode, 3)
-	sensor := v.Add(ChanceNode, 3)
-	maintenance := v.Add(ChanceNode, 2)
-	evacuate := v.Add(DecisionNode, 2)
+	earthquake := v.AddVariable(ChanceNode, 3)
+	sensor := v.AddVariable(ChanceNode, 3)
+	maintenance := v.AddVariable(ChanceNode, 2)
+	evacuate := v.AddVariable(DecisionNode, 2)
 
-	materialDamage := v.Add(UtilityNode, 1)
-	humanDamage := v.Add(UtilityNode, 1)
-	evacCost := v.Add(UtilityNode, 1)
+	materialDamage := v.AddVariable(UtilityNode, 1)
+	humanDamage := v.AddVariable(UtilityNode, 1)
+	evacCost := v.AddVariable(UtilityNode, 1)
 
 	_, _, _ = materialDamage, humanDamage, evacCost
 
@@ -200,13 +200,13 @@ func TestDecisionEvacuate(t *testing.T) {
 func TestDecisionOil(t *testing.T) {
 	v := NewVariables()
 
-	oil := v.Add(ChanceNode, 3)
-	test := v.Add(DecisionNode, 2)
-	testResult := v.Add(ChanceNode, 3)
-	drill := v.Add(DecisionNode, 2)
+	oil := v.AddVariable(ChanceNode, 3)
+	test := v.AddVariable(DecisionNode, 2)
+	testResult := v.AddVariable(ChanceNode, 3)
+	drill := v.AddVariable(DecisionNode, 2)
 
-	utilityDrill := v.Add(UtilityNode, 1)
-	utilityTest := v.Add(UtilityNode, 1)
+	utilityDrill := v.AddVariable(UtilityNode, 1)
+	utilityTest := v.AddVariable(UtilityNode, 1)
 
 	fOil := v.CreateFactor([]Variable{oil}, []float64{
 		0.5, 0.3, 0.2,
@@ -273,12 +273,12 @@ func TestDecisionRobot(t *testing.T) {
 
 	accidentProb := 0.1
 
-	short := v.Add(DecisionNode, 2)
-	pads := v.Add(DecisionNode, 2)
+	short := v.AddVariable(DecisionNode, 2)
+	pads := v.AddVariable(DecisionNode, 2)
 
-	accident := v.Add(ChanceNode, 2)
+	accident := v.AddVariable(ChanceNode, 2)
 
-	utility := v.Add(UtilityNode, 1)
+	utility := v.AddVariable(UtilityNode, 1)
 
 	fAccident := v.CreateFactor([]Variable{short, accident}, []float64{
 		accidentProb, 1 - accidentProb, // short
@@ -314,9 +314,9 @@ func TestDecisionRobot(t *testing.T) {
 func TestSortDecisions(t *testing.T) {
 	v := NewVariables()
 
-	d3 := v.Add(DecisionNode, 2)
-	d2 := v.Add(DecisionNode, 2)
-	d1 := v.Add(DecisionNode, 2)
+	d3 := v.AddVariable(DecisionNode, 2)
+	d2 := v.AddVariable(DecisionNode, 2)
+	d1 := v.AddVariable(DecisionNode, 2)
 
 	deps := map[Variable][]Variable{
 		d2: {d1},

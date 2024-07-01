@@ -20,16 +20,19 @@ type Variable struct {
 	NodeType NodeType
 }
 
+// Variables provides variable and factor creation functionality, as well as factor operations.
 type Variables struct {
 	factorCounter int
 	variables     variables
 }
 
+// NewVariables creates a new Variables instance.
 func NewVariables() *Variables {
 	return &Variables{}
 }
 
-func (v *Variables) Add(nodeType NodeType, outcomes uint16) Variable {
+// AddVariable creates and add a new [Variable].
+func (v *Variables) AddVariable(nodeType NodeType, outcomes uint16) Variable {
 	v.variables = append(v.variables,
 		Variable{
 			Id:       uint16(len(v.variables)),
@@ -39,6 +42,9 @@ func (v *Variables) Add(nodeType NodeType, outcomes uint16) Variable {
 	return v.variables[len(v.variables)-1]
 }
 
+// CreateFactor creates a new [Factor] for the given variables.
+//
+// Argument data may be nil.
 func (v *Variables) CreateFactor(vars []Variable, data []float64) Factor {
 	rows := 1
 	variables := make([]Variable, len(vars))
@@ -63,6 +69,7 @@ func (v *Variables) CreateFactor(vars []Variable, data []float64) Factor {
 	}
 }
 
+// Restrict a factor to the given evidence.
 func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Factor {
 	if observation < 0 || observation >= int(variable.outcomes) {
 		panic(fmt.Sprintf("observation %d out of range for variable with %d possible observation values", observation, variable.outcomes))
@@ -105,6 +112,7 @@ func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Fact
 	return fNew
 }
 
+// SumOut a [Variable] from a [Factor].
 func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 	newVars := []Variable{}
 	idx := -1
@@ -143,6 +151,7 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 	return fNew
 }
 
+// Policy derives a policy from a [Factor].
 func (v *Variables) Policy(f *Factor, variable Variable) Factor {
 	newVars := []Variable{}
 	idx := -1
@@ -210,6 +219,7 @@ func (v *Variables) Policy(f *Factor, variable Variable) Factor {
 	return fNew
 }
 
+// Rearrange changes the [Variable] order of a [Factor].
 func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
 	if len(f.Variables) != len(variables) {
 		panic("number of old and new variables doesn't match")
@@ -249,6 +259,7 @@ func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
 	return fNew
 }
 
+// Product multiplies factors.
 func (v *Variables) Product(factors ...*Factor) Factor {
 	if len(factors) == 1 {
 		return v.CreateFactor(factors[0].Variables, append([]float64{}, factors[0].Data...))
@@ -295,6 +306,7 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 	return f
 }
 
+// Sum sums up factors, similar to [Variables.Product].
 func (v *Variables) Sum(factors ...*Factor) Factor {
 	if len(factors) == 1 {
 		return v.CreateFactor(factors[0].Variables, append([]float64{}, factors[0].Data...))
@@ -341,6 +353,7 @@ func (v *Variables) Sum(factors ...*Factor) Factor {
 	return f
 }
 
+// Marginal calculates marginal probabilities from a [Factor] for the given [Variable].
 func (v *Variables) Marginal(f *Factor, variable Variable) Factor {
 	idx := -1
 	for i := range f.Variables {
@@ -366,6 +379,7 @@ func (v *Variables) Marginal(f *Factor, variable Variable) Factor {
 	return fNew
 }
 
+// Normalize normalizes a [Factor].
 func (v *Variables) Normalize(f *Factor) Factor {
 	fNew := v.CreateFactor(f.Variables, append([]float64{}, f.Data...))
 
@@ -384,6 +398,8 @@ func (v *Variables) Normalize(f *Factor) Factor {
 	return fNew
 }
 
+// NormalizeFor normalizes a [Factor] for a certain [Variable].
+// It also re-arranges the new factor to have the normalized variable as the last one.
 func (v *Variables) NormalizeFor(f *Factor, variable Variable) Factor {
 	idx := -1
 	for i := range f.Variables {
@@ -426,6 +442,7 @@ func (v *Variables) NormalizeFor(f *Factor, variable Variable) Factor {
 	return fNew
 }
 
+// Invert a [Factor] by applying 1/x for each element (if x != 0).
 func (v *Variables) Invert(f *Factor) Factor {
 	fNew := v.CreateFactor(f.Variables, append([]float64{}, f.Data...))
 
@@ -438,8 +455,10 @@ func (v *Variables) Invert(f *Factor) Factor {
 	return fNew
 }
 
+// Helper type for a list of variables
 type variables []Variable
 
+// Index creates a flat [Factor] index from a multi-dimensional index.
 func (v variables) Index(indices []int) int {
 	if len(indices) != len(v) {
 		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(v), len(indices)))
@@ -461,6 +480,7 @@ func (v variables) Index(indices []int) int {
 	return idx
 }
 
+// Index creates multi-dimensional index from a flat [Factor] index.
 func (v variables) Outcomes(index int, indices []int) {
 	if len(indices) != len(v) {
 		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(v), len(indices)))
