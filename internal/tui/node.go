@@ -6,7 +6,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mlange-42/bbn"
-	"github.com/mlange-42/bbn/ve"
+	"github.com/mlange-42/bbn/internal/ve"
 )
 
 const maxStateLabelWidth = 8

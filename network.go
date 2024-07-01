@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/mlange-42/bbn/ve"
+	"github.com/mlange-42/bbn/internal/ve"
 )
 
 type Variable struct {
