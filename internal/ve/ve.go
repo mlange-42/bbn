@@ -1,6 +1,7 @@
 package ve
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 )
@@ -118,6 +119,11 @@ func (ve *VE) sumUtilities() {
 	ve.factors[sum.id] = &sum
 }
 
+type variableDegree struct {
+	Variable Variable
+	Degree   int
+}
+
 func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, verbose bool) {
 	isDecisionParent := ve.getDecisionParents()
 
@@ -128,7 +134,6 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, verbose boo
 		}
 		hidden[v.Id] = v
 	}
-	// TODO: really exclude evidence variables?
 	for _, ev := range evidence {
 		delete(hidden, ev.Variable.Id)
 	}
@@ -136,11 +141,37 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, verbose boo
 		delete(hidden, v.Id)
 	}
 
-	if verbose {
-		fmt.Println("Hidden variables: ", hidden)
-	}
+	// TODO: check elimination order of hidden variables
+	hiddenList := make([]variableDegree, len(hidden))
+	i := 0
+	newVars := []Variable{}
 	for _, v := range hidden {
-		ve.removeHidden(v)
+		for _, f := range ve.factors {
+			if !slices.ContainsFunc(f.Variables, func(v2 Variable) bool { return v2.Id == v.Id }) {
+				continue
+			}
+			for _, vv := range f.Variables {
+				if !slices.ContainsFunc(newVars, func(v2 Variable) bool { return v2.Id == vv.Id }) {
+					newVars = append(newVars, vv)
+				}
+			}
+		}
+		degree := len(newVars)
+		newVars = newVars[:0]
+		hiddenList[i] = variableDegree{
+			Variable: v,
+			Degree:   degree,
+		}
+		i++
+	}
+	slices.SortFunc(hiddenList, func(a, b variableDegree) int { return cmp.Compare(a.Variable.Id, b.Variable.Id) })
+	slices.SortStableFunc(hiddenList, func(a, b variableDegree) int { return cmp.Compare(a.Degree, b.Degree) })
+
+	if verbose {
+		fmt.Println("Hidden variables: ", hiddenList)
+	}
+	for _, v := range hiddenList {
+		ve.removeHidden(v.Variable)
 		if verbose {
 			fmt.Println("Eliminate", v)
 			ve.printFactors()
