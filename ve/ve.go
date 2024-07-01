@@ -340,13 +340,33 @@ func (ve *VE) restrictEvidence(evidence Evidence) {
 func (ve *VE) removeHidden(variable Variable) {
 	indices := []int{}
 	factors := []*Factor{}
+	//utilityFactors := []*Factor{}
 
 	for k, f := range ve.factors {
 		if slices.ContainsFunc(f.Variables, func(v Variable) bool { return v.Id == variable.Id }) {
 			indices = append(indices, k)
+
+			/*hasUtility := false
+			for _, v := range f.Variables {
+				if v.NodeType == UtilityNode {
+					hasUtility = true
+					break
+				}
+			}
+			if hasUtility {
+				utilityFactors = append(utilityFactors, f)
+			} else {*/
 			factors = append(factors, f)
+			//}
 		}
 	}
+
+	/*if len(utilityFactors) > 1 {
+		sum := ve.Variables.Sum(utilityFactors...)
+		factors = append(factors, &sum)
+	} else if len(utilityFactors) == 1 {
+		factors = append(factors, utilityFactors[0])
+	}*/
 
 	prod := ve.Variables.Product(factors...)
 	prod = ve.Variables.SumOut(&prod, variable)
