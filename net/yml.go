@@ -22,22 +22,17 @@ var nodeTypes = map[string]ve.NodeType{
 }
 
 type variableYaml struct {
-	Variable string   // Name of the node.
-	Type     string   `yaml:",omitempty"` // Type of the node [nature, decision, utility]
-	Outcomes []string `yaml:",flow"`      // Names of the node's possible states.
-	Position [2]int   `yaml:",flow"`      // Coordinates for visualization, optional.
-}
-
-type factorYaml struct {
-	For   string
-	Given []string    `yaml:",omitempty"`
-	Table [][]float64 `yaml:",omitempty"`
+	Variable string      // Name of the node.
+	Given    []string    `yaml:",omitempty"`
+	Type     string      `yaml:",omitempty"` // Type of the node [nature, decision, utility]
+	Outcomes []string    `yaml:",flow"`      // Names of the node's possible states.
+	Position [2]int      `yaml:",flow"`      // Coordinates for visualization, optional.
+	Table    [][]float64 `yaml:",omitempty"`
 }
 
 type networkYaml struct {
 	Name      string
 	Variables []variableYaml
-	Factors   []factorYaml
 }
 
 // FromBIFXML creates a [Network] from YAML. See also [FromFile].
@@ -53,7 +48,7 @@ func FromYAML(content []byte) (*Network, error) {
 	}
 
 	variables := make([]Variable, len(net.Variables))
-	factors := make([]Factor, len(net.Factors))
+	factors := []Factor{}
 	for i, v := range net.Variables {
 		tp, ok := nodeTypes[v.Type]
 		if !ok {
@@ -65,20 +60,20 @@ func FromYAML(content []byte) (*Network, error) {
 			Outcomes: v.Outcomes,
 			Position: v.Position,
 		}
-	}
-	for i, f := range net.Factors {
-		var table []float64
-		if len(f.Table) > 0 {
-			table = make([]float64, 0, len(f.Table)*len(f.Table[0]))
-			for _, row := range f.Table {
+
+		if len(v.Table) > 0 {
+			var table []float64
+			table = make([]float64, 0, len(v.Table)*len(v.Table[0]))
+			for _, row := range v.Table {
 				table = append(table, row...)
 			}
+			factors = append(factors, Factor{
+				For:   v.Variable,
+				Given: v.Given,
+				Table: table,
+			})
 		}
-		factors[i] = Factor{
-			For:   f.For,
-			Given: f.Given,
-			Table: table,
-		}
+
 	}
 
 	n := New(net.Name, variables, factors)
