@@ -53,3 +53,11 @@ variables:
   table:
   - [-10] # test+
   - [  0] # test-
+
+- variable: Total utility
+  position: [0, 23]
+  outcomes: [Test utility, Drill utility]
+  type: utility
+  given: [Test utility, Drill utility]
+  table:
+  - [1.0, 2.0]

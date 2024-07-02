@@ -135,6 +135,9 @@ func (n *Network) prepareVariables() {
 		if n.totalUtilityIndex >= 0 {
 			panic("found multiple nodes for total utility")
 		}
+		if len(v.Outcomes) != len(v.Factor.Given) {
+			panic("invalid total utility node; number of parents and number of outcomes must be the same")
+		}
 		n.totalUtilityIndex = i
 	}
 }
@@ -294,7 +297,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 	varNames := map[string]*variable{}
 	varIDs := make([]variable, len(n.variables))
 	dependencies := map[ve.Variable][]ve.Variable{}
-	numUtilityNodes := 0
+	utilityNodes := []*Variable{}
 	totalUtilityName := ""
 
 	// collect variables for lookup
@@ -306,7 +309,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		}
 		// count utility nodes
 		if v.Type == ve.UtilityNode {
-			numUtilityNodes++
+			utilityNodes = append(utilityNodes, &v)
 		}
 		// treat decision variables with policy as normal change variables
 		_, isEvidence := evidence[v.Name]
@@ -377,7 +380,17 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 
 	var weights []float64
 	if n.totalUtilityIndex >= 0 {
-		weights = n.variables[n.totalUtilityIndex].Factor.Table
+		node := &n.variables[n.totalUtilityIndex]
+		table := node.Factor.Table
+		parents := node.Factor.Given
+		weights := make([]float64, len(utilityNodes))
+		for i := range utilityNodes {
+			idx := slices.Index(parents, utilityNodes[i].Name)
+			if idx < 0 {
+				return nil, nil, fmt.Errorf("utility node %s not included in total utility", utilityNodes[i].Name)
+			}
+			weights[i] = table[idx]
+		}
 	}
 
 	// add policies as factors
