@@ -378,25 +378,35 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		factors = append(factors, factor)
 	}
 
-	var weights []float64
-	if n.totalUtilityIndex >= 0 {
-		node := &n.variables[n.totalUtilityIndex]
-		table := node.Factor.Table
-		parents := node.Factor.Given
-		weights := make([]float64, len(utilityNodes))
-		for i := range utilityNodes {
-			idx := slices.Index(parents, utilityNodes[i].Name)
-			if idx < 0 {
-				return nil, nil, fmt.Errorf("utility node %s not included in total utility", utilityNodes[i].Name)
-			}
-			weights[i] = table[idx]
-		}
-	}
-
 	// add policies as factors
 	factors = append(factors, n.policyFactors(vars, varIDs, evidence)...)
 
+	weights, err := n.prepareUtilityWeights(utilityNodes)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	return ve.New(vars, factors, dependencies, weights, false), varNames, nil
+}
+
+func (n *Network) prepareUtilityWeights(utilityNodes []*Variable) ([]float64, error) {
+	var weights []float64
+	if n.totalUtilityIndex < 0 {
+		return nil, nil
+	}
+	node := &n.variables[n.totalUtilityIndex]
+	table := node.Factor.Table
+	parents := node.Factor.Given
+	weights = make([]float64, len(utilityNodes))
+	for i := range utilityNodes {
+		idx := slices.Index(parents, utilityNodes[i].Name)
+		if idx < 0 {
+			return nil, fmt.Errorf("utility node %s not included in total utility", utilityNodes[i].Name)
+		}
+		weights[i] = table[idx]
+	}
+
+	return weights, nil
 }
 
 // policyFactors collects policies as factors.
