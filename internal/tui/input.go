@@ -58,6 +58,13 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 		return nil
 	} else if event.Rune() == 'i' {
 		a.ignorePolicies = !a.ignorePolicies
+
+		if a.ignorePolicies {
+			a.graph.SetBorderColor(tcell.ColorBlue)
+		} else {
+			a.graph.SetBorderColor(tcell.ColorDefault)
+		}
+
 		a.updateMarginals()
 		a.render(true)
 		return nil
