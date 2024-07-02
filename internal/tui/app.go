@@ -120,11 +120,8 @@ func (a *App) createCanvas() {
 	for i := range a.canvas {
 		a.canvas[i] = make([]rune, bounds.W)
 		a.colors[i] = make([]Color, bounds.W)
-		for j := range a.canvas[i] {
-			a.canvas[i][j] = Empty
-			a.colors[i][j] = White
-		}
 	}
+	//a.clearCanvas()
 }
 
 func (a *App) createWidgets() {
