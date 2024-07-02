@@ -35,7 +35,7 @@ func TestEliminate(t *testing.T) {
 	query := []Variable{rain}
 	ve := New(vars,
 		[]Factor{fRain, fSprinkler, fGrass},
-		nil, nil, true)
+		nil, nil)
 	result := ve.SolveQuery(evidence, query)
 
 	for _, q := range query {
@@ -78,7 +78,7 @@ func TestDecisionUmbrella(t *testing.T) {
 	ve := New(v,
 		[]Factor{fWeather, fForecast, fUtility},
 		map[Variable][]Variable{umbrella: {forecast}},
-		nil, true)
+		nil)
 
 	result1 := ve.SolveUtility(evidence, nil, nil)
 
@@ -129,7 +129,7 @@ func TestDecisionUmbrella2(t *testing.T) {
 	ve := New(v,
 		[]Factor{fWeather, fForecast, fUtility},
 		map[Variable][]Variable{umbrella: {weather, forecast}},
-		nil, true)
+		nil)
 
 	result := ve.SolvePolicies(false)
 
@@ -189,7 +189,7 @@ func TestDecisionEvacuate(t *testing.T) {
 	ve := New(v,
 		[]Factor{fEarthquake, fSensor, fMaintenance, fMaterialDamage, fHumanDamage, fEvacCost},
 		map[Variable][]Variable{evacuate: {sensor}},
-		nil, false)
+		nil)
 
 	result := ve.SolveUtility(evidence, nil, nil)
 
@@ -244,7 +244,7 @@ func TestDecisionOil(t *testing.T) {
 	ve := New(v,
 		[]Factor{fOil, fResult, fUtilityTest, fUtilityDrill},
 		map[Variable][]Variable{drill: {test, testResult}},
-		nil, true)
+		nil)
 
 	policies := ve.SolvePolicies(false)
 
@@ -304,7 +304,7 @@ func TestDecisionRobot(t *testing.T) {
 	ve := New(v,
 		[]Factor{fAccident, fUtility},
 		map[Variable][]Variable{},
-		nil, true)
+		nil)
 
 	result1 := ve.SolveUtility(evidence, nil, nil)
 	result := v.Rearrange(result1, []Variable{short, pads})
@@ -330,7 +330,7 @@ func TestSortDecisions(t *testing.T) {
 
 	ve := New(v,
 		[]Factor{},
-		deps, nil, true)
+		deps, nil)
 
 	assert.Equal(t, []Variable{d1, d2, d3}, ve.getDecisions())
 }

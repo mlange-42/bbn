@@ -123,7 +123,7 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 	}
 
 	n := New("umbrella", vars, factors)
-	policy, err := n.SolvePolicies()
+	policy, err := n.SolvePolicies(true)
 	assert.Nil(t, err)
 
 	assert.Equal(t,
@@ -209,7 +209,7 @@ func TestNetworkSolveOil(t *testing.T) {
 	}
 
 	n := New("oil", vars, factors)
-	policy, err := n.SolvePolicies()
+	policy, err := n.SolvePolicies(true)
 	assert.Nil(t, err)
 
 	assert.Equal(t,

@@ -34,7 +34,7 @@ variables:
   type: decision
 
 - variable: Test result
-  outcomes: [yes, no]
+  outcomes: [pos, neg]
   given: [Test, Infected]
   position: [31, 8]
   table:

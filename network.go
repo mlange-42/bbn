@@ -159,16 +159,17 @@ func (n *Network) TotalUtilityIndex() int {
 }
 
 // SolvePolicies solves and inserts policies for decisions, using Variable Elimination.
-func (n *Network) SolvePolicies() (map[string]Factor, error) {
+func (n *Network) SolvePolicies(stepwise bool) (map[string]Factor, error) {
 	clear(n.policies)
 
-	for {
+	decisions := n.countDecisionSteps(stepwise)
+	for i := 0; i < decisions; i++ {
 		var err error
 		n.ve, n.variableNames, err = n.toVE(nil)
 		if err != nil {
 			return nil, err
 		}
-		policies := n.ve.SolvePolicies(true)
+		policies := n.ve.SolvePolicies(stepwise)
 		if policies == nil {
 			break
 		}
@@ -216,6 +217,22 @@ func (n *Network) SolvePolicies() (map[string]Factor, error) {
 	}
 
 	return result, nil
+}
+
+func (n *Network) countDecisionSteps(stepwise bool) int {
+	if !stepwise {
+		return 1
+	}
+	decisions := 0
+	for i := range n.variables {
+		if n.variables[i].Type == ve.DecisionNode {
+			decisions++
+		}
+	}
+	if decisions == 0 {
+		return 1
+	}
+	return decisions
 }
 
 // SolveQuery solves a query, using Variable Elimination.
@@ -394,7 +411,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		return nil, nil, err
 	}
 
-	return ve.New(vars, factors, dependencies, weights, false), varNames, nil
+	return ve.New(vars, factors, dependencies, weights), varNames, nil
 }
 
 func (n *Network) prepareUtilityWeights() ([]float64, error) {
