@@ -214,6 +214,7 @@ func (a *App) createHelpPanel() *tview.Grid {
 		SetColumns(0).
 		SetRows(0, 1)
 	subGrid.SetBorder(true)
+	subGrid.SetTitle(" Help ")
 
 	subGrid.AddItem(a.help, 0, 0, 1, 1, 0, 0, true)
 
