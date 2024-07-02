@@ -9,7 +9,7 @@ import (
 	"github.com/mlange-42/bbn/internal/ve"
 )
 
-const maxStateLabelWidth = 8
+const maxStateLabelWidth = 12
 const maxBars = 10
 
 type Node interface {
