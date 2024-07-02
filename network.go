@@ -301,7 +301,6 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 	varNames := map[string]*variable{}
 	varIDs := make([]variable, len(n.variables))
 	dependencies := map[ve.Variable][]ve.Variable{}
-	utilityNodes := []*Variable{}
 	totalUtilityName := ""
 
 	// collect variables for lookup
@@ -310,10 +309,6 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		if i == n.totalUtilityIndex {
 			totalUtilityName = v.Name
 			continue
-		}
-		// count utility nodes
-		if v.Type == ve.UtilityNode {
-			utilityNodes = append(utilityNodes, &v)
 		}
 		// treat decision variables with policy as normal change variables
 		_, isEvidence := evidence[v.Name]
@@ -385,7 +380,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 	// add policies as factors
 	factors = append(factors, n.policyFactors(vars, varIDs, evidence)...)
 
-	weights, err := n.prepareUtilityWeights(utilityNodes)
+	weights, err := n.prepareUtilityWeights()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -393,7 +388,21 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 	return ve.New(vars, factors, dependencies, weights, false), varNames, nil
 }
 
-func (n *Network) prepareUtilityWeights(utilityNodes []*Variable) ([]float64, error) {
+func (n *Network) prepareUtilityWeights() ([]float64, error) {
+	utilityNodes := []*Variable{}
+
+	// collect variables for lookup
+	for i, v := range n.variables {
+		// skip total utility node
+		if i == n.totalUtilityIndex {
+			continue
+		}
+		// count utility nodes
+		if v.Type == ve.UtilityNode {
+			utilityNodes = append(utilityNodes, &v)
+		}
+	}
+
 	var weights []float64
 	if n.totalUtilityIndex < 0 {
 		return nil, nil
