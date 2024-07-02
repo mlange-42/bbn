@@ -300,7 +300,10 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		factors = append(factors, factor)
 	}
 
-	for _, f := range n.policies {
+	for name, f := range n.policies {
+		if _, isEvidence := evidence[name]; isEvidence {
+			continue
+		}
 		variables := make([]ve.Variable, len(f.Variables))
 		for i, v := range f.Variables {
 			if v.NodeType == ve.DecisionNode {
