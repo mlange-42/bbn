@@ -1,0 +1,69 @@
+name: Medical Treatment Decision
+
+variables:
+
+- variable: Infected
+  outcomes: [yes, no]
+  position: [1, 0]
+  table:
+  - [0.05, 0.95]
+
+- variable: Symptoms
+  outcomes: [yes, no]
+  given: [Infected]
+  position: [1, 8]
+  table:
+  - [0.8, 0.2] # infected+
+  - [0.05, 0.95] # infected-
+
+- variable: Disease cost
+  given: [Infected, Treatment]
+  outcomes: [euros]
+  position: [44, 0]
+  type: utility
+  table:
+  - [ -100] # infected+ treatment+
+  - [-1000] # infected+ treatment-
+  - [    0] # infected- treatment+
+  - [    0] # infected- treatment-
+  
+- variable: Test
+  outcomes: [yes, no]
+  given: [Symptoms]
+  position: [1, 16]
+  type: decision
+
+- variable: Test result
+  outcomes: [pos, neg]
+  given: [Test, Infected]
+  position: [31, 8]
+  table:
+  - [0.95, 0.05] # test+ infected+
+  - [0.05, 0.95] # test+ infected-
+  - [0.5, 0.5]   # test- infected+
+  - [0.5, 0.5]   # test- infected-
+
+- variable: Test cost
+  given: [Test]
+  outcomes: [euros]
+  position: [1, 24]
+  type: utility
+  table:
+  - [-5] # test+
+  - [ 0] # test-
+  
+- variable: Treatment
+  outcomes: [yes, no]
+  given: [Test, Test result]
+  position: [46, 17]
+  type: decision
+
+- variable: Treatment cost
+  given: [Treatment]
+  outcomes: [euros]
+  position: [44, 24]
+  type: utility
+  table:
+  - [-100] # treatment+
+  - [  0] # treatment-
+  

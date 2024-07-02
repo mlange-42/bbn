@@ -76,7 +76,7 @@ func runInferenceCommand(path string, evidence []string) ([]bbn.Variable, map[st
 		tuiNodes[i] = tui.NewNode(n)
 	}
 
-	_, err = net.SolvePolicies()
+	_, err = net.SolvePolicies(true)
 	if err != nil {
 		return nil, nil, nil, err
 	}
