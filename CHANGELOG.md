@@ -8,6 +8,8 @@
 * Implement multi-stage decision networks (#45)
 * Adds network training to the TUI app (#54)
 * Adds a toggle to the TUI app to ignore policies of decision nodes with evidence (#56)
+* Nodes can be moved in the TUI app with WASD keys (#57)
+* Save network fro TUI app using Ctrl+S (#57)
 
 ## [[v0.4.0]](https://github.com/mlange-42/bbn/compare/v0.3.0...v0.4.0)
 
