@@ -12,13 +12,43 @@ type Variable struct {
 	Type     ve.NodeType
 	Outcomes []string
 	Position [2]int
-	Factor   Factor
+	Factor   *Factor // Don't set this, it is initialized when constructing the network.
 }
 
 type Factor struct {
-	For   string
-	Given []string  `yaml:",omitempty"`
-	Table []float64 `yaml:",omitempty"`
+	For      string
+	Given    []string  `yaml:",omitempty"`
+	Table    []float64 `yaml:",omitempty"`
+	outcomes []int
+	columns  int
+}
+
+func (f *Factor) RowIndex(indices []int) (int, bool) {
+	if len(indices) != len(f.outcomes) {
+		panic(fmt.Sprintf("factor with %d given variables can't use %d indices", len(f.outcomes), len(indices)))
+	}
+
+	if len(indices) == 0 {
+		return 0, true
+	}
+
+	curr := len(f.outcomes) - 1
+	idx := indices[curr]
+	if idx < 0 {
+		return 0, false
+	}
+	stride := 1
+	curr--
+	for curr >= 0 {
+		currIdx := indices[curr]
+		if currIdx < 0 {
+			return 0, false
+		}
+		stride *= int(f.outcomes[curr+1])
+		idx += currIdx * stride
+		curr--
+	}
+	return idx, true
 }
 
 type variable struct {
@@ -36,13 +66,27 @@ type Network struct {
 }
 
 func New(name string, variables []Variable, factors []Factor) *Network {
+	outcomes := make(map[string]int, len(variables))
+	for i := range variables {
+		outcomes[variables[i].Name] = len(variables[i].Outcomes)
+	}
 	for i := range variables {
 		v := &variables[i]
 		idx := slices.IndexFunc(factors, func(f Factor) bool { return f.For == v.Name })
 		if idx < 0 {
 			continue
 		}
-		v.Factor = factors[idx]
+		v.Factor = &factors[idx]
+
+		v.Factor.columns = len(v.Outcomes)
+		v.Factor.outcomes = make([]int, len(v.Factor.Given))
+		for i, g := range v.Factor.Given {
+			n, ok := outcomes[g]
+			if !ok {
+				panic(fmt.Sprintf("parent variable %s of %s not found", g, v.Name))
+			}
+			v.Factor.outcomes[i] = n
+		}
 	}
 	return &Network{
 		name:      name,
@@ -54,6 +98,10 @@ func New(name string, variables []Variable, factors []Factor) *Network {
 
 func (n *Network) Name() string {
 	return n.name
+}
+
+func (n *Network) Variables() []Variable {
+	return n.variables
 }
 
 // SolvePolicies solves and inserts policies for decisions, using Variable Elimination.

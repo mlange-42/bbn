@@ -58,7 +58,7 @@ func (a *App) Run() error {
 	for name, f := range policy {
 		idx := a.nodesByName[name]
 		node := a.nodes[idx]
-		node.Node().Factor = f
+		node.Node().Factor = &f
 	}
 
 	a.marginals, err = Solve(a.network, a.evidence, a.nodes)
