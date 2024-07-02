@@ -57,6 +57,9 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 		}
 		a.render(true)
 		return nil
+	} else if event.Rune() == 'h' {
+		a.showHelp()
+		return nil
 	} else if event.Rune() == 't' {
 		a.showTable()
 		return nil
@@ -140,9 +143,18 @@ func (a *App) inputMove(event *tcell.EventKey) *tcell.EventKey {
 	}
 	return event
 }
+
 func (a *App) inputTable(event *tcell.EventKey) *tcell.EventKey {
 	if event.Key() == tcell.KeyEsc {
 		a.pages.HidePage("Table")
+		return nil
+	}
+	return event
+}
+
+func (a *App) inputHelp(event *tcell.EventKey) *tcell.EventKey {
+	if event.Key() == tcell.KeyEsc {
+		a.pages.HidePage("Help")
 		return nil
 	}
 	return event
@@ -191,6 +203,11 @@ func (a *App) showTable() {
 	a.pages.ShowPage("Table")
 
 	a.app.SetFocus(a.table)
+}
+
+func (a *App) showHelp() {
+	a.pages.ShowPage("Help")
+	a.app.SetFocus(a.help)
 }
 
 func (a *App) mouseInputGraph(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
