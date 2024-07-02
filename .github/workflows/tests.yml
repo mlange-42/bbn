@@ -82,4 +82,4 @@ jobs:
         ./bbn inference _examples/robot.yml
         ./bbn inference _examples/sprinkler.yml
         ./bbn inference _examples/umbrella.yml
-        #./bbn train _examples/fruits-untrained.yml _examples/fruits.csv
+        ./bbn train _examples/fruits-untrained.yml _examples/fruits.csv
