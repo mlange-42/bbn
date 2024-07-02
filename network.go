@@ -104,6 +104,10 @@ func (n *Network) prepareVariables() {
 		}
 	}
 
+	n.prepareUtilityNodes(varNames)
+}
+
+func (n *Network) prepareUtilityNodes(varNames map[string]*Variable) {
 	n.totalUtilityIndex = -1
 	for i := range n.variables {
 		v := &n.variables[i]
