@@ -61,16 +61,7 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 		a.showTable()
 		return nil
 	} else if event.Rune() == 'i' {
-		a.ignorePolicies = !a.ignorePolicies
-
-		if a.ignorePolicies {
-			a.graph.SetBorderColor(tcell.ColorBlue)
-		} else {
-			a.graph.SetBorderColor(tcell.ColorDefault)
-		}
-
-		a.updateMarginals()
-		a.render(true)
+		a.toggleIgnorePolicy()
 		return nil
 	} else if event.Key() == tcell.KeyCtrlS {
 		a.saveNetwork()
@@ -78,6 +69,19 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 	} else {
 		return a.inputMove(event)
 	}
+}
+
+func (a *App) toggleIgnorePolicy() {
+	a.ignorePolicies = !a.ignorePolicies
+
+	if a.ignorePolicies {
+		a.graph.SetBorderColor(tcell.ColorBlue)
+	} else {
+		a.graph.SetBorderColor(tcell.ColorDefault)
+	}
+
+	a.updateMarginals()
+	a.render(true)
 }
 
 func (a *App) saveNetwork() {
