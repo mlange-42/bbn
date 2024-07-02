@@ -17,7 +17,7 @@
 
 * Adds oil drilling decision example (#48)
 * Adds robot decision example (#50)
-* Adds disease control decision example (#60)
+* Adds medical treatment decision example (#60)
 
 ## [[v0.4.0]](https://github.com/mlange-42/bbn/compare/v0.3.0...v0.4.0)
 
