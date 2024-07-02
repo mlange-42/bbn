@@ -73,10 +73,10 @@ func TestNetworkToVE(t *testing.T) {
 
 	n := New("umbrella", vars, factors)
 
-	v, variables, err := n.toVE()
+	v, variables, err := n.toVE(nil)
 	assert.Nil(t, err)
 
-	result1 := v.SolveUtility(nil, nil, nil, true)
+	result1 := v.SolveUtility(nil, nil, nil)
 
 	fmt.Println("Summarize")
 	fmt.Println(result1)
@@ -123,7 +123,7 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 	}
 
 	n := New("umbrella", vars, factors)
-	policy, err := n.SolvePolicies(false)
+	policy, err := n.SolvePolicies()
 	assert.Nil(t, err)
 
 	assert.Equal(t,
@@ -157,7 +157,12 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 	normUtil := n.NormalizeUtility(utility, f)
 	fmt.Println("--> NormalizeUtility", normUtil)
 
-	assert.Equal(t, []float64{70, 20}, normUtil.Data)
+	expected := []float64{70, 20}
+	assert.Equal(t, len(expected), len(normUtil.Data))
+
+	for i := range expected {
+		assert.Less(t, math.Abs(expected[i]-normUtil.Data[i]), 0.0001)
+	}
 }
 
 func TestNetworkSolveOil(t *testing.T) {
@@ -204,7 +209,7 @@ func TestNetworkSolveOil(t *testing.T) {
 	}
 
 	n := New("oil", vars, factors)
-	policy, err := n.SolvePolicies(false)
+	policy, err := n.SolvePolicies()
 	assert.Nil(t, err)
 
 	assert.Equal(t,

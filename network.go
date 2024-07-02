@@ -105,16 +105,16 @@ func (n *Network) Variables() []Variable {
 }
 
 // SolvePolicies solves and inserts policies for decisions, using Variable Elimination.
-func (n *Network) SolvePolicies(verbose bool) (map[string]Factor, error) {
+func (n *Network) SolvePolicies() (map[string]Factor, error) {
 	clear(n.policies)
 
 	var err error
-	n.ve, n.variableNames, err = n.toVE()
+	n.ve, n.variableNames, err = n.toVE(nil)
 	if err != nil {
 		return nil, err
 	}
 
-	policies := n.ve.SolvePolicies(verbose)
+	policies := n.ve.SolvePolicies()
 	for name, v := range n.variableNames {
 		if v.VeVariable.NodeType != ve.DecisionNode {
 			continue
@@ -156,8 +156,8 @@ func (n *Network) SolvePolicies(verbose bool) (map[string]Factor, error) {
 }
 
 // SolveQuery solves a query, using Variable Elimination.
-func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose bool) (map[string][]float64, *ve.Factor, error) {
-	f, err := n.solve(evidence, query, false, "", verbose)
+func (n *Network) SolveQuery(evidence map[string]string, query []string, ignorePolicies bool) (map[string][]float64, *ve.Factor, error) {
+	f, err := n.solve(evidence, query, false, "", ignorePolicies)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -172,14 +172,19 @@ func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose
 }
 
 // SolveUtility solves utility, using Variable Elimination.
-func (n *Network) SolveUtility(evidence map[string]string, query []string, utilityVar string, verbose bool) (*ve.Factor, error) {
-	return n.solve(evidence, query, true, utilityVar, verbose)
+func (n *Network) SolveUtility(evidence map[string]string, query []string, utilityVar string, ignorePolicies bool) (*ve.Factor, error) {
+	return n.solve(evidence, query, true, utilityVar, ignorePolicies)
 }
 
 // solve solves a query or utility, using Variable Elimination.
-func (n *Network) solve(evidence map[string]string, query []string, utility bool, utilityVar string, verbose bool) (*ve.Factor, error) {
+func (n *Network) solve(evidence map[string]string, query []string, utility bool, utilityVar string, ignorePolicies bool) (*ve.Factor, error) {
+	var decisionEvidence map[string]string
+	if ignorePolicies {
+		decisionEvidence = evidence
+	}
+
 	var err error
-	n.ve, n.variableNames, err = n.toVE()
+	n.ve, n.variableNames, err = n.toVE(decisionEvidence)
 	if err != nil {
 		return nil, err
 	}
@@ -215,9 +220,9 @@ func (n *Network) solve(evidence map[string]string, query []string, utility bool
 			}
 			util = &u.VeVariable
 		}
-		return n.ve.SolveUtility(ev, q, util, verbose), nil
+		return n.ve.SolveUtility(ev, q, util), nil
 	} else {
-		return n.ve.SolveQuery(ev, q, verbose), nil
+		return n.ve.SolveQuery(ev, q), nil
 	}
 }
 
@@ -237,14 +242,15 @@ func (n *Network) ToEvidence(variable string, value string) ([]float64, error) {
 }
 
 // toVE creates a Variable Elimination solver from the network.
-func (n *Network) toVE() (*ve.VE, map[string]*variable, error) {
+func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable, error) {
 	vars := ve.NewVariables()
 	varNames := map[string]*variable{}
 	varIDs := make([]variable, len(n.variables))
 	dependencies := map[ve.Variable][]ve.Variable{}
 
 	for i, v := range n.variables {
-		if v.Type == ve.DecisionNode {
+		_, isEvidence := evidence[v.Name]
+		if v.Type == ve.DecisionNode && !isEvidence {
 			if _, ok := n.policies[v.Name]; ok {
 				varIDs[i] = variable{
 					Variable:   v,
@@ -294,7 +300,17 @@ func (n *Network) toVE() (*ve.VE, map[string]*variable, error) {
 		factors = append(factors, factor)
 	}
 
-	for _, f := range n.policies {
+	factors = append(factors, n.policyFactors(vars, varIDs, evidence)...)
+
+	return ve.New(vars, factors, dependencies, false), varNames, nil
+}
+
+func (n *Network) policyFactors(vars *ve.Variables, varIDs []variable, evidence map[string]string) []ve.Factor {
+	factors := []ve.Factor{}
+	for name, f := range n.policies {
+		if _, isEvidence := evidence[name]; isEvidence {
+			continue
+		}
 		variables := make([]ve.Variable, len(f.Variables))
 		for i, v := range f.Variables {
 			if v.NodeType == ve.DecisionNode {
@@ -303,15 +319,12 @@ func (n *Network) toVE() (*ve.VE, map[string]*variable, error) {
 					v.NodeType = ve.ChanceNode
 				}
 			}
-			/*if v.Id == variable.VeVariable.Id {
-				v.NodeType = ve.ChanceNode
-			}*/
 			variables[i] = v
 		}
 		factors = append(factors, vars.CreateFactor(variables, f.Data))
 	}
 
-	return ve.New(vars, factors, dependencies), varNames, nil
+	return factors
 }
 
 // Normalize a factor.

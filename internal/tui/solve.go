@@ -7,7 +7,7 @@ import (
 	"github.com/mlange-42/bbn/internal/ve"
 )
 
-func Solve(network *bbn.Network, evidence map[string]string, nodes []Node) (map[string][]float64, error) {
+func Solve(network *bbn.Network, evidence map[string]string, nodes []Node, ignorePolicies bool) (map[string][]float64, error) {
 	queries := []string{}
 	utilities := []string{}
 
@@ -32,14 +32,14 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node) (map[
 		result[variable] = p
 	}
 
-	_, f, err := network.SolveQuery(evidence, []string{}, false)
+	_, f, err := network.SolveQuery(evidence, []string{}, ignorePolicies)
 	if err != nil {
 		return nil, err
 	}
 	totalProb := f.Data[0]
 
 	for _, q := range queries {
-		r, _, err := network.SolveQuery(evidence, []string{q}, false)
+		r, _, err := network.SolveQuery(evidence, []string{q}, ignorePolicies)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +50,7 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node) (map[
 		}
 	}
 
-	f, err = network.SolveUtility(evidence, []string{}, "", false)
+	f, err = network.SolveUtility(evidence, []string{}, "", ignorePolicies)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node) (map[
 	}
 
 	for _, n := range utilities {
-		f, err = network.SolveUtility(evidence, []string{}, n, false)
+		f, err = network.SolveUtility(evidence, []string{}, n, ignorePolicies)
 		if err != nil {
 			return nil, err
 		}

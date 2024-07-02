@@ -45,7 +45,7 @@ variables:
 	n, err := FromYAML([]byte(yml))
 	assert.Nil(t, err)
 
-	policy, err := n.SolvePolicies(true)
+	policy, err := n.SolvePolicies()
 	assert.Nil(t, err)
 
 	fmt.Println(policy)

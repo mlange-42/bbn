@@ -35,8 +35,8 @@ func TestEliminate(t *testing.T) {
 	query := []Variable{rain}
 	ve := New(vars,
 		[]Factor{fRain, fSprinkler, fGrass},
-		nil)
-	result := ve.SolveQuery(evidence, query, true)
+		nil, true)
+	result := ve.SolveQuery(evidence, query)
 
 	for _, q := range query {
 		fmt.Println(vars.Marginal(result, q))
@@ -77,9 +77,10 @@ func TestDecisionUmbrella(t *testing.T) {
 	evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fWeather, fForecast, fUtility},
-		map[Variable][]Variable{umbrella: {forecast}})
+		map[Variable][]Variable{umbrella: {forecast}},
+		true)
 
-	result1 := ve.SolveUtility(evidence, nil, nil, true)
+	result1 := ve.SolveUtility(evidence, nil, nil)
 
 	fmt.Println("Summarize")
 	fmt.Println(result1)
@@ -127,9 +128,10 @@ func TestDecisionUmbrella2(t *testing.T) {
 
 	ve := New(v,
 		[]Factor{fWeather, fForecast, fUtility},
-		map[Variable][]Variable{umbrella: {weather, forecast}})
+		map[Variable][]Variable{umbrella: {weather, forecast}},
+		true)
 
-	result := ve.SolvePolicies(true)
+	result := ve.SolvePolicies()
 
 	fmt.Println("Summarize")
 	for k, v := range result {
@@ -186,9 +188,10 @@ func TestDecisionEvacuate(t *testing.T) {
 	evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fEarthquake, fSensor, fMaintenance, fMaterialDamage, fHumanDamage, fEvacCost},
-		map[Variable][]Variable{evacuate: {sensor}})
+		map[Variable][]Variable{evacuate: {sensor}},
+		false)
 
-	result := ve.SolveUtility(evidence, nil, nil, false)
+	result := ve.SolveUtility(evidence, nil, nil)
 
 	fmt.Println("Summarize")
 	fmt.Println(result)
@@ -240,9 +243,10 @@ func TestDecisionOil(t *testing.T) {
 	//evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fOil, fResult, fUtilityTest, fUtilityDrill},
-		map[Variable][]Variable{drill: {test, testResult}})
+		map[Variable][]Variable{drill: {test, testResult}},
+		true)
 
-	policies := ve.SolvePolicies(true)
+	policies := ve.SolvePolicies()
 
 	testPolicy := policies[test][1]
 	drillPolicy := v.Rearrange(policies[drill][1], []Variable{test, testResult, drill})
@@ -299,9 +303,10 @@ func TestDecisionRobot(t *testing.T) {
 	evidence := []Evidence{}
 	ve := New(v,
 		[]Factor{fAccident, fUtility},
-		map[Variable][]Variable{})
+		map[Variable][]Variable{},
+		true)
 
-	result1 := ve.SolveUtility(evidence, nil, nil, true)
+	result1 := ve.SolveUtility(evidence, nil, nil)
 	result := v.Rearrange(result1, []Variable{short, pads})
 
 	fmt.Println("Summarize")
@@ -325,7 +330,7 @@ func TestSortDecisions(t *testing.T) {
 
 	ve := New(v,
 		[]Factor{},
-		deps)
+		deps, true)
 
 	assert.Equal(t, []Variable{d1, d2, d3}, ve.getDecisions())
 }
