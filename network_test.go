@@ -157,7 +157,12 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 	normUtil := n.NormalizeUtility(utility, f)
 	fmt.Println("--> NormalizeUtility", normUtil)
 
-	assert.Equal(t, []float64{70, 20}, normUtil.Data)
+	expected := []float64{70, 20}
+	assert.Equal(t, len(expected), len(normUtil.Data))
+
+	for i := range expected {
+		assert.Less(t, math.Abs(expected[i]-normUtil.Data[i]), 0.0001)
+	}
 }
 
 func TestNetworkSolveOil(t *testing.T) {
