@@ -66,7 +66,7 @@ func (a *App) Run() error {
 		a.nodesByName[n.Name] = i
 	}
 
-	policy, err := a.network.SolvePolicies(false)
+	policy, err := a.network.SolvePolicies()
 	if err != nil {
 		return err
 	}

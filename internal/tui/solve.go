@@ -32,14 +32,14 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node, ignor
 		result[variable] = p
 	}
 
-	_, f, err := network.SolveQuery(evidence, []string{}, ignorePolicies, false)
+	_, f, err := network.SolveQuery(evidence, []string{}, ignorePolicies)
 	if err != nil {
 		return nil, err
 	}
 	totalProb := f.Data[0]
 
 	for _, q := range queries {
-		r, _, err := network.SolveQuery(evidence, []string{q}, ignorePolicies, false)
+		r, _, err := network.SolveQuery(evidence, []string{q}, ignorePolicies)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +50,7 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node, ignor
 		}
 	}
 
-	f, err = network.SolveUtility(evidence, []string{}, "", ignorePolicies, false)
+	f, err = network.SolveUtility(evidence, []string{}, "", ignorePolicies)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node, ignor
 	}
 
 	for _, n := range utilities {
-		f, err = network.SolveUtility(evidence, []string{}, n, ignorePolicies, false)
+		f, err = network.SolveUtility(evidence, []string{}, n, ignorePolicies)
 		if err != nil {
 			return nil, err
 		}

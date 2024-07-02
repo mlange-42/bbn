@@ -71,7 +71,7 @@ func TestTrainer(t *testing.T) {
 		"Rain":     "no",
 		"GrassWet": "yes",
 	}
-	result, _, err := net.SolveQuery(evidence, []string{"Sprinkler"}, false, false)
+	result, _, err := net.SolveQuery(evidence, []string{"Sprinkler"}, false)
 	assert.Nil(t, err)
 
 	assert.Equal(t, map[string][]float64{
@@ -132,7 +132,7 @@ func TestTrainerDecision(t *testing.T) {
 	net, err := trainer.UpdateNetwork()
 	assert.Nil(t, err)
 
-	policy, err := net.SolvePolicies(false)
+	policy, err := net.SolvePolicies()
 	assert.Nil(t, err)
 
 	assert.Equal(t, []float64{0, 1, 0.5, 0.5, 1, 0}, policy["umbrella"].Table)

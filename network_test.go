@@ -76,7 +76,7 @@ func TestNetworkToVE(t *testing.T) {
 	v, variables, err := n.toVE(nil)
 	assert.Nil(t, err)
 
-	result1 := v.SolveUtility(nil, nil, nil, true)
+	result1 := v.SolveUtility(nil, nil, nil)
 
 	fmt.Println("Summarize")
 	fmt.Println(result1)
@@ -123,7 +123,7 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 	}
 
 	n := New("umbrella", vars, factors)
-	policy, err := n.SolvePolicies(false)
+	policy, err := n.SolvePolicies()
 	assert.Nil(t, err)
 
 	assert.Equal(t,
@@ -138,7 +138,7 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 	query := []string{"weather"}
 	evidence := map[string]string{"forecast": "rainy"}
 
-	result, f, err := n.SolveQuery(evidence, query, false, false)
+	result, f, err := n.SolveQuery(evidence, query, false)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Query", f)
@@ -146,7 +146,7 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 		fmt.Println("--> Query", q, v)
 	}
 
-	utility, err := n.SolveUtility(evidence, query, "", false, false)
+	utility, err := n.SolveUtility(evidence, query, "", false)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Utility", utility)
@@ -204,7 +204,7 @@ func TestNetworkSolveOil(t *testing.T) {
 	}
 
 	n := New("oil", vars, factors)
-	policy, err := n.SolvePolicies(false)
+	policy, err := n.SolvePolicies()
 	assert.Nil(t, err)
 
 	assert.Equal(t,
@@ -224,7 +224,7 @@ func TestNetworkSolveOil(t *testing.T) {
 	query := []string{"test-result"}
 	evidence := map[string]string{}
 
-	result, f, err := n.SolveQuery(evidence, query, false, false)
+	result, f, err := n.SolveQuery(evidence, query, false)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Query", f)
@@ -232,7 +232,7 @@ func TestNetworkSolveOil(t *testing.T) {
 		fmt.Println("--> Query", q, v)
 	}
 
-	utility, err := n.SolveUtility(evidence, query, "", false, false)
+	utility, err := n.SolveUtility(evidence, query, "", false)
 	assert.Nil(t, err)
 
 	fmt.Println("--> Utility", utility)
@@ -243,12 +243,12 @@ func TestNetworkSolveOil(t *testing.T) {
 	normUtil := n.NormalizeUtility(utility, f)
 	fmt.Println("--> NormalizeUtility", normUtil)
 
-	utility, err = n.SolveUtility(evidence, query, "test-utility", false, false)
+	utility, err = n.SolveUtility(evidence, query, "test-utility", false)
 	assert.Nil(t, err)
 	normUtil = n.NormalizeUtility(utility, f)
 	fmt.Println("--> NormalizeUtility test-utility", normUtil)
 
-	utility, err = n.SolveUtility(evidence, query, "drill-utility", false, false)
+	utility, err = n.SolveUtility(evidence, query, "drill-utility", false)
 	assert.Nil(t, err)
 	normUtil = n.NormalizeUtility(utility, f)
 	fmt.Println("--> NormalizeUtility drill-utility", normUtil)
