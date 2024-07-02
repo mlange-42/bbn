@@ -8,7 +8,7 @@ variables:
   - [25, 50, 25]
 
 - variable: Infection
-  position: [37, 9]
+  position: [37, 8]
   outcomes: [yes, no]
   given: [Vaccinate, Herd size]
   table:
@@ -21,7 +21,7 @@ variables:
   - [5, 95] # no,  large
 
 - variable: Symptoms
-  position: [37, 17]
+  position: [37, 18]
   outcomes: [yes, no]
   given: [Infection]
   table:
@@ -30,13 +30,13 @@ variables:
   - [ 5, 95] # infection-
 
 - variable: Vaccinate
-  position: [1, 9]
+  position: [1, 10]
   outcomes: [yes, no]
   given: [Herd size]
   type: decision
 
 - variable: Test
-  position: [33, 25]
+  position: [33, 26]
   outcomes: [yes, no]
   given: [Symptoms, Herd size, Vaccinate]
   type: decision
@@ -44,7 +44,7 @@ variables:
 - variable: Test result
   outcomes: [pos, neg]
   given: [Test, Infection]
-  position: [68, 28]
+  position: [68, 29]
   table:
   - [0.95, 0.05] # test+ infected+
   - [0.02, 0.98] # test+ infected-
@@ -65,7 +65,7 @@ variables:
   - [ 0] # no,  large
   
 - variable: Test cost
-  position: [1, 25]
+  position: [1, 26]
   outcomes: [euros]
   given: [Test]
   type: utility
@@ -75,14 +75,14 @@ variables:
 
 - variable: Treatment
   outcomes: [yes, no]
-  given: [Test, Test result, Vaccinate]
-  position: [73, 10]
+  given: [Test, Test result, Vaccinate, Herd size]
+  position: [75, 13]
   type: decision
 
 - variable: Treatment cost
   given: [Treatment]
   outcomes: [euros]
-  position: [86, 18]
+  position: [87, 20]
   type: utility
   table:
   - [-10] # treatment+
