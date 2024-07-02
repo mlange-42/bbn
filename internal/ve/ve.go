@@ -21,10 +21,11 @@ type VE struct {
 	eliminated   []bool
 	dependencies map[Variable][]Variable
 	factors      map[int]*Factor
+	weights      []float64
 	verbose      bool
 }
 
-func New(variables *Variables, factors []Factor, dependencies map[Variable][]Variable, verbose bool) *VE {
+func New(variables *Variables, factors []Factor, dependencies map[Variable][]Variable, weights []float64, verbose bool) *VE {
 	fac := map[int]*Factor{}
 	for _, f := range factors {
 		fac[f.id] = &f
@@ -35,6 +36,7 @@ func New(variables *Variables, factors []Factor, dependencies map[Variable][]Var
 		eliminated:   make([]bool, len(variables.variables)),
 		dependencies: dependencies,
 		factors:      fac,
+		weights:      weights,
 		verbose:      verbose,
 	}
 }
@@ -86,9 +88,10 @@ func (ve *VE) removeUtilities(except *Variable) {
 func (ve *VE) sumUtilities() {
 	utils := []Variable{}
 	for _, u := range ve.Variables.variables {
-		if u.NodeType == UtilityNode {
-			utils = append(utils, u)
+		if u.NodeType != UtilityNode {
+			continue
 		}
+		utils = append(utils, u)
 	}
 
 	if len(utils) == 0 {
@@ -99,10 +102,15 @@ func (ve *VE) sumUtilities() {
 	factors := []*Factor{}
 
 	for k, f := range ve.factors {
-		for _, u := range utils {
+		for i, u := range utils {
 			if slices.Contains(f.Variables, u) {
+				scaled := f
+				if ve.weights != nil {
+					ff := ve.Variables.Product(scaled, &Factor{Data: []float64{ve.weights[i]}})
+					scaled = &ff
+				}
 				indices = append(indices, k)
-				factors = append(factors, f)
+				factors = append(factors, scaled)
 				break
 			}
 		}
