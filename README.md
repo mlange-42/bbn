@@ -54,10 +54,10 @@ Same example with the command line tool, given some evidence:
 bbn inference _examples/sprinkler.yml -e Rain=no,GrassWet=yes
 ```
 
-~~Train a network from data:~~ (currently not functional)
+Train a network from data:
 
 ```
-bbn train _examples/fruits-untrained.yml _examples/fruits.csv
+bbni _examples/fruits-untrained.yml --train _examples/fruits.csv
 ```
 
 Also try the other examples in folder [_examples](https://github.com/mlange-42/bbn/tree/main/_examples).
