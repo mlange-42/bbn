@@ -21,13 +21,19 @@ var nodeTypes = map[string]ve.NodeType{
 	UtilityNodeType:  ve.UtilityNode,
 }
 
+var nodeTypeNames = map[ve.NodeType]string{
+	ve.ChanceNode:   "",
+	ve.DecisionNode: DecisionNodeType,
+	ve.UtilityNode:  UtilityNodeType,
+}
+
 type variableYaml struct {
 	Variable string      // Name of the node.
-	Given    []string    `yaml:",omitempty"`
+	Given    []string    `yaml:",flow,omitempty"`
 	Type     string      `yaml:",omitempty"` // Type of the node [nature, decision, utility]
 	Outcomes []string    `yaml:",flow"`      // Names of the node's possible states.
 	Position [2]int      `yaml:",flow"`      // Coordinates for visualization, optional.
-	Table    [][]float64 `yaml:",omitempty"`
+	Table    [][]float64 `yaml:",flow,omitempty"`
 }
 
 type networkYaml struct {
@@ -78,4 +84,41 @@ func FromYAML(content []byte) (*Network, error) {
 	n := New(net.Name, variables, factors)
 
 	return n, nil
+}
+
+func ToYAML(network *Network) ([]byte, error) {
+	variables := make([]variableYaml, len(network.variables))
+	for i, v := range network.variables {
+		cols := len(v.Outcomes)
+		table := make([][]float64, len(v.Factor.Table)/cols)
+
+		for i := range table {
+			table[i] = v.Factor.Table[i*cols : (i+1)*cols]
+		}
+
+		variables[i] = variableYaml{
+			Variable: v.Name,
+			Given:    v.Factor.Given,
+			Type:     nodeTypeNames[v.Type],
+			Outcomes: v.Outcomes,
+			Position: v.Position,
+			Table:    table,
+		}
+	}
+
+	net := networkYaml{
+		Name:      network.Name(),
+		Variables: variables,
+	}
+
+	writer := bytes.Buffer{}
+	encoder := yaml.NewEncoder(&writer)
+	encoder.SetIndent(2)
+
+	err := encoder.Encode(net)
+	if err != nil {
+		return nil, err
+	}
+
+	return writer.Bytes(), nil
 }

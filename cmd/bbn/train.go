@@ -42,14 +42,12 @@ func trainCommand() *cobra.Command {
 				return err
 			}
 
-			fmt.Println(net)
-
-			/*yml, err := bbn.ToYAML(net)
+			yml, err := bbn.ToYAML(net)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println(string(yml))*/
+			fmt.Println(string(yml))
 			return nil
 		},
 	}

@@ -6,6 +6,7 @@ import (
 
 func (a *App) render(isUpdate bool) {
 	if !isUpdate {
+		a.clearCanvas()
 		a.renderEdges()
 	}
 	a.renderNodes()
@@ -124,6 +125,15 @@ func (a *App) renderEdgeCorner(b1, b2 *Bounds) {
 			a.canvas[y][xStart] = BorderV[0]
 		}
 		a.canvas[b2.Y+b2.H][xStart] = ArrowUp
+	}
+}
+
+func (a *App) clearCanvas() {
+	for i := range a.canvas {
+		for j := range a.canvas[i] {
+			a.canvas[i][j] = Empty
+			a.colors[i][j] = White
+		}
 	}
 }
 
