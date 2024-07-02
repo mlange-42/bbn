@@ -5,7 +5,6 @@ import (
 	"unicode"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/mlange-42/bbn"
 	"github.com/mlange-42/bbn/internal/ve"
 	"github.com/rivo/tview"
 )
@@ -57,6 +56,11 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 	} else if event.Rune() == 't' {
 		a.showTable()
 		return nil
+	} else if event.Rune() == 'i' {
+		a.ignorePolicies = !a.ignorePolicies
+		a.updateMarginals()
+		a.render(true)
+		return nil
 	}
 	return event
 }
@@ -78,12 +82,6 @@ func (a *App) inputEnter() error {
 
 	value := node.Node().Outcomes[a.selectedState]
 
-	// Store old evidence in case of fail/error.
-	oldEvidence := make(map[string]string, len(a.evidence))
-	for k, v := range a.evidence {
-		oldEvidence[k] = v
-	}
-
 	// Add/clear selected state
 	if oldValue, ok := a.evidence[node.Node().Name]; ok {
 		if oldValue == value {
@@ -95,21 +93,14 @@ func (a *App) inputEnter() error {
 		a.evidence[node.Node().Name] = value
 	}
 
-	// Store old marginals in case of fail/error.
-	oldMarginals := a.marginals
+	return a.updateMarginals()
+}
 
-	// Perform sampling
+func (a *App) updateMarginals() error {
 	var err error
-	a.marginals, err = Solve(a.network, a.evidence, a.nodes)
+	a.marginals, err = Solve(a.network, a.evidence, a.nodes, a.ignorePolicies)
 	if err != nil {
-		if _, ok := err.(*bbn.ConflictingEvidenceError); ok {
-			// Rollback on error
-			// TODO: show alert!
-			a.evidence = oldEvidence
-			a.marginals = oldMarginals
-		} else {
-			return err
-		}
+		return err
 	}
 	return nil
 }

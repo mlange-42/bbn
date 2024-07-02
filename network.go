@@ -109,7 +109,7 @@ func (n *Network) SolvePolicies(verbose bool) (map[string]Factor, error) {
 	clear(n.policies)
 
 	var err error
-	n.ve, n.variableNames, err = n.toVE()
+	n.ve, n.variableNames, err = n.toVE(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -156,8 +156,8 @@ func (n *Network) SolvePolicies(verbose bool) (map[string]Factor, error) {
 }
 
 // SolveQuery solves a query, using Variable Elimination.
-func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose bool) (map[string][]float64, *ve.Factor, error) {
-	f, err := n.solve(evidence, query, false, "", verbose)
+func (n *Network) SolveQuery(evidence map[string]string, query []string, ignorePolicies, verbose bool) (map[string][]float64, *ve.Factor, error) {
+	f, err := n.solve(evidence, query, false, "", ignorePolicies, verbose)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -172,14 +172,19 @@ func (n *Network) SolveQuery(evidence map[string]string, query []string, verbose
 }
 
 // SolveUtility solves utility, using Variable Elimination.
-func (n *Network) SolveUtility(evidence map[string]string, query []string, utilityVar string, verbose bool) (*ve.Factor, error) {
-	return n.solve(evidence, query, true, utilityVar, verbose)
+func (n *Network) SolveUtility(evidence map[string]string, query []string, utilityVar string, ignorePolicies, verbose bool) (*ve.Factor, error) {
+	return n.solve(evidence, query, true, utilityVar, ignorePolicies, verbose)
 }
 
 // solve solves a query or utility, using Variable Elimination.
-func (n *Network) solve(evidence map[string]string, query []string, utility bool, utilityVar string, verbose bool) (*ve.Factor, error) {
+func (n *Network) solve(evidence map[string]string, query []string, utility bool, utilityVar string, ignorePolicies, verbose bool) (*ve.Factor, error) {
+	var decisionEvidence map[string]string
+	if ignorePolicies {
+		decisionEvidence = evidence
+	}
+
 	var err error
-	n.ve, n.variableNames, err = n.toVE()
+	n.ve, n.variableNames, err = n.toVE(decisionEvidence)
 	if err != nil {
 		return nil, err
 	}
@@ -237,14 +242,15 @@ func (n *Network) ToEvidence(variable string, value string) ([]float64, error) {
 }
 
 // toVE creates a Variable Elimination solver from the network.
-func (n *Network) toVE() (*ve.VE, map[string]*variable, error) {
+func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable, error) {
 	vars := ve.NewVariables()
 	varNames := map[string]*variable{}
 	varIDs := make([]variable, len(n.variables))
 	dependencies := map[ve.Variable][]ve.Variable{}
 
 	for i, v := range n.variables {
-		if v.Type == ve.DecisionNode {
+		_, isEvidence := evidence[v.Name]
+		if v.Type == ve.DecisionNode && !isEvidence {
 			if _, ok := n.policies[v.Name]; ok {
 				varIDs[i] = variable{
 					Variable:   v,

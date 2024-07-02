@@ -53,7 +53,7 @@ func Example_sprinkler() {
 		"Sprinkler",
 	}
 
-	result, _, err := net.SolveQuery(evidence, query, false)
+	result, _, err := net.SolveQuery(evidence, query, false, false)
 	if err != nil {
 		panic(err)
 	}

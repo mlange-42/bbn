@@ -81,7 +81,7 @@ func runInferenceCommand(path string, evidence []string) ([]bbn.Variable, map[st
 		return nil, nil, nil, err
 	}
 
-	result, err := tui.Solve(net, ev, tuiNodes)
+	result, err := tui.Solve(net, ev, tuiNodes, false)
 	if err != nil {
 		return nil, nil, nil, err
 	}

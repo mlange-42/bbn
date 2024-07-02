@@ -28,6 +28,8 @@ type App struct {
 	marginals     map[string][]float64
 	selectedNode  int
 	selectedState int
+
+	ignorePolicies bool
 }
 
 func New(path string, evidence map[string]string, trainingFile, noData string, csvDelimiter rune) *App {
@@ -75,7 +77,7 @@ func (a *App) Run() error {
 		node.Node().Factor = &f
 	}
 
-	a.marginals, err = Solve(a.network, a.evidence, a.nodes)
+	err = a.updateMarginals()
 	if err != nil {
 		return err
 	}
@@ -157,7 +159,7 @@ func (a *App) createMainPanel() *tview.Grid {
 
 	help := tview.NewTextView().
 		SetWrap(false).
-		SetText("Exit: ESC  Scroll: ←→↕  Navigate: Tab, Space/Numbers\nToggle outcome: Enter/LeftClick  Show table: T/RightClick")
+		SetText("Exit: ESC  Scroll: ←→↕  Navigate: Tab, Space/Numbers  Ignore policies: i\nToggle outcome: Enter/LeftClick  Show table: T/RightClick")
 	grid.AddItem(help, 2, 0, 1, 2, 0, 0, false)
 
 	return grid

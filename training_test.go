@@ -71,7 +71,7 @@ func TestTrainer(t *testing.T) {
 		"Rain":     "no",
 		"GrassWet": "yes",
 	}
-	result, _, err := net.SolveQuery(evidence, []string{"Sprinkler"}, false)
+	result, _, err := net.SolveQuery(evidence, []string{"Sprinkler"}, false, false)
 	assert.Nil(t, err)
 
 	assert.Equal(t, map[string][]float64{
