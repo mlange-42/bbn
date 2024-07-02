@@ -56,6 +56,7 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 		return nil
 	} else if event.Rune() == 't' {
 		a.showTable()
+		return nil
 	}
 	return event
 }
