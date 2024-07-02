@@ -300,6 +300,13 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		factors = append(factors, factor)
 	}
 
+	factors = append(factors, n.policyFactors(vars, varIDs, evidence)...)
+
+	return ve.New(vars, factors, dependencies, false), varNames, nil
+}
+
+func (n *Network) policyFactors(vars *ve.Variables, varIDs []variable, evidence map[string]string) []ve.Factor {
+	factors := []ve.Factor{}
 	for name, f := range n.policies {
 		if _, isEvidence := evidence[name]; isEvidence {
 			continue
@@ -312,15 +319,12 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 					v.NodeType = ve.ChanceNode
 				}
 			}
-			/*if v.Id == variable.VeVariable.Id {
-				v.NodeType = ve.ChanceNode
-			}*/
 			variables[i] = v
 		}
 		factors = append(factors, vars.CreateFactor(variables, f.Data))
 	}
 
-	return ve.New(vars, factors, dependencies, false), varNames, nil
+	return factors
 }
 
 // Normalize a factor.
