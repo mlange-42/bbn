@@ -75,6 +75,7 @@ jobs:
         ./bbn inference _examples/asia.yml
         ./bbn inference _examples/dog-problem.xml
         ./bbn inference _examples/earthquake.yml
+        ./bbn inference _examples/disease-control.yml
         ./bbn inference _examples/medical-treatment.yml
         ./bbn inference _examples/mendel.yml
         ./bbn inference _examples/monty-hall.yml
