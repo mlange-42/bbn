@@ -66,49 +66,28 @@ type Network struct {
 }
 
 func New(name string, variables []Variable, factors []Factor) *Network {
-	prepareVariables(variables, factors)
-	outcomes := make(map[string]int, len(variables))
-	for i := range variables {
-		outcomes[variables[i].Name] = len(variables[i].Outcomes)
-	}
-	for i := range variables {
-		v := &variables[i]
-		idx := slices.IndexFunc(factors, func(f Factor) bool { return f.For == v.Name })
-		if idx < 0 {
-			continue
-		}
-		v.Factor = &factors[idx]
-
-		v.Factor.columns = len(v.Outcomes)
-		v.Factor.outcomes = make([]int, len(v.Factor.Given))
-		for i, g := range v.Factor.Given {
-			n, ok := outcomes[g]
-			if !ok {
-				panic(fmt.Sprintf("parent variable %s of %s not found", g, v.Name))
-			}
-			v.Factor.outcomes[i] = n
-		}
-	}
-	return &Network{
+	net := &Network{
 		name:      name,
 		variables: variables,
 		factors:   factors,
 		policies:  map[string]ve.Factor{},
 	}
+	net.prepareVariables()
+	return net
 }
 
-func prepareVariables(variables []Variable, factors []Factor) {
-	outcomes := make(map[string]int, len(variables))
-	for i := range variables {
-		outcomes[variables[i].Name] = len(variables[i].Outcomes)
+func (n *Network) prepareVariables() {
+	outcomes := make(map[string]int, len(n.variables))
+	for i := range n.variables {
+		outcomes[n.variables[i].Name] = len(n.variables[i].Outcomes)
 	}
-	for i := range variables {
-		v := &variables[i]
-		idx := slices.IndexFunc(factors, func(f Factor) bool { return f.For == v.Name })
+	for i := range n.variables {
+		v := &n.variables[i]
+		idx := slices.IndexFunc(n.factors, func(f Factor) bool { return f.For == v.Name })
 		if idx < 0 {
 			continue
 		}
-		v.Factor = &factors[idx]
+		v.Factor = &n.factors[idx]
 
 		v.Factor.columns = len(v.Outcomes)
 		v.Factor.outcomes = make([]int, len(v.Factor.Given))
@@ -274,7 +253,9 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 	varIDs := make([]variable, len(n.variables))
 	dependencies := map[ve.Variable][]ve.Variable{}
 
+	// collect variables for lookup
 	for i, v := range n.variables {
+		// treat decision variables with policy as normal change variables
 		_, isEvidence := evidence[v.Name]
 		if v.Type == ve.DecisionNode && !isEvidence {
 			if _, ok := n.policies[v.Name]; ok {
@@ -286,6 +267,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 				continue
 			}
 		}
+		// for all other variables
 		varIDs[i] = variable{
 			Variable:   v,
 			VeVariable: vars.AddVariable(v.Type, uint16(len(v.Outcomes))),
@@ -293,13 +275,16 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		varNames[v.Name] = &varIDs[i]
 	}
 
+	// create factors from tables
 	factors := []ve.Factor{}
 	for _, f := range n.factors {
+		// get primary variable
 		forVar, ok := varNames[f.For]
 		if !ok {
 			return nil, nil, fmt.Errorf("variable %s for factor not found", f.For)
 		}
 
+		// collect conditional variables
 		variables := make([]ve.Variable, len(f.Given))
 		for j, v := range f.Given {
 			vv, ok := varNames[v]
@@ -309,44 +294,58 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 			variables[j] = vv.VeVariable
 		}
 
+		// don't add factors for unsolved decision nodes, but add dependencies
 		if forVar.VeVariable.NodeType == ve.DecisionNode {
 			dependencies[forVar.VeVariable] = variables
 			continue
 		}
+		// don't add factors for solved decision nodes, done later
 		if forVar.Variable.Type == ve.DecisionNode {
 			continue
 		}
 
+		// append primary variable as last variable of the factor
 		variables = append(variables, forVar.VeVariable)
 
 		factor := vars.CreateFactor(variables, f.Table)
+
+		// normalize for primary chance variable
 		if forVar.Variable.Type == ve.ChanceNode {
 			factor = vars.NormalizeFor(&factor, variables[len(variables)-1])
 		}
+
+		// add to list of factors
 		factors = append(factors, factor)
 	}
 
+	// add policies as factors
 	factors = append(factors, n.policyFactors(vars, varIDs, evidence)...)
 
 	return ve.New(vars, factors, dependencies, false), varNames, nil
 }
 
+// policyFactors collects policies as factors.
 func (n *Network) policyFactors(vars *ve.Variables, varIDs []variable, evidence map[string]string) []ve.Factor {
 	factors := []ve.Factor{}
 	for name, f := range n.policies {
+		// if decision variable has evidence (and policies are ignored), don't add a factor
 		if _, isEvidence := evidence[name]; isEvidence {
 			continue
 		}
+		// collect variables
 		variables := make([]ve.Variable, len(f.Variables))
 		for i, v := range f.Variables {
+			// treat solved decision nodes as chance nodes
 			if v.NodeType == ve.DecisionNode {
 				vv := varIDs[v.Id]
 				if _, ok := n.policies[vv.Variable.Name]; ok {
 					v.NodeType = ve.ChanceNode
 				}
 			}
+			// add to list of variables
 			variables[i] = v
 		}
+		// add to list of factors
 		factors = append(factors, vars.CreateFactor(variables, f.Data))
 	}
 
