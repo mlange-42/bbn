@@ -19,6 +19,9 @@ func main() {
 // rootCommand sets up the CLI for the TUI.
 func rootCommand() *cobra.Command {
 	evidence := []string{}
+	var training string
+	var noData string
+	var delim string
 
 	root := cobra.Command{
 		Use:           "bbni [file]",
@@ -36,11 +39,19 @@ func rootCommand() *cobra.Command {
 				return err
 			}
 
-			a := tui.New(args[0], ev)
+			delimRunes := []rune(delim)
+			if len(delimRunes) != 1 {
+				return fmt.Errorf("argument for --delim must be a single rune; got '%s'", delim)
+			}
+
+			a := tui.New(args[0], ev, training, noData, delimRunes[0])
 			return a.Run()
 		},
 	}
 	root.Flags().StringSliceVarP(&evidence, "evidence", "e", []string{}, "Evidence in the format:\n    k1=v1,k2=v2,k3=v3")
+	root.Flags().StringVarP(&training, "train", "t", "", "train the network from the given file")
+	root.Flags().StringVarP(&noData, "no-data", "n", "", "Value for missing data (default \"\")")
+	root.Flags().StringVarP(&delim, "delim", "d", ",", "CSV delimiter for training file")
 
 	root.Flags().SortFlags = false
 

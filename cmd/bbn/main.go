@@ -31,7 +31,7 @@ func rootCommand() *cobra.Command {
 		},
 	}
 	root.AddCommand(inferCommand())
-	//root.AddCommand(trainCommand())
+	root.AddCommand(trainCommand())
 
 	return &root
 }

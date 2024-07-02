@@ -8,8 +8,12 @@ import (
 )
 
 type App struct {
-	app         *tview.Application
-	file        string
+	app          *tview.Application
+	file         string
+	trainingFile string
+	csvDelimiter rune
+	noData       string
+
 	nodes       []Node
 	nodesByName map[string]int
 	pages       *tview.Pages
@@ -26,13 +30,15 @@ type App struct {
 	selectedState int
 }
 
-func New(path string, evidence map[string]string) *App {
+func New(path string, evidence map[string]string, trainingFile, noData string, csvDelimiter rune) *App {
 	if evidence == nil {
 		evidence = map[string]string{}
 	}
 	return &App{
-		file:     path,
-		evidence: evidence,
+		file:         path,
+		trainingFile: trainingFile,
+		csvDelimiter: csvDelimiter,
+		evidence:     evidence,
 	}
 }
 
@@ -41,7 +47,15 @@ func (a *App) Run() error {
 	if err != nil {
 		return err
 	}
+
 	a.network = net
+
+	if a.trainingFile != "" {
+		a.network, err = TrainNetwork(net, nodes, a.trainingFile, a.noData, a.csvDelimiter)
+		if err != nil {
+			return err
+		}
+	}
 
 	a.nodes = make([]Node, len(nodes))
 	a.nodesByName = make(map[string]int, len(nodes))
@@ -58,7 +72,7 @@ func (a *App) Run() error {
 	for name, f := range policy {
 		idx := a.nodesByName[name]
 		node := a.nodes[idx]
-		node.Node().Factor = f
+		node.Node().Factor = &f
 	}
 
 	a.marginals, err = Solve(a.network, a.evidence, a.nodes)

@@ -9,6 +9,41 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestFactorRow(t *testing.T) {
+	a := Variable{Name: "a", Type: ve.ChanceNode, Outcomes: []string{"yes", "no", "maybe"}}
+	b := Variable{Name: "b", Type: ve.ChanceNode, Outcomes: []string{"yes", "no"}}
+	c := Variable{Name: "c", Type: ve.DecisionNode, Outcomes: []string{"yes", "no", "maybe"}}
+
+	factor := Factor{
+		For:   "c",
+		Given: []string{"a", "b"},
+		Table: []float64{
+			0, 1, 2,
+			3, 4, 5,
+			6, 7, 8,
+			9, 10, 11,
+			12, 13, 14,
+			15, 16, 17,
+		},
+	}
+
+	net := New("test", []Variable{a, b, c}, []Factor{factor})
+
+	variable := net.Variables()[2]
+
+	s, ok := variable.Factor.RowIndex([]int{0, 0})
+	assert.True(t, ok)
+	assert.Equal(t, 0, s)
+
+	s, ok = variable.Factor.RowIndex([]int{2, 0})
+	assert.True(t, ok)
+	assert.Equal(t, 4, s)
+
+	s, ok = variable.Factor.RowIndex([]int{-1, 0})
+	assert.False(t, ok)
+	_ = s
+}
+
 func TestNetworkToVE(t *testing.T) {
 	vars := []Variable{
 		{Name: "weather", Type: ve.ChanceNode, Outcomes: []string{"rainy", "sunny"}},

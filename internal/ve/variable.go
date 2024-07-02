@@ -482,6 +482,35 @@ func (v variables) Index(indices []int) int {
 	return idx
 }
 
+func (v variables) IndexWithNoData(indices []int) (int, bool) {
+	if len(indices) != len(v) {
+		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(v), len(indices)))
+	}
+	if len(v) == 0 {
+		return 0, true
+	}
+
+	curr := len(v) - 1
+	idx := indices[curr]
+	if idx < 0 {
+		return 0, false
+	}
+
+	stride := 1
+
+	curr--
+	for curr >= 0 {
+		currIdx := indices[curr]
+		if currIdx < 0 {
+			return 0, false
+		}
+		stride *= int(v[curr+1].outcomes)
+		idx += currIdx * stride
+		curr--
+	}
+	return idx, true
+}
+
 // Index creates multi-dimensional index from a flat [Factor] index.
 func (v variables) Outcomes(index int, indices []int) {
 	if len(indices) != len(v) {

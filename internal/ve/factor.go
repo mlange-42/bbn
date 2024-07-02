@@ -12,6 +12,10 @@ func (f *Factor) Index(indices []int) int {
 	return f.Variables.Index(indices)
 }
 
+func (f *Factor) IndexWithNoData(indices []int) (int, bool) {
+	return f.Variables.IndexWithNoData(indices)
+}
+
 func (f *Factor) Outcomes(index int, indices []int) {
 	f.Variables.Outcomes(index, indices)
 }
