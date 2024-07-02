@@ -2,13 +2,13 @@ name: Disease Control Decision
 variables:
 
 - variable: Herd size
-  position: [36, 0]
+  position: [36, 1]
   outcomes: [small, medium, large]
   table:
   - [25, 50, 25]
 
 - variable: Infection
-  position: [37, 8]
+  position: [37, 9]
   outcomes: [yes, no]
   given: [Vaccinate, Herd size]
   table:
@@ -21,22 +21,22 @@ variables:
   - [5, 95] # no,  large
 
 - variable: Symptoms
-  position: [37, 16]
+  position: [37, 17]
   outcomes: [yes, no]
   given: [Infection]
   table:
   # yes no
-  - [80, 20] # infection+
+  - [90, 10] # infection+
   - [ 5, 95] # infection-
 
 - variable: Vaccinate
-  position: [1, 8]
+  position: [1, 9]
   outcomes: [yes, no]
   given: [Herd size]
   type: decision
 
 - variable: Test
-  position: [33, 24]
+  position: [33, 25]
   outcomes: [yes, no]
   given: [Symptoms, Herd size, Vaccinate]
   type: decision
@@ -44,15 +44,15 @@ variables:
 - variable: Test result
   outcomes: [pos, neg]
   given: [Test, Infection]
-  position: [68, 27]
+  position: [68, 28]
   table:
   - [0.95, 0.05] # test+ infected+
-  - [0.05, 0.95] # test+ infected-
+  - [0.02, 0.98] # test+ infected-
   - [0.5, 0.5]   # test- infected+
   - [0.5, 0.5]   # test- infected-
 
 - variable: Vaccination cost
-  position: [1, 0]
+  position: [1, 1]
   outcomes: [euros]
   given: [Vaccinate, Herd size]
   type: utility
@@ -65,7 +65,7 @@ variables:
   - [ 0] # no,  large
   
 - variable: Test cost
-  position: [1, 24]
+  position: [1, 25]
   outcomes: [euros]
   given: [Test]
   type: utility
@@ -76,13 +76,13 @@ variables:
 - variable: Treatment
   outcomes: [yes, no]
   given: [Test, Test result, Vaccinate]
-  position: [73, 9]
+  position: [73, 10]
   type: decision
 
 - variable: Treatment cost
   given: [Treatment]
   outcomes: [euros]
-  position: [86, 17]
+  position: [86, 18]
   type: utility
   table:
   - [-10] # treatment+
@@ -112,12 +112,12 @@ variables:
 - variable: Outbreak cost
   given: [Outbreak, Herd size]
   outcomes: [euros]
-  position: [102, 4]
+  position: [102, 6]
   type: utility
   table:
   - [-100] # outbreak+ small
-  - [-200] # outbreak+ medium
-  - [-500] # outbreak+ large
+  - [-500] # outbreak+ medium
+  - [-5000] # outbreak+ large
   - [0] # outbreak- small
   - [0] # outbreak- medium
   - [0] # outbreak- large
