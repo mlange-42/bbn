@@ -20,6 +20,8 @@ type App struct {
 	graph       *tview.TextView
 	tableDialog *tview.Grid
 	table       *tview.Table
+	helpDialog  *tview.Grid
+	help        *tview.TextView
 	canvas      [][]rune
 	colors      [][]Color
 	network     *bbn.Network
@@ -97,10 +99,14 @@ func (a *App) Run() error {
 	a.tableDialog = a.createTablePanel()
 	a.pages.AddPage("Table", a.tableDialog, true, false)
 
+	a.helpDialog = a.createHelpPanel()
+	a.pages.AddPage("Help", a.helpDialog, true, false)
+
 	mainPanel.SetInputCapture(a.inputMainPanel)
 	a.table.SetInputCapture(a.inputTable)
 	a.table.SetMouseCapture(a.mouseInputTable)
 	a.graph.SetMouseCapture(a.mouseInputGraph)
+	a.help.SetInputCapture(a.inputHelp)
 
 	a.app.SetFocus(a.graph)
 
@@ -138,11 +144,27 @@ func (a *App) createWidgets() {
 		SetSeparator(tview.Borders.Vertical)
 	a.table.SetBorder(true)
 
+	a.help = tview.NewTextView().
+		SetWrap(true).
+		SetText(` Set/unset evidence by clicking on the probability bars of nodes.
+
+                    Keyboard              Mouse
+
+ Exit               ESC
+ Scroll             ←→↕
+ Navigate nodes     Tab/BackTab
+ Navigate bars      Space/Numbers
+ Toggle evidence    Enter                 left click
+ Show table         T                     right click
+ Ignore policies    I
+ Move node          W/A/S/D
+ Save network       Ctrl+S
+`)
 }
 
 func (a *App) createMainPanel() *tview.Grid {
 	grid := tview.NewGrid().
-		SetRows(1, 0, 2).
+		SetRows(1, 0, 1).
 		SetColumns(len(a.canvas[0])+3, 0).
 		SetBorders(false)
 
@@ -155,7 +177,7 @@ func (a *App) createMainPanel() *tview.Grid {
 
 	help := tview.NewTextView().
 		SetWrap(false).
-		SetText("Exit: ESC  Scroll: ←→↕  Navigate: Tab, Space/Numbers  Ignore policies: i\nToggle outcome: Enter/LeftClick  Show table: T/RightClick")
+		SetText("Press H for help!")
 	grid.AddItem(help, 2, 0, 1, 2, 0, 0, false)
 
 	return grid
@@ -164,7 +186,7 @@ func (a *App) createMainPanel() *tview.Grid {
 func (a *App) createTablePanel() *tview.Grid {
 	grid := tview.NewGrid().
 		SetColumns(0, 72, 0).
-		SetRows(0, 16, 0)
+		SetRows(0, 17, 0)
 
 	subGrid := tview.NewGrid().
 		SetColumns(0).
@@ -176,6 +198,29 @@ func (a *App) createTablePanel() *tview.Grid {
 	help := tview.NewTextView().
 		SetWrap(false).
 		SetText("Close table: ESC  Scroll: ←→↕")
+	subGrid.AddItem(help, 1, 0, 1, 1, 0, 0, false)
+
+	grid.AddItem(subGrid, 1, 1, 1, 1, 0, 0, false)
+
+	return grid
+}
+
+func (a *App) createHelpPanel() *tview.Grid {
+	grid := tview.NewGrid().
+		SetColumns(0, 72, 0).
+		SetRows(0, 17, 0)
+
+	subGrid := tview.NewGrid().
+		SetColumns(0).
+		SetRows(0, 1)
+	subGrid.SetBorder(true)
+	subGrid.SetTitle(" Help ")
+
+	subGrid.AddItem(a.help, 0, 0, 1, 1, 0, 0, true)
+
+	help := tview.NewTextView().
+		SetWrap(false).
+		SetText(" Close help: ESC  Scroll: ←→↕")
 	subGrid.AddItem(help, 1, 0, 1, 1, 0, 0, false)
 
 	grid.AddItem(subGrid, 1, 1, 1, 1, 0, 0, false)

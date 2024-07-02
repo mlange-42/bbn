@@ -20,18 +20,11 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 		return nil
 	} else if event.Key() == tcell.KeyTAB {
 		// Tab through nodes.
-		a.selectedNode = (a.selectedNode + 1) % len(a.nodes)
-		a.selectedState = 0
-		a.render(true)
+		a.selectNextNode()
 		return nil
 	} else if event.Key() == tcell.KeyBacktab {
 		// Tab through nodes, backwards.
-		a.selectedNode--
-		if a.selectedNode < 0 {
-			a.selectedNode = len(a.nodes) - 1
-		}
-		a.selectedState = 0
-		a.render(true)
+		a.selectPreviousNode()
 		return nil
 	} else if event.Rune() == ' ' {
 		// Cycle through states.
@@ -40,15 +33,7 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 		return nil
 	} else if unicode.IsDigit(event.Rune()) {
 		// Select states by index/number keys.
-		idx, err := strconv.Atoi(string(event.Rune()))
-		if err != nil {
-			panic(err)
-		}
-		idx -= 1
-		if idx >= 0 && idx < len(a.nodes[a.selectedNode].Node().Outcomes) {
-			a.selectedState = idx
-			a.render(true)
-		}
+		a.selectNodeOutcome(string(event.Rune()))
 		return nil
 	} else if event.Key() == tcell.KeyEnter {
 		// Set selected state as evidence.
@@ -56,6 +41,9 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 			panic(err)
 		}
 		a.render(true)
+		return nil
+	} else if event.Rune() == 'h' {
+		a.showHelp()
 		return nil
 	} else if event.Rune() == 't' {
 		a.showTable()
@@ -67,7 +55,7 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 		a.saveNetwork()
 		return nil
 	} else {
-		return a.inputMove(event)
+		return a.moveNode(event)
 	}
 }
 
@@ -99,7 +87,7 @@ func (a *App) saveNetwork() {
 	}
 }
 
-func (a *App) inputMove(event *tcell.EventKey) *tcell.EventKey {
+func (a *App) moveNode(event *tcell.EventKey) *tcell.EventKey {
 	node := a.nodes[a.selectedNode]
 
 	dx, dy := 0, 0
@@ -140,9 +128,18 @@ func (a *App) inputMove(event *tcell.EventKey) *tcell.EventKey {
 	}
 	return event
 }
+
 func (a *App) inputTable(event *tcell.EventKey) *tcell.EventKey {
 	if event.Key() == tcell.KeyEsc {
 		a.pages.HidePage("Table")
+		return nil
+	}
+	return event
+}
+
+func (a *App) inputHelp(event *tcell.EventKey) *tcell.EventKey {
+	if event.Key() == tcell.KeyEsc {
+		a.pages.HidePage("Help")
 		return nil
 	}
 	return event
@@ -191,6 +188,11 @@ func (a *App) showTable() {
 	a.pages.ShowPage("Table")
 
 	a.app.SetFocus(a.table)
+}
+
+func (a *App) showHelp() {
+	a.pages.ShowPage("Help")
+	a.app.SetFocus(a.help)
 }
 
 func (a *App) mouseInputGraph(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
@@ -246,4 +248,31 @@ func (a *App) mousePosInGraph(x, y int) (int, int) {
 	boxX, boxY, _, _ := a.graph.GetInnerRect()
 	scrollY, scrollX := a.graph.GetScrollOffset()
 	return x - boxX + scrollX, y - boxY + scrollY
+}
+
+func (a *App) selectNextNode() {
+	a.selectedNode = (a.selectedNode + 1) % len(a.nodes)
+	a.selectedState = 0
+	a.render(true)
+}
+
+func (a *App) selectPreviousNode() {
+	a.selectedNode--
+	if a.selectedNode < 0 {
+		a.selectedNode = len(a.nodes) - 1
+	}
+	a.selectedState = 0
+	a.render(true)
+}
+
+func (a *App) selectNodeOutcome(index string) {
+	idx, err := strconv.Atoi(index)
+	if err != nil {
+		panic(err)
+	}
+	idx -= 1
+	if idx >= 0 && idx < len(a.nodes[a.selectedNode].Node().Outcomes) {
+		a.selectedState = idx
+		a.render(true)
+	}
 }
