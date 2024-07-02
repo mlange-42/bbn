@@ -131,7 +131,7 @@ func TestDecisionUmbrella2(t *testing.T) {
 		map[Variable][]Variable{umbrella: {weather, forecast}},
 		nil, true)
 
-	result := ve.SolvePolicies()
+	result := ve.SolvePolicies(false)
 
 	fmt.Println("Summarize")
 	for k, v := range result {
@@ -246,7 +246,7 @@ func TestDecisionOil(t *testing.T) {
 		map[Variable][]Variable{drill: {test, testResult}},
 		nil, true)
 
-	policies := ve.SolvePolicies()
+	policies := ve.SolvePolicies(false)
 
 	testPolicy := policies[test][1]
 	drillPolicy := v.Rearrange(policies[drill][1], []Variable{test, testResult, drill})

@@ -191,16 +191,28 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable) {
 
 func (ve *VE) getDecisionParents() []bool {
 	isDecisionParent := make([]bool, len(ve.Variables.variables))
-	for _, v := range ve.Variables.variables {
-		if ve.eliminated[v.Id] || v.NodeType != DecisionNode {
-			continue
-		}
-		if vars, ok := ve.dependencies[v]; ok {
-			for _, v := range vars {
-				isDecisionParent[v.Id] = true
-			}
+
+	decisions := ve.getDecisions()
+	if len(decisions) == 0 {
+		return isDecisionParent
+	}
+	dec := decisions[len(decisions)-1]
+	if vars, ok := ve.dependencies[dec]; ok {
+		for _, v := range vars {
+			isDecisionParent[v.Id] = true
 		}
 	}
+	/*
+		for _, v := range ve.Variables.variables {
+			if ve.eliminated[v.Id] || v.NodeType != DecisionNode {
+				continue
+			}
+			if vars, ok := ve.dependencies[v]; ok {
+				for _, v := range vars {
+					isDecisionParent[v.Id] = true
+				}
+			}
+		}*/
 	return isDecisionParent
 }
 
@@ -259,7 +271,12 @@ func (ve *VE) solve(evidence []Evidence, query []Variable, utility bool, utility
 	return ve.summarize()
 }
 
-func (ve *VE) SolvePolicies() map[Variable][2]*Factor {
+func (ve *VE) SolvePolicies(single bool) map[Variable][2]*Factor {
+	decisions := ve.getDecisions()
+	if len(decisions) == 0 {
+		return nil
+	}
+
 	if ve.verbose {
 		fmt.Println("Sum utilities")
 	}
@@ -278,20 +295,15 @@ func (ve *VE) SolvePolicies() map[Variable][2]*Factor {
 		fmt.Println("Policies")
 	}
 
-	decisions := ve.getDecisions()
-	if len(decisions) == 0 {
-		return nil
-	}
-
 	if ve.verbose {
 		fmt.Println("Collecting decisions")
 		fmt.Println(decisions)
 	}
 
-	return ve.solvePolicies(decisions)
+	return ve.solvePolicies(decisions, single)
 }
 
-func (ve *VE) solvePolicies(decisions []Variable) map[Variable][2]*Factor {
+func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*Factor {
 	policies := map[Variable][2]*Factor{}
 	for i := len(decisions) - 1; i >= 0; i-- {
 		dec := decisions[i]
@@ -322,6 +334,14 @@ func (ve *VE) solvePolicies(decisions []Variable) map[Variable][2]*Factor {
 				}
 			}
 		}
+		if factorIdx < 0 {
+			for i, f := range ve.factors {
+				if !slices.Contains(f.Variables, dec) {
+					continue
+				}
+				factorIdx = i
+			}
+		}
 
 		if factorIdx < 0 {
 			panic(fmt.Sprintf("found no factors containing variable %d and its parents", dec.Id))
@@ -349,6 +369,10 @@ func (ve *VE) solvePolicies(decisions []Variable) map[Variable][2]*Factor {
 
 		if ve.verbose {
 			ve.printFactors()
+		}
+
+		if single {
+			break
 		}
 	}
 

@@ -162,19 +162,24 @@ func (n *Network) TotalUtilityIndex() int {
 func (n *Network) SolvePolicies() (map[string]Factor, error) {
 	clear(n.policies)
 
-	var err error
-	n.ve, n.variableNames, err = n.toVE(nil)
-	if err != nil {
-		return nil, err
-	}
-
-	policies := n.ve.SolvePolicies()
-	for name, v := range n.variableNames {
-		if v.VeVariable.NodeType != ve.DecisionNode {
-			continue
+	for {
+		var err error
+		n.ve, n.variableNames, err = n.toVE(nil)
+		if err != nil {
+			return nil, err
 		}
-		if p, ok := policies[v.VeVariable]; ok {
-			n.policies[name] = *p[1]
+		policies := n.ve.SolvePolicies(true)
+		if policies == nil {
+			break
+		}
+
+		for name, v := range n.variableNames {
+			if v.VeVariable.NodeType != ve.DecisionNode {
+				continue
+			}
+			if p, ok := policies[v.VeVariable]; ok {
+				n.policies[name] = *p[1]
+			}
 		}
 	}
 
@@ -182,7 +187,11 @@ func (n *Network) SolvePolicies() (map[string]Factor, error) {
 	for name, f := range n.policies {
 		forVar := n.variableNames[name]
 		newVars := make([]ve.Variable, len(f.Variables))
-		idx := slices.Index(f.Variables, forVar.VeVariable)
+		idx := slices.IndexFunc(
+			f.Variables,
+			func(v ve.Variable) bool { return v.Id == forVar.VeVariable.Id },
+		)
+
 		for i := 0; i < idx; i++ {
 			newVars[i] = f.Variables[i]
 		}
