@@ -73,6 +73,7 @@ jobs:
     - name: Run CLI examples
       run: |
         ./bbn inference _examples/asia.yml
+        ./bbn inference _examples/disease-control.yml
         ./bbn inference _examples/dog-problem.xml
         ./bbn inference _examples/earthquake.yml
         ./bbn inference _examples/mendel.yml
