@@ -11,7 +11,15 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node, ignor
 	queries := []string{}
 	utilities := []string{}
 
-	for _, n := range nodes {
+	totalUtilityName := ""
+	var totalUtilityNode *bbn.Variable
+
+	for i, n := range nodes {
+		if i == network.TotalUtilityIndex() {
+			totalUtilityName = n.Node().Name
+			totalUtilityNode = n.Node()
+			continue
+		}
 		if n.Node().Type == ve.UtilityNode {
 			utilities = append(utilities, n.Node().Name)
 			continue
@@ -70,6 +78,16 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node, ignor
 		}
 
 		result[n] = []float64{nodeUtility, totalUtility}
+	}
+
+	if totalUtilityName != "" {
+		util := make([]float64, len(totalUtilityNode.Factor.Given)+1)
+		for i, g := range totalUtilityNode.Factor.Given {
+			f := result[g]
+			util[i] = f[0] * totalUtilityNode.Factor.Table[i]
+		}
+		util[len(util)-1] = totalUtility
+		result[totalUtilityName] = util
 	}
 
 	return result, nil

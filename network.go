@@ -57,12 +57,13 @@ type variable struct {
 }
 
 type Network struct {
-	name          string
-	variables     []Variable
-	factors       []Factor
-	policies      map[string]ve.Factor
-	ve            *ve.VE
-	variableNames map[string]*variable
+	name              string
+	variables         []Variable
+	factors           []Factor
+	policies          map[string]ve.Factor
+	ve                *ve.VE
+	variableNames     map[string]*variable
+	totalUtilityIndex int
 }
 
 func New(name string, variables []Variable, factors []Factor) *Network {
@@ -77,10 +78,13 @@ func New(name string, variables []Variable, factors []Factor) *Network {
 }
 
 func (n *Network) prepareVariables() {
+	varNames := map[string]*Variable{}
 	outcomes := make(map[string]int, len(n.variables))
 	for i := range n.variables {
 		outcomes[n.variables[i].Name] = len(n.variables[i].Outcomes)
+		varNames[n.variables[i].Name] = &n.variables[i]
 	}
+
 	for i := range n.variables {
 		v := &n.variables[i]
 		idx := slices.IndexFunc(n.factors, func(f Factor) bool { return f.For == v.Name })
@@ -99,6 +103,40 @@ func (n *Network) prepareVariables() {
 			v.Factor.outcomes[i] = n
 		}
 	}
+
+	n.totalUtilityIndex = -1
+	for i := range n.variables {
+		v := &n.variables[i]
+		if v.Type != ve.UtilityNode {
+			continue
+		}
+		hasUtilParents := false
+		hasOtherParents := false
+		for _, parent := range v.Factor.Given {
+			p, ok := varNames[parent]
+			if !ok {
+				panic(fmt.Sprintf("parent node %s for %s not found", parent, v.Name))
+			}
+			if p.Type == ve.UtilityNode {
+				hasUtilParents = true
+			} else {
+				hasOtherParents = true
+			}
+		}
+		if hasUtilParents && hasOtherParents {
+			panic(fmt.Sprintf("utility node %s has utility parents and other parents; can only have either or", v.Name))
+		}
+		if !hasUtilParents && !hasOtherParents {
+			panic(fmt.Sprintf("utility node %s has no parents", v.Name))
+		}
+		if !hasUtilParents {
+			continue
+		}
+		if n.totalUtilityIndex >= 0 {
+			panic("found multiple nodes for total utility")
+		}
+		n.totalUtilityIndex = i
+	}
 }
 
 func (n *Network) Name() string {
@@ -107,6 +145,10 @@ func (n *Network) Name() string {
 
 func (n *Network) Variables() []Variable {
 	return n.variables
+}
+
+func (n *Network) TotalUtilityIndex() int {
+	return n.totalUtilityIndex
 }
 
 // SolvePolicies solves and inserts policies for decisions, using Variable Elimination.
@@ -252,9 +294,20 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 	varNames := map[string]*variable{}
 	varIDs := make([]variable, len(n.variables))
 	dependencies := map[ve.Variable][]ve.Variable{}
+	numUtilityNodes := 0
+	totalUtilityName := ""
 
 	// collect variables for lookup
 	for i, v := range n.variables {
+		// skip total utility node
+		if i == n.totalUtilityIndex {
+			totalUtilityName = v.Name
+			continue
+		}
+		// count utility nodes
+		if v.Type == ve.UtilityNode {
+			numUtilityNodes++
+		}
 		// treat decision variables with policy as normal change variables
 		_, isEvidence := evidence[v.Name]
 		if v.Type == ve.DecisionNode && !isEvidence {
@@ -278,6 +331,10 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 	// create factors from tables
 	factors := []ve.Factor{}
 	for _, f := range n.factors {
+		// skip factor for total utility
+		if f.For == totalUtilityName {
+			continue
+		}
 		// get primary variable
 		forVar, ok := varNames[f.For]
 		if !ok {
@@ -318,10 +375,15 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		factors = append(factors, factor)
 	}
 
+	var weights []float64
+	if n.totalUtilityIndex >= 0 {
+		weights = n.variables[n.totalUtilityIndex].Factor.Table
+	}
+
 	// add policies as factors
 	factors = append(factors, n.policyFactors(vars, varIDs, evidence)...)
 
-	return ve.New(vars, factors, dependencies, false), varNames, nil
+	return ve.New(vars, factors, dependencies, weights, false), varNames, nil
 }
 
 // policyFactors collects policies as factors.

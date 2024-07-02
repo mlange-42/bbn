@@ -154,7 +154,7 @@ func (n *node) drawStateLabels() {
 		copy(n.runes[i+2][2:n.barsX-1], []rune(label))
 	}
 	if n.node.Type == ve.UtilityNode {
-		copy(n.runes[1+2][2:n.barsX-1], []rune("total"))
+		copy(n.runes[len(n.node.Outcomes)+2][2:n.barsX-1], []rune("total"))
 	}
 }
 
