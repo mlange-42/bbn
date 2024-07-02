@@ -66,6 +66,7 @@ type Network struct {
 }
 
 func New(name string, variables []Variable, factors []Factor) *Network {
+	prepareVariables(variables, factors)
 	outcomes := make(map[string]int, len(variables))
 	for i := range variables {
 		outcomes[variables[i].Name] = len(variables[i].Outcomes)
@@ -93,6 +94,31 @@ func New(name string, variables []Variable, factors []Factor) *Network {
 		variables: variables,
 		factors:   factors,
 		policies:  map[string]ve.Factor{},
+	}
+}
+
+func prepareVariables(variables []Variable, factors []Factor) {
+	outcomes := make(map[string]int, len(variables))
+	for i := range variables {
+		outcomes[variables[i].Name] = len(variables[i].Outcomes)
+	}
+	for i := range variables {
+		v := &variables[i]
+		idx := slices.IndexFunc(factors, func(f Factor) bool { return f.For == v.Name })
+		if idx < 0 {
+			continue
+		}
+		v.Factor = &factors[idx]
+
+		v.Factor.columns = len(v.Outcomes)
+		v.Factor.outcomes = make([]int, len(v.Factor.Given))
+		for i, g := range v.Factor.Given {
+			n, ok := outcomes[g]
+			if !ok {
+				panic(fmt.Sprintf("parent variable %s of %s not found", g, v.Name))
+			}
+			v.Factor.outcomes[i] = n
+		}
 	}
 }
 
