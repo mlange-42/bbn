@@ -121,7 +121,6 @@ func (a *App) createCanvas() {
 		a.canvas[i] = make([]rune, bounds.W)
 		a.colors[i] = make([]Color, bounds.W)
 	}
-	//a.clearCanvas()
 }
 
 func (a *App) createWidgets() {

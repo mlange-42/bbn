@@ -1,10 +1,14 @@
 package tui
 
 import (
+	"os"
+	"path"
 	"strconv"
+	"strings"
 	"unicode"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/mlange-42/bbn"
 	"github.com/mlange-42/bbn/internal/ve"
 	"github.com/rivo/tview"
 )
@@ -68,26 +72,65 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 		a.updateMarginals()
 		a.render(true)
 		return nil
+	} else if event.Key() == tcell.KeyCtrlS {
+		a.saveNetwork()
+		return nil
 	} else {
 		return a.inputMove(event)
 	}
 }
 
+func (a *App) saveNetwork() {
+	yml, err := bbn.ToYAML(a.network)
+	if err != nil {
+		panic(err)
+	}
+
+	ext := path.Ext(a.file)
+	saveFile := strings.TrimSuffix(a.file, ext) + "-save.yml"
+
+	err = os.WriteFile(saveFile, yml, 0644)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (a *App) inputMove(event *tcell.EventKey) *tcell.EventKey {
+	node := a.nodes[a.selectedNode]
+
 	dx, dy := 0, 0
+	createCanvas := false
 	if event.Rune() == 'w' {
-		dy--
+		if node.Bounds().Y > 0 {
+			dy--
+		}
 	} else if event.Rune() == 'a' {
-		dx--
+		if node.Bounds().X > 0 {
+			dx--
+		}
 	} else if event.Rune() == 's' {
 		dy++
+		if node.Bounds().Y+node.Bounds().H >= len(a.canvas) {
+			createCanvas = true
+		}
 	} else if event.Rune() == 'd' {
 		dx++
+		if node.Bounds().X+node.Bounds().W >= len(a.canvas[0]) {
+			createCanvas = true
+		}
 	}
 	if dx != 0 || dy != 0 {
-		b := a.nodes[a.selectedNode].Bounds()
+		b := node.Bounds()
 		b.X += dx
 		b.Y += dy
+
+		p := a.network.Variables()[a.selectedNode].Position
+		a.network.Variables()[a.selectedNode].Position = [2]int{p[0] + dx, p[1] + dy}
+
+		if createCanvas {
+			a.createCanvas()
+		}
+
 		a.render(false)
 		return nil
 	}
