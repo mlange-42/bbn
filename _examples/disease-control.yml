@@ -4,6 +4,7 @@ variables:
 - variable: Herd size
   position: [36, 0]
   outcomes: [small, medium, large]
+  color: yellow
   table:
   - [25, 50, 25]
 

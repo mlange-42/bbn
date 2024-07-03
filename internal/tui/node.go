@@ -50,7 +50,8 @@ func NewNode(n bbn.Variable) Node {
 		bounds.H++
 	}
 
-	var color Color
+	color := White
+	//if n.Color == "" {
 	switch n.Type {
 	case ve.ChanceNode:
 		color = White
@@ -59,6 +60,13 @@ func NewNode(n bbn.Variable) Node {
 	case ve.DecisionNode:
 		color = Blue
 	}
+	/*} else {
+		var ok bool
+		color, ok = NamedColors[n.Color]
+		if !ok {
+			panic(fmt.Sprintf("unknown node color %s", n.Color))
+		}
+	}*/
 
 	runes := make([][]rune, bounds.H)
 	colors := make([][]Color, bounds.H)
