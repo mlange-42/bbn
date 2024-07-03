@@ -2,13 +2,13 @@ name: Disease Control Decision
 variables:
 
 - variable: Herd size
-  position: [36, 1]
+  position: [36, 0]
   outcomes: [small, medium, large]
   table:
   - [25, 50, 25]
 
 - variable: Infection
-  position: [37, 8]
+  position: [39, 8]
   outcomes: [yes, no]
   given: [Vaccinate, Herd size]
   table:
@@ -21,7 +21,7 @@ variables:
   - [5, 95] # no,  large
 
 - variable: Symptoms
-  position: [37, 18]
+  position: [39, 17]
   outcomes: [yes, no]
   given: [Infection]
   table:
@@ -36,7 +36,7 @@ variables:
   type: decision
 
 - variable: Test
-  position: [33, 26]
+  position: [33, 25]
   outcomes: [yes, no]
   given: [Symptoms, Herd size, Vaccinate]
   type: decision
@@ -44,7 +44,7 @@ variables:
 - variable: Test result
   outcomes: [pos, neg]
   given: [Test, Infection]
-  position: [68, 29]
+  position: [68, 28]
   table:
   - [0.95, 0.05] # test+ infected+
   - [0.02, 0.98] # test+ infected-
@@ -52,7 +52,7 @@ variables:
   - [0.5, 0.5]   # test- infected-
 
 - variable: Vaccination cost
-  position: [1, 1]
+  position: [1, 0]
   outcomes: [euros]
   given: [Vaccinate, Herd size]
   type: utility
@@ -65,7 +65,7 @@ variables:
   - [ 0] # no,  large
   
 - variable: Test cost
-  position: [1, 26]
+  position: [1, 25]
   outcomes: [euros]
   given: [Test]
   type: utility
@@ -89,30 +89,26 @@ variables:
   - [  0] # treatment-
 
 - variable: Outbreak
-  position: [73, 0]
+  position: [79, 6]
   outcomes: [yes, no]
-  given: [Infection, Treatment, Herd size]
+  given: [Infection, Treatment, Vaccinate]
   table:
-  - [1, 99] # inf+ treat+ small
-  - [2, 98] # inf+ treat+ medium
-  - [5, 95] # inf+ treat+ large
+  - [1, 99] # inf+ treat+ vacc+
+  - [5, 95] # inf+ treat+ vacc-
   
-  - [10, 90] # inf+ treat- small
-  - [20, 80] # inf+ treat- medium
-  - [50, 50] # inf+ treat- large
+  - [5, 95] # inf+ treat- vacc+
+  - [25, 75] # inf+ treat- vacc-
   
-  - [0, 100] # inf- treat+ small
-  - [0, 100] # inf- treat+ medium
-  - [0, 100] # inf- treat+ large
+  - [0, 100] # inf- treat+ vacc+
+  - [0, 100] # inf- treat+ vacc-
   
-  - [0, 100] # inf- treat- small
-  - [0, 100] # inf- treat- medium
-  - [0, 100] # inf- treat- large
+  - [0, 100] # inf- treat- vacc+
+  - [0, 100] # inf- treat- vacc-
   
 - variable: Outbreak cost
   given: [Outbreak, Herd size]
   outcomes: [euros]
-  position: [102, 6]
+  position: [78, 0]
   type: utility
   table:
   - [-100] # outbreak+ small
