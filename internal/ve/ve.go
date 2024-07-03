@@ -265,41 +265,7 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 	factors := []*Factor{}
 	for i := len(decisions) - 1; i >= 0; i-- {
 		dec := decisions[i]
-
-		deps := ve.dependencies[dec]
-		for _, f := range ve.factors {
-			if !slices.Contains(f.Variables, dec) {
-				continue
-			}
-			if len(deps) == 0 && len(f.Variables) == 1 {
-				factors = append(factors, f)
-				continue
-			}
-			hasParent := true
-			//hasNonParent := false
-			for _, v := range f.Variables {
-				if slices.Contains(deps, v) {
-					hasParent = true
-				} /*else if v != dec {
-					hasNonParent = true
-				}*/
-			}
-			if !hasParent /*|| hasNonParent*/ {
-				continue
-			}
-			factors = append(factors, f)
-		}
-		if len(factors) == 0 {
-			for _, f := range ve.factors {
-				if !slices.Contains(f.Variables, dec) {
-					continue
-				}
-				if len(f.Variables) > 1 {
-					continue
-				}
-				factors = append(factors, f)
-			}
-		}
+		factors = ve.findDecisionFactors(dec, factors)
 
 		/*fmt.Println("Decision on", dec)
 		fmt.Println("Remaining factors")
@@ -342,6 +308,45 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 	}
 
 	return policies
+}
+
+func (ve *VE) findDecisionFactors(decision Variable, result []*Factor) []*Factor {
+	deps := ve.dependencies[decision]
+	for _, f := range ve.factors {
+		if !slices.Contains(f.Variables, decision) {
+			continue
+		}
+		if len(deps) == 0 && len(f.Variables) == 1 {
+			result = append(result, f)
+			continue
+		}
+		hasParent := true
+		//hasNonParent := false
+		for _, v := range f.Variables {
+			if slices.Contains(deps, v) {
+				hasParent = true
+			} /*else if v != dec {
+				hasNonParent = true
+			}*/
+		}
+		if !hasParent /*|| hasNonParent*/ {
+			continue
+		}
+		result = append(result, f)
+	}
+	if len(result) == 0 {
+		for _, f := range ve.factors {
+			if !slices.Contains(f.Variables, decision) {
+				continue
+			}
+			if len(f.Variables) > 1 {
+				continue
+			}
+			result = append(result, f)
+		}
+	}
+
+	return result
 }
 
 func (ve *VE) restrictEvidence(evidence Evidence) {
