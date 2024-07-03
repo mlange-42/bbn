@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mlange-42/bbn/internal/logic"
 	"github.com/mlange-42/bbn/internal/ve"
+	"github.com/mlange-42/bbn/logic"
 	"gopkg.in/yaml.v3"
 )
 

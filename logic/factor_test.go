@@ -3,7 +3,7 @@ package logic_test
 import (
 	"testing"
 
-	"github.com/mlange-42/bbn/internal/logic"
+	"github.com/mlange-42/bbn/logic"
 	"github.com/stretchr/testify/assert"
 )
 
