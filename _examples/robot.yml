@@ -15,6 +15,7 @@ variables:
 - variable: Accident
   outcomes: [yes, no]
   position: [40, 0]
+  color: gray
   given: [Short path]
   table:
   - [0.1, 0.9] # short path

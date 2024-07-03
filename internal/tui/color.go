@@ -41,6 +41,25 @@ var ColorTags = []string{
 	"[-]",
 }
 
+var ColorNames = []string{
+	"black",
+	"maroon",
+	"green",
+	"olive",
+	"navy",
+	"purple",
+	"teal",
+	"silver",
+	"gray",
+	"red",
+	"lime",
+	"yellow",
+	"blue",
+	"fuchsia",
+	"aqua",
+	"white",
+}
+
 var NamedColors = map[string]Color{
 	"black":   Black,
 	"maroon":  Maroon,

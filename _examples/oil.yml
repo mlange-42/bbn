@@ -4,6 +4,7 @@ variables:
 
 - variable: Oil
   position: [1, 0]
+  color: gray
   outcomes: ["dry", "wet", "soaking"]
   table:
   - [0.5, 0.3, 0.2]

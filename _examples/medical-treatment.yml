@@ -5,6 +5,7 @@ variables:
 - variable: Infected
   outcomes: [yes, no]
   position: [1, 0]
+  color: gray
   table:
   - [0.05, 0.95]
 

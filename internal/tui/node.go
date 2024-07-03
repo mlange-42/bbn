@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"math"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/mlange-42/bbn"
@@ -50,23 +51,10 @@ func NewNode(n bbn.Variable) Node {
 		bounds.H++
 	}
 
-	color := White
-	//if n.Color == "" {
-	switch n.Type {
-	case ve.ChanceNode:
-		color = White
-	case ve.UtilityNode:
-		color = Green
-	case ve.DecisionNode:
-		color = Blue
+	color, err := nodeColor(&n)
+	if err != nil {
+		panic(err)
 	}
-	/*} else {
-		var ok bool
-		color, ok = NamedColors[n.Color]
-		if !ok {
-			panic(fmt.Sprintf("unknown node color %s", n.Color))
-		}
-	}*/
 
 	runes := make([][]rune, bounds.H)
 	colors := make([][]Color, bounds.H)
@@ -94,6 +82,27 @@ func NewNode(n bbn.Variable) Node {
 	node.drawStateLabels()
 
 	return &node
+}
+
+func nodeColor(n *bbn.Variable) (Color, error) {
+	color := White
+	if n.Color == "" {
+		switch n.Type {
+		case ve.ChanceNode:
+			color = White
+		case ve.UtilityNode:
+			color = Green
+		case ve.DecisionNode:
+			color = Blue
+		}
+	} else {
+		var ok bool
+		color, ok = NamedColors[n.Color]
+		if !ok {
+			return Black, fmt.Errorf("unknown node color %s; available colors are:\n %s", n.Color, strings.Join(ColorNames, ", "))
+		}
+	}
+	return color, nil
 }
 
 func (n *node) Node() *bbn.Variable {

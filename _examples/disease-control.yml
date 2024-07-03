@@ -4,12 +4,12 @@ variables:
 - variable: Herd size
   position: [36, 0]
   outcomes: [small, medium, large]
-  color: yellow
   table:
   - [25, 50, 25]
 
 - variable: Infection
   position: [39, 8]
+  color: gray
   outcomes: [yes, no]
   given: [Vaccinate, Herd size]
   table:
@@ -91,6 +91,7 @@ variables:
 
 - variable: Outbreak
   position: [79, 6]
+  color: gray
   outcomes: [yes, no]
   given: [Infection, Treatment, Vaccinate]
   table:
