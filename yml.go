@@ -97,7 +97,7 @@ func toTable(v *variableYaml) ([]float64, error) {
 	if v.Logic != "" {
 		l, ok := logic.Factors[strings.ToLower(v.Logic)]
 		if !ok {
-			return nil, fmt.Errorf("unknown logic operator %s", v.Logic)
+			return nil, fmt.Errorf("unknown logic operator %s; valid operators are e.g.: not, and, or, xor, if-then, if-not-then, if-then-not, if-not-then-not, not-and, etc", v.Logic)
 		}
 		if len(v.Given) != l.Operands() {
 			return nil, fmt.Errorf("logic %s requires %d operands, but %d were given",

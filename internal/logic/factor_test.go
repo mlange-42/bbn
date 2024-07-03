@@ -10,6 +10,7 @@ import (
 func TestFactorOperands(t *testing.T) {
 	assert.Equal(t, 1, logic.Not.Operands())
 	assert.Equal(t, 2, logic.And.Operands())
+	assert.Equal(t, 1, logic.Cond.Operands())
 }
 
 func TestFactorTable(t *testing.T) {
@@ -45,4 +46,9 @@ func TestFactorTable(t *testing.T) {
 		0, 1,
 		1, 0,
 	}, logic.BiCond.Table())
+
+	assert.Equal(t, []float64{
+		1, 0,
+		0.5, 0.5,
+	}, logic.Cond.Table())
 }
