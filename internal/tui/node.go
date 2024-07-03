@@ -45,7 +45,7 @@ func NewNode(n bbn.Variable) Node {
 	bounds := Bounds{
 		X: n.Position[0],
 		Y: n.Position[1],
-		W: max(maxStateLen+maxBars+7, titleLength) + 6,
+		W: max(maxStateLen+maxBars+9, titleLength) + 4,
 		H: len(n.Outcomes) + 3,
 	}
 
