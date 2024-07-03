@@ -151,7 +151,7 @@ func (a *App) updateCanvas() {
 			builder.WriteRune(r)
 			prevColor = c
 		}
-		builder.WriteString(ColorTags[0])
+		builder.WriteString(ColorTags[White])
 
 		if i < len(a.canvas)-1 {
 			builder.WriteRune('\n')

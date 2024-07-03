@@ -33,6 +33,7 @@ type variableYaml struct {
 	Type     string      `yaml:",omitempty"` // Type of the node [nature, decision, utility]
 	Outcomes []string    `yaml:",flow"`      // Names of the node's possible states.
 	Position [2]int      `yaml:",flow"`      // Coordinates for visualization, optional.
+	Color    string      `yaml:",omitempty"` // Node color, optional.
 	Table    [][]float64 `yaml:",flow,omitempty"`
 }
 
@@ -65,6 +66,7 @@ func FromYAML(content []byte) (*Network, error) {
 			Type:     tp,
 			Outcomes: v.Outcomes,
 			Position: v.Position,
+			Color:    v.Color,
 		}
 
 		var table []float64

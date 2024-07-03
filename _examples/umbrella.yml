@@ -3,6 +3,7 @@ variables:
 
 - variable: Weather
   position: [16, 0]
+  color: gray
   outcomes: [Sunny, Rainy]
   table: 
   - [70, 30]

@@ -12,6 +12,7 @@ type Variable struct {
 	Type     ve.NodeType
 	Outcomes []string
 	Position [2]int
+	Color    string
 	Factor   *Factor // Don't set this, it is initialized when constructing the network.
 }
 
