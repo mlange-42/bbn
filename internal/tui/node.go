@@ -10,7 +10,8 @@ import (
 	"github.com/mlange-42/bbn/internal/ve"
 )
 
-const maxStateLabelWidth = 12
+const maxNodeLabelWidth = 48
+const maxStateLabelWidth = 16
 const maxBars = 10
 
 type Node interface {
@@ -39,11 +40,12 @@ func NewNode(n bbn.Variable) Node {
 	if maxStateLen > maxStateLabelWidth {
 		maxStateLen = maxStateLabelWidth
 	}
+	titleLength := min(utf8.RuneCountInString(n.Name), maxNodeLabelWidth)
 
 	bounds := Bounds{
 		X: n.Position[0],
 		Y: n.Position[1],
-		W: maxStateLen + maxBars + 7 + 6,
+		W: max(maxStateLen+maxBars+7, titleLength) + 6,
 		H: len(n.Outcomes) + 3,
 	}
 
