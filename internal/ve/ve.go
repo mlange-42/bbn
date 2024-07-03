@@ -132,8 +132,8 @@ type variableDegree struct {
 	Degree   int
 }
 
-func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable) {
-	isDecisionParent := ve.getDecisionParents()
+func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, singleDecision bool) {
+	isDecisionParent := ve.getDecisionParents(singleDecision)
 
 	hidden := map[uint16]Variable{}
 	for i, v := range ve.Variables.variables {
@@ -180,19 +180,26 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable) {
 	}
 }
 
-func (ve *VE) getDecisionParents() []bool {
+func (ve *VE) getDecisionParents(single bool) []bool {
 	isDecisionParent := make([]bool, len(ve.Variables.variables))
 
 	decisions := ve.getDecisions()
 	if len(decisions) == 0 {
 		return isDecisionParent
 	}
-	dec := decisions[len(decisions)-1]
-	if vars, ok := ve.dependencies[dec]; ok {
-		for _, v := range vars {
-			isDecisionParent[v.Id] = true
+
+	for i := len(decisions) - 1; i >= 0; i-- {
+		dec := decisions[i]
+		if vars, ok := ve.dependencies[dec]; ok {
+			for _, v := range vars {
+				isDecisionParent[v.Id] = true
+			}
+		}
+		if single {
+			break
 		}
 	}
+
 	/*
 		for _, v := range ve.Variables.variables {
 			if ve.eliminated[v.Id] || v.NodeType != DecisionNode {
@@ -235,7 +242,7 @@ func (ve *VE) solve(evidence []Evidence, query []Variable, utility bool, utility
 		ve.removeUtilities(nil)
 	}
 
-	ve.eliminateHidden(evidence, query)
+	ve.eliminateHidden(evidence, query, false)
 
 	return ve.summarize()
 }
@@ -248,7 +255,7 @@ func (ve *VE) SolvePolicies(single bool) map[Variable][2]*Factor {
 
 	ve.sumUtilities()
 
-	ve.eliminateHidden(nil, nil)
+	ve.eliminateHidden(nil, nil, single)
 
 	return ve.solvePolicies(decisions, single)
 }
@@ -264,25 +271,41 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 			if !slices.Contains(f.Variables, dec) {
 				continue
 			}
-			if len(deps) == 0 {
+			if len(deps) == 0 && len(f.Variables) == 1 {
 				factors = append(factors, f)
 				continue
 			}
-			for _, v := range deps {
-				if slices.Contains(f.Variables, v) {
-					factors = append(factors, f)
-					break
-				}
+			hasParent := true
+			//hasNonParent := false
+			for _, v := range f.Variables {
+				if slices.Contains(deps, v) {
+					hasParent = true
+				} /*else if v != dec {
+					hasNonParent = true
+				}*/
 			}
+			if !hasParent /*|| hasNonParent*/ {
+				continue
+			}
+			factors = append(factors, f)
 		}
 		if len(factors) == 0 {
 			for _, f := range ve.factors {
 				if !slices.Contains(f.Variables, dec) {
 					continue
 				}
+				if len(f.Variables) > 1 {
+					continue
+				}
 				factors = append(factors, f)
 			}
 		}
+
+		/*fmt.Println("Decision on", dec)
+		fmt.Println("Remaining factors")
+		for _, f := range ve.factors {
+			fmt.Println(f)
+		}*/
 
 		if len(factors) == 0 {
 			panic(fmt.Sprintf("found no factors containing variable %d and its parents", dec.Id))
@@ -296,9 +319,12 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 			f := ve.Variables.Product(factors...)
 			fac = &f
 		}
-		/*for _, f := range factors {
+		/*fmt.Println("Selected factors")
+		for _, f := range factors {
 			fmt.Println(f)
-		}*/
+		}
+		fmt.Println("Factor product")
+		fmt.Println(fac)*/
 
 		policy := ve.Variables.Policy(fac, dec)
 
@@ -306,7 +332,7 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 		ve.factors[policy.id] = &policy
 		ve.Variables.variables[dec.Id].NodeType = ChanceNode
 
-		ve.eliminateHidden(nil, nil)
+		ve.eliminateHidden(nil, nil, single)
 
 		factors = factors[:0]
 
