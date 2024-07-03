@@ -1,0 +1,38 @@
+name: Hypothetical Syllogism
+variables:
+
+- variable: Wake up
+  position: [1, 0]
+  outcomes: [no, yes]
+  table:
+  - [50, 50]
+
+- variable: Work
+  position: [33, 0]
+  outcomes: [no, yes]
+  table:
+  - [50, 50]
+
+- variable: Get paid
+  position: [65, 0]
+  outcomes: [no, yes]
+  table:
+  - [50, 50]
+
+- variable: "! Wake up => ! Work"
+  position: [17, 8]
+  outcomes: [yes, no]
+  given: [Wake up, Work]
+  logic: COND
+
+- variable: "! Work => ! Get paid"
+  position: [50, 8]
+  outcomes: [yes, no]
+  given: [Work, Get paid]
+  logic: COND
+
+- variable: "! Wake up => ! Get paid"
+  position: [33, 16]
+  outcomes: [yes, no]
+  given: ["! Wake up => ! Work", "! Work => ! Get paid"]
+  logic: COND

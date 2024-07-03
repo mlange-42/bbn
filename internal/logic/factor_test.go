@@ -31,4 +31,18 @@ func TestFactorTable(t *testing.T) {
 		1, 0,
 		0, 1,
 	}, logic.Or.Table())
+
+	assert.Equal(t, []float64{
+		1, 0,
+		0, 1,
+		1, 0,
+		1, 0,
+	}, logic.Cond.Table())
+
+	assert.Equal(t, []float64{
+		1, 0,
+		0, 1,
+		0, 1,
+		1, 0,
+	}, logic.BiCond.Table())
 }
