@@ -94,7 +94,7 @@ func (a *App) renderEdgeCorner(b1, b2 *Bounds) {
 	}
 	var xStart int
 	if rightwards {
-		for x := b1.X + b1.W + 1; x < b2.X; x++ {
+		for x := b1.X + b1.W; x < b2.X; x++ {
 			a.canvas[yStart][x] = BorderH[0]
 		}
 		xStart = b2.X
