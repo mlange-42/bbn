@@ -494,3 +494,50 @@ func (n *Network) Marginal(f *ve.Factor, v string) ve.Factor {
 	}
 	return n.ve.Variables.Marginal(f, vv.VeVariable)
 }
+
+func (n *Network) Rearrange(f *ve.Factor, variables []string) ve.Factor {
+	vars := n.rearrangeVariables(f, variables)
+	return n.ve.Variables.Rearrange(f, vars)
+}
+
+func (n *Network) rearrangeVariables(f *ve.Factor, variables []string) []ve.Variable {
+	vars := make([]ve.Variable, 0, len(f.Variables))
+	done := make([]bool, len(f.Variables))
+	for i := 0; i < len(variables)-1; i++ {
+		idx, ok := n.variableIndex(f, variables[i])
+		if !ok {
+			panic(fmt.Sprintf("variable %s to rearrange not in factor", variables[i]))
+		}
+		vars = append(vars, f.Variables[idx])
+		done[idx] = true
+	}
+
+	idx, ok := n.variableIndex(f, variables[len(variables)-1])
+	if !ok {
+		panic(fmt.Sprintf("variable %s to rearrange not in factor", variables[len(variables)-1]))
+	}
+	last := f.Variables[idx]
+
+	for i, d := range done {
+		if d || f.Variables[i].Id == last.Id {
+			continue
+		}
+		vars = append(vars, f.Variables[i])
+	}
+
+	vars = append(vars, last)
+
+	return vars
+}
+
+func (n *Network) variableIndex(f *ve.Factor, v string) (int, bool) {
+	variable, ok := n.variableNames[v]
+	if !ok {
+		panic(fmt.Sprintf("variable %s not found in network", v))
+	}
+	idx := slices.IndexFunc(f.Variables, func(vv ve.Variable) bool { return vv.Id == variable.VeVariable.Id })
+	if idx < 0 {
+		return -1, false
+	}
+	return idx, true
+}

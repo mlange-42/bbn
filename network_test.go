@@ -258,3 +258,34 @@ func TestNetworkSolveOil(t *testing.T) {
 	normUtil = n.NormalizeUtility(utility, f)
 	fmt.Println("--> NormalizeUtility drill-utility", normUtil)
 }
+
+func TestNetworkRearrange(t *testing.T) {
+	variables := []Variable{
+		{Name: "a", Type: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
+		{Name: "b", Type: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
+		{Name: "c", Type: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
+		{Name: "d", Type: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
+	}
+
+	fac := Factor{
+		For:   "d",
+		Given: []string{"a", "b", "c"},
+	}
+
+	net := New("test", variables, []Factor{fac})
+
+	_, f, err := net.SolveQuery(map[string]string{}, []string{"a", "b", "c", "d"}, true)
+	assert.Nil(t, err)
+
+	vars := []ve.Variable(f.Variables)
+	a, b, c, d := vars[0], vars[1], vars[2], vars[3]
+
+	result := net.rearrangeVariables(f, []string{"a", "b", "c", "d"})
+	assert.Equal(t, vars, result)
+
+	result = net.rearrangeVariables(f, []string{"d", "c", "b", "a"})
+	assert.Equal(t, []ve.Variable{d, c, b, a}, result)
+
+	result = net.rearrangeVariables(f, []string{"d", "a"})
+	assert.Equal(t, []ve.Variable{d, b, c, a}, result)
+}
