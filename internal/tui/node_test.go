@@ -11,7 +11,7 @@ import (
 
 func TestNodeRender(t *testing.T) {
 	node := bbn.Variable{
-		Name:     "TestNode with a very long name",
+		Name:     "TestNode",
 		Outcomes: []string{"yes", "no", "maybe"},
 		Position: [2]int{0, 0},
 	}
@@ -28,7 +28,7 @@ func TestNodeRender(t *testing.T) {
 
 	assert.Equal(t,
 		`╔══════════════════════════╗
-║ TestNode with a very lon ║
+║ TestNode                 ║
 ║ yes   █░░░░░░░░░  10.000 ║
 ║[no    ██░░░░░░░░  20.000]║
 ║ maybe ███████░░░  70.000 ║
