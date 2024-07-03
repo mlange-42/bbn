@@ -5,7 +5,7 @@
 ### Features
 
 * Reworked library and apps to use Variable Elimination for inference (#42, #43, #44, #45, #46, #47, #48)
-* Implement multi-stage decision networks (#45, #60)
+* Implement multi-stage decision networks (#45, #60, #61)
 * Adds network training to the TUI app (#54)
 * Adds a toggle to the TUI app to ignore policies of decision nodes with evidence (#56)
 * Nodes can be moved in the TUI app with WASD keys (#57)
@@ -18,6 +18,7 @@
 * Adds oil drilling decision example (#48)
 * Adds robot decision example (#50)
 * Adds medical treatment decision example (#60)
+* Adds disease control decision example (#61)
 
 ## [[v0.4.0]](https://github.com/mlange-42/bbn/compare/v0.3.0...v0.4.0)
 

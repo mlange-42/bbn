@@ -255,52 +255,60 @@ func (ve *VE) SolvePolicies(single bool) map[Variable][2]*Factor {
 
 func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*Factor {
 	policies := map[Variable][2]*Factor{}
+	factors := []*Factor{}
 	for i := len(decisions) - 1; i >= 0; i-- {
 		dec := decisions[i]
 
 		deps := ve.dependencies[dec]
-		factorIdx := -1
-		for i, f := range ve.factors {
+		for _, f := range ve.factors {
 			if !slices.Contains(f.Variables, dec) {
 				continue
 			}
 			if len(deps) == 0 {
-				if factorIdx >= 0 {
-					panic(fmt.Sprintf("found multiple factors containing variable %d and its parents", dec.Id))
-				}
-				factorIdx = i
+				factors = append(factors, f)
 				continue
 			}
 			for _, v := range deps {
 				if slices.Contains(f.Variables, v) {
-					if factorIdx >= 0 {
-						panic(fmt.Sprintf("found multiple factors containing variable %d and its parents", dec.Id))
-					}
-					factorIdx = i
+					factors = append(factors, f)
 					break
 				}
 			}
 		}
-		if factorIdx < 0 {
-			for i, f := range ve.factors {
+		if len(factors) == 0 {
+			for _, f := range ve.factors {
 				if !slices.Contains(f.Variables, dec) {
 					continue
 				}
-				factorIdx = i
+				factors = append(factors, f)
 			}
 		}
 
-		if factorIdx < 0 {
+		if len(factors) == 0 {
 			panic(fmt.Sprintf("found no factors containing variable %d and its parents", dec.Id))
 		}
 
-		policy := ve.Variables.Policy(ve.factors[factorIdx], dec)
+		// TODO: check that multiplying when multiple factors are remaining is correct!
+		var fac *Factor
+		if len(factors) == 1 {
+			fac = factors[0]
+		} else {
+			f := ve.Variables.Product(factors...)
+			fac = &f
+		}
+		/*for _, f := range factors {
+			fmt.Println(f)
+		}*/
 
-		policies[dec] = [2]*Factor{ve.factors[factorIdx], &policy}
+		policy := ve.Variables.Policy(fac, dec)
+
+		policies[dec] = [2]*Factor{fac, &policy}
 		ve.factors[policy.id] = &policy
 		ve.Variables.variables[dec.Id].NodeType = ChanceNode
 
 		ve.eliminateHidden(nil, nil)
+
+		factors = factors[:0]
 
 		if single {
 			break
