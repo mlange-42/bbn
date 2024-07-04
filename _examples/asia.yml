@@ -1,14 +1,24 @@
 name: Asia
+info: >-
+  The good old Asia example about lung cancer diagnosis.
+
+
+  Yellow are typical evidence nodes. Set/unset their values by clicking the bars.
+
+
+  Observe the probabilities for the three diseases (white nodes).
 variables:
 
 - variable: Visit to Asia
   position: [1, 0]
+  color: yellow
   outcomes: [yes, no]
   table:
   - [1, 99]
 
 - variable: Smoker
   position: [49, 0]
+  color: yellow
   outcomes: [yes, no]
   table:
   - [50, 50]
@@ -39,12 +49,14 @@ variables:
 
 - variable: Tuberculosis or Cancer
   position: [18, 14]
+  color: gray
   given: [Has Tuberculosis, Has Lung Cancer]
   outcomes: [yes, no]
   logic: OR
 
 - variable: XRay Result
   position: [1, 21]
+  color: yellow
   given: [Tuberculosis or Cancer]
   outcomes: [abnormal, normal]
   table:
@@ -53,6 +65,7 @@ variables:
 
 - variable: Dyspnea
   position: [49, 21]
+  color: yellow
   given: [Tuberculosis or Cancer, Has Bronchitis]
   outcomes: [yes, no]
   table:

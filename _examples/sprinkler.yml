@@ -1,4 +1,10 @@
 name: Sprinkler
+info: >-
+  The famous sprinkler example.
+
+
+  Experiment with setting/unsetting the evidence values of some nodes by clicking the bars.
+  Observe how the remaining nodes behave.
 variables:
 
 - variable: Rain

@@ -1,4 +1,18 @@
 name: Umbrella Decision Network
+info: >-
+  Decision network for whether to take an umbrella.
+  The agent knows the weather forecast, but weather itself is not observable.
+
+
+  The umbrella decision (blue) is taken to maximize the utility (green),
+  which depends on the actual weather and the decision.
+
+  
+  To trigger a decision, set the forecast (white) to a value by clicking a bar.
+  To view the complete decision policy, right-click the Umbrella node.
+
+
+  To inspect utilities, right-click the green utility node. 
 variables:
 
 - variable: Weather

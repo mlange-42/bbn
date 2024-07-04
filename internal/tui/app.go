@@ -168,7 +168,7 @@ func (a *App) createWidgets() {
  Navigate nodes     Tab/BackTab
  Navigate bars      Space/Numbers
  Toggle evidence    Enter                 left click
- Show table         T                     right click
+ Show node table    T                     right click
  Ignore policies    P
  Move node          W/A/S/D
  Save network       Ctrl+S
