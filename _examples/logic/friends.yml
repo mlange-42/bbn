@@ -36,6 +36,7 @@ variables:
 
 - variable: Count correct
   position: [49, 8]
+  color: gray
   outcomes: [0, 1, 2, 3, 4]
   given: [A, B, C, D]
   logic: count-true
@@ -66,24 +67,28 @@ variables:
 
 - variable: Count == 2
   position: [3, 24]
+  color: gray
   outcomes: [right, wrong]
   given: [Count correct]
   logic: outcome-is 2 5
 
 - variable: Count <= 2
   position: [4, 29]
+  color: gray
   outcomes: [right, wrong]
   given: [Count correct]
   logic: outcome-less 3 5
 
 - variable: B is wrong
   position: [95, 24]
+  color: gray
   outcomes: [right, wrong]
   given: ['"Max. two are right"']
   logic: not
 
 - variable: Count <= 1
   position: [94, 29]
+  color: gray
   outcomes: [right, wrong]
   given: [Count correct]
   logic: outcome-less 2 5

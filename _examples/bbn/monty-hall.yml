@@ -6,7 +6,7 @@ info:
   It is a game with three doors, behind one of which is the price (a car),
   and nothing is behind the two other doors.
   First, the player chooses a door.
-  Next, the game host opens one of the two doors that were not selected by the player.
+  Next Monty, the game host, opens one of the two doors that were not selected by the player.
   Finally, the player may choose to change their decision to the other close door.
 
 
@@ -31,7 +31,7 @@ variables:
   table: 
   - [1, 1, 1]
 
-- variable: Host
+- variable: Monty
   position: [16, 8]
   given: [Player, Car]
   outcomes: [Door1, Door2, Door3]
