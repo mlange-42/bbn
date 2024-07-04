@@ -47,20 +47,20 @@ go get github.com/mlange-42/bbn
 Try the famous sprinkler example:
 
 ```
-bbni _examples/sprinkler.yml
+bbni _examples/bbn/sprinkler.yml
 ```
 
 Same example with the command line tool, given some evidence:
 
 ```
-bbn inference _examples/sprinkler.yml -e Rain=no,GrassWet=yes
+bbn inference _examples/bbn/sprinkler.yml -e Rain=no,GrassWet=yes
 ```
 
 Train a network from data:
 
 ```
-bbn train _examples/fruits-untrained.yml _examples/fruits.csv
-bbni _examples/fruits-untrained.yml --train _examples/fruits.csv
+bbn train _examples/bbn/fruits-untrained.yml _examples/bbn/fruits.csv
+bbni _examples/bbn/fruits-untrained.yml --train _examples/bbn/fruits.csv
 ```
 
 Also try the other examples in folder [_examples](https://github.com/mlange-42/bbn/tree/main/_examples).
