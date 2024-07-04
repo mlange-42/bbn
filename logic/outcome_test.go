@@ -53,3 +53,35 @@ func TestOutcomeEither(t *testing.T) {
 		0, 1,
 	}, table)
 }
+
+func TestOutcomeLess(t *testing.T) {
+	idx := OutcomeLess(0, 0)
+	err := idx.SetArgs(2, 4)
+	assert.Nil(t, err)
+
+	table, err := idx.Table(1)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []float64{
+		1, 0,
+		1, 0,
+		0, 1,
+		0, 1,
+	}, table)
+}
+
+func TestOutcomeGreater(t *testing.T) {
+	idx := OutcomeGreater(0, 0)
+	err := idx.SetArgs(2, 4)
+	assert.Nil(t, err)
+
+	table, err := idx.Table(1)
+	assert.Nil(t, err)
+
+	assert.Equal(t, []float64{
+		0, 1,
+		0, 1,
+		1, 0,
+		1, 0,
+	}, table)
+}
