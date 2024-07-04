@@ -80,12 +80,12 @@ jobs:
         ./bbn inference _examples/bbn/sprinkler.yml
     - name: Run decision examples
       run: |
-        ./bbn inference _examples/disease-control.yml
-        ./bbn inference _examples/earthquake.yml
-        ./bbn inference _examples/medical.yml
-        ./bbn inference _examples/oil.yml
-        ./bbn inference _examples/robot.yml
-        ./bbn inference _examples/umbrella.yml
+        ./bbn inference _examples/decision/disease-control.yml
+        ./bbn inference _examples/decision/earthquake.yml
+        ./bbn inference _examples/decision/medical.yml
+        ./bbn inference _examples/decision/oil.yml
+        ./bbn inference _examples/decision/robot.yml
+        ./bbn inference _examples/decision/umbrella.yml
     - name: Run logic examples
       run: |
         ./bbn inference _examples/logic/friends.yml
