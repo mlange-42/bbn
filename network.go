@@ -59,6 +59,7 @@ type variable struct {
 
 type Network struct {
 	name              string
+	info              string
 	variables         []Variable
 	factors           []Factor
 	policies          map[string]ve.Factor
@@ -67,9 +68,10 @@ type Network struct {
 	totalUtilityIndex int
 }
 
-func New(name string, variables []Variable, factors []Factor) (*Network, error) {
+func New(name string, info string, variables []Variable, factors []Factor) (*Network, error) {
 	net := &Network{
 		name:      name,
+		info:      info,
 		variables: variables,
 		factors:   factors,
 		policies:  map[string]ve.Factor{},
@@ -157,6 +159,10 @@ func (n *Network) prepareUtilityNodes(varNames map[string]*Variable) error {
 
 func (n *Network) Name() string {
 	return n.name
+}
+
+func (n *Network) Info() string {
+	return n.info
 }
 
 func (n *Network) Variables() []Variable {

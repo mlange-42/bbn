@@ -1,4 +1,14 @@
 name: Knights and Knaves
+info: >-
+  A classical Knights and Knaves puzzle.
+  Knights always say the truth, while knaves always lie.
+
+
+  Person A says "We are both knaves".
+  Can you derive who is what?
+  
+
+  Activate the ==> in the blue node to solve.
 variables:
 
 - variable: A

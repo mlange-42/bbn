@@ -14,6 +14,7 @@
 * Optional total utility node for weighting individual utilities (#59)
 * Adds support for custom node colors in YAML files (#64)
 * Adds shortcuts for logic nodes like, and, or, if-then, etc. (#65)
+* Networks can have a longer info text, also shown in TUI app (#65)
 
 ### Documentation
 

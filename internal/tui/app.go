@@ -22,6 +22,8 @@ type App struct {
 	table       *tview.Table
 	helpDialog  *tview.Grid
 	help        *tview.TextView
+	infoDialog  *tview.Grid
+	info        *tview.TextView
 	canvas      [][]rune
 	colors      [][]Color
 	network     *bbn.Network
@@ -102,17 +104,28 @@ func (a *App) Run() error {
 	a.helpDialog = a.createHelpPanel()
 	a.pages.AddPage("Help", a.helpDialog, true, false)
 
+	a.infoDialog = a.createInfoPanel()
+	a.pages.AddPage("Info", a.infoDialog, true, false)
+
 	mainPanel.SetInputCapture(a.inputMainPanel)
+	a.graph.SetMouseCapture(a.mouseInputGraph)
+
 	a.table.SetInputCapture(a.inputTable)
 	a.table.SetMouseCapture(a.mouseInputTable)
-	a.graph.SetMouseCapture(a.mouseInputGraph)
+
 	a.help.SetInputCapture(a.inputHelp)
+	a.help.SetMouseCapture(a.mouseInputHelp)
 
-	a.app.SetFocus(a.graph)
+	a.info.SetInputCapture(a.inputInfo)
+	a.info.SetMouseCapture(a.mouseInputInfo)
 
-	if err := a.app.SetRoot(a.pages, true).Run(); err != nil {
+	rooted := a.app.SetRoot(a.pages, true)
+	a.showInfo()
+
+	if err := rooted.Run(); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -156,10 +169,13 @@ func (a *App) createWidgets() {
  Navigate bars      Space/Numbers
  Toggle evidence    Enter                 left click
  Show table         T                     right click
- Ignore policies    I
+ Ignore policies    P
  Move node          W/A/S/D
  Save network       Ctrl+S
 `)
+	a.info = tview.NewTextView().
+		SetWrap(true).
+		SetText(a.network.Info())
 }
 
 func (a *App) createMainPanel() *tview.Grid {
@@ -177,7 +193,7 @@ func (a *App) createMainPanel() *tview.Grid {
 
 	help := tview.NewTextView().
 		SetWrap(false).
-		SetText("Press H for help!")
+		SetText("Press H for help, I for network info!")
 	grid.AddItem(help, 2, 0, 1, 2, 0, 0, false)
 
 	return grid
@@ -222,6 +238,29 @@ func (a *App) createHelpPanel() *tview.Grid {
 		SetWrap(false).
 		SetText(" Close help: ESC  Scroll: ←→↕")
 	subGrid.AddItem(help, 1, 0, 1, 1, 0, 0, false)
+
+	grid.AddItem(subGrid, 1, 1, 1, 1, 0, 0, false)
+
+	return grid
+}
+
+func (a *App) createInfoPanel() *tview.Grid {
+	grid := tview.NewGrid().
+		SetColumns(0, 72, 0).
+		SetRows(0, 17, 0)
+
+	subGrid := tview.NewGrid().
+		SetColumns(0).
+		SetRows(0, 1)
+	subGrid.SetBorder(true)
+	subGrid.SetTitle(" Info ")
+
+	subGrid.AddItem(a.info, 0, 0, 1, 1, 0, 0, true)
+
+	info := tview.NewTextView().
+		SetWrap(false).
+		SetText(" Close info: ESC  Scroll: ←→↕")
+	subGrid.AddItem(info, 1, 0, 1, 1, 0, 0, false)
 
 	grid.AddItem(subGrid, 1, 1, 1, 1, 0, 0, false)
 

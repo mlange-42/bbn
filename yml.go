@@ -43,6 +43,7 @@ type variableYaml struct {
 
 type networkYaml struct {
 	Name      string
+	Info      string `yaml:",omitempty"`
 	Variables []variableYaml
 }
 
@@ -85,7 +86,7 @@ func FromYAML(content []byte) (*Network, error) {
 		})
 	}
 
-	return New(net.Name, variables, factors)
+	return New(net.Name, net.Info, variables, factors)
 }
 
 func toTable(v *variableYaml) ([]float64, error) {

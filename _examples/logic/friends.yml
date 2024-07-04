@@ -1,4 +1,10 @@
 name: Who is right?
+info: >-
+  Four friends A, B, C and D meet and state the quoted facts below.
+  Who is right, and who is wrong?
+  
+
+  Activate the ==> in the blue node to solve.
 variables:
 
 - variable: A
@@ -25,7 +31,7 @@ variables:
   table:
   - [50, 50]
 
-- variable: Count right
+- variable: Count correct
   position: [49, 8]
   outcomes: [0, 1, 2, 3, 4]
   given: [A, B, C, D]
@@ -58,25 +64,25 @@ variables:
 - variable: Count == 2
   position: [3, 24]
   outcomes: [right, wrong]
-  given: [Count right]
+  given: [Count correct]
   logic: outcome-is 2 5
 
 - variable: Count <= 3
   position: [4, 29]
   outcomes: [right, wrong]
-  given: [Count right]
+  given: [Count correct]
   logic: outcome-less 3 5
 
 - variable: B is wrong
   position: [95, 24]
   outcomes: [right, wrong]
-  given: [B]
-  logic: equals-not
+  given: ['"Max. two are right"']
+  logic: not
 
 - variable: Count <= 1
-  position: [95, 29]
+  position: [94, 29]
   outcomes: [right, wrong]
-  given: [Count right]
+  given: [Count correct]
   logic: outcome-less 2 5
 
 - variable: Trigger

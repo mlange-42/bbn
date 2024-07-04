@@ -96,7 +96,7 @@ func FromBIFXML(content []byte) (*Network, error) {
 		})
 	}
 
-	return New(bifNet.Network.Name, variables, factors)
+	return New(bifNet.Network.Name, "", variables, factors)
 }
 
 // Search and parse position property in format `position = (x, y)`

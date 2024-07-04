@@ -43,7 +43,7 @@ func Example_sprinkler() {
 		},
 	}
 
-	net, err := bbn.New("Sprinkler", variables, factors)
+	net, err := bbn.New("Sprinkler", "", variables, factors)
 	if err != nil {
 		panic(err)
 	}

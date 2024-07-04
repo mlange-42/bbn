@@ -1,4 +1,11 @@
 name: Weekday 7 friends puzzle
+info: >-
+  Seven friends meet, and are not sure which day of the week it is.
+  Each one has a guess, but only one is right.
+  Which day of the week is it?
+  
+
+  Activate the ==> in the blue node to solve.
 variables:
 
 - variable: Day of week
@@ -8,43 +15,43 @@ variables:
   table:
   - [1, 1, 1, 1, 1, 1, 1]
 
-- variable: Mon
+- variable: '"It is Monday"'
   position: [1, 13]
   given: [Day of week]
   outcomes: [yes, no]
   logic: outcome-is 0 7
   
-- variable: Tue
+- variable: '"It is Tuesday"'
   position: [28, 11]
   given: [Day of week]
   outcomes: [yes, no]
   logic: outcome-is 1 7
   
-- variable: Wed
+- variable: '"It is Wednesday"'
   position: [55, 11]
   given: [Day of week]
   outcomes: [yes, no]
   logic: outcome-is 2 7
   
-- variable: Thu-Fri
+- variable: '"It is Thursday or Friday"'
   position: [82, 13]
   given: [Day of week]
   outcomes: [yes, no]
   logic: outcome-either 3 4 7
   
-- variable: Sun-1
+- variable: '"It is Sunday"'
   position: [2, 19]
   given: [Day of week]
   outcomes: [yes, no]
   logic: outcome-is 6 7
   
-- variable: Sun-2
-  position: [41, 17]
+- variable: '"Tomorrow is Monday"'
+  position: [41, 18]
   given: [Day of week]
   outcomes: [yes, no]
   logic: outcome-is 6 7
   
-- variable: NotSun
+- variable: '"It is not Sunday"'
   position: [81, 19]
   given: [Day of week]
   outcomes: [yes, no]
@@ -54,5 +61,12 @@ variables:
   position: [39, 25]
   color: blue
   outcomes: [==>, " "]
-  given: [Mon, Tue, Wed, Thu-Fri, Sun-1, Sun-2, NotSun]
+  given: 
+  - '"It is Monday"'
+  - '"It is Tuesday"'
+  - '"It is Wednesday"'
+  - '"It is Thursday or Friday"'
+  - '"It is Sunday"'
+  - '"Tomorrow is Monday"'
+  - '"It is not Sunday"'
   logic: count-is 1

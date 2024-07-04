@@ -49,7 +49,7 @@ func TestTrainer(t *testing.T) {
 		},
 	}
 
-	net, err := bbn.New("Sprinkler", vars, factors)
+	net, err := bbn.New("Sprinkler", "", vars, factors)
 	assert.Nil(t, err)
 
 	data := [][]int{
@@ -109,7 +109,7 @@ func TestTrainerDecision(t *testing.T) {
 		}},
 	}
 
-	net, err := bbn.New("umbrella", vars, factors)
+	net, err := bbn.New("umbrella", "", vars, factors)
 	assert.Nil(t, err)
 	trainer := bbn.NewTrainer(net)
 	_ = trainer

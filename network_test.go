@@ -27,7 +27,7 @@ func TestFactorRow(t *testing.T) {
 		},
 	}
 
-	net, err := New("test", []Variable{a, b, c}, []Factor{factor})
+	net, err := New("test", "", []Variable{a, b, c}, []Factor{factor})
 	assert.Nil(t, err)
 
 	variable := net.Variables()[2]
@@ -72,7 +72,7 @@ func TestNetworkToVE(t *testing.T) {
 		}},
 	}
 
-	n, err := New("umbrella", vars, factors)
+	n, err := New("umbrella", "", vars, factors)
 	assert.Nil(t, err)
 
 	v, variables, err := n.toVE(nil)
@@ -124,7 +124,7 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 		}},
 	}
 
-	n, err := New("umbrella", vars, factors)
+	n, err := New("umbrella", "", vars, factors)
 	assert.Nil(t, err)
 	policy, err := n.SolvePolicies(true)
 	assert.Nil(t, err)
@@ -211,7 +211,7 @@ func TestNetworkSolveOil(t *testing.T) {
 		}},
 	}
 
-	n, err := New("oil", vars, factors)
+	n, err := New("oil", "", vars, factors)
 	assert.Nil(t, err)
 	policy, err := n.SolvePolicies(true)
 	assert.Nil(t, err)
@@ -276,7 +276,7 @@ func TestNetworkRearrange(t *testing.T) {
 		Given: []string{"a", "b", "c"},
 	}
 
-	net, err := New("test", variables, []Factor{fac})
+	net, err := New("test", "", variables, []Factor{fac})
 	assert.Nil(t, err)
 
 	_, f, err := net.SolveQuery(map[string]string{}, []string{"a", "b", "c", "d"}, true)

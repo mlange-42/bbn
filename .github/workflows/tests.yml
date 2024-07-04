@@ -72,6 +72,7 @@ jobs:
       run: go build ./cmd/bbn
     - name: Run CLI examples
       run: |
+        ./bbn inference _examples/logic/friends.yml
         ./bbn inference _examples/logic/knights.yml
         ./bbn inference _examples/logic/weekday.yml
         ./bbn inference _examples/asia.yml
