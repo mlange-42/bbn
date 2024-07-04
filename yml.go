@@ -84,9 +84,7 @@ func FromYAML(content []byte) (*Network, error) {
 		})
 	}
 
-	n := New(net.Name, variables, factors)
-
-	return n, nil
+	return New(net.Name, variables, factors)
 }
 
 func toTable(v *variableYaml) ([]float64, error) {

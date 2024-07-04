@@ -22,6 +22,6 @@ variables:
 - variable: We are both knaves
   position: [1, 8]
   color: blue
-  outcomes: [yes, no]
+  outcomes: [==>, " "]
   given: [A, A knave && B knave]
   logic: bicond

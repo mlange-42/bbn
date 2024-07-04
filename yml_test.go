@@ -92,7 +92,8 @@ func TestToYAML(t *testing.T) {
 		},
 	}
 
-	net := New("Sprinkler", []Variable{rain, sprinkler, grassWet}, []Factor{fRain, fSprinkler, fGrass})
+	net, err := New("Sprinkler", []Variable{rain, sprinkler, grassWet}, []Factor{fRain, fSprinkler, fGrass})
+	assert.Nil(t, err)
 
 	yml, err := ToYAML(net)
 	assert.Nil(t, err)
