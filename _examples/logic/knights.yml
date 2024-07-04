@@ -13,15 +13,15 @@ variables:
   table:
   - [50, 50]
 
-- variable: A knave || B knight
+- variable: A knave && B knave
   position: [46, 8]
   outcomes: [yes, no]
   given: [A, B]
-  logic: not-or
+  logic: not-and-not
 
-- variable: Either I am knave or B is knight
+- variable: We are both knaves
   position: [1, 8]
   color: blue
   outcomes: [yes, no]
-  given: [A, A knave || B knight]
+  given: [A, A knave && B knave]
   logic: bicond
