@@ -1,4 +1,26 @@
 name: Disease Control Decision
+info: >-
+  A decision network for disease control decisions in livestock herds.
+
+
+  Three decisions are taken sequentially:
+  
+  (1) Whether to vaccinate, preventively, depending on herd size.
+  Vaccination reduces infection and spread risk.
+
+  (2) Whether to perform a test, depending on the herd size,
+  previous vaccination, and whether an animal has symptoms.
+
+  (3) Whether to treat (or cull) the animal, depending on the herd size,
+  previous vaccination, the test and its result.
+  Treatment reduces the spread risk.
+
+
+  Get definitive decisions by setting the values of "Herd size",
+  "Symptoms" and "Test result" by clicking on the resp. bars.
+
+
+  Particularly inspect the differences between the policies for the different herd sizes.
 variables:
 
 - variable: Herd size
@@ -89,7 +111,7 @@ variables:
   - [-10] # treatment+
   - [  0] # treatment-
 
-- variable: Outbreak
+- variable: Spread
   position: [79, 6]
   color: gray
   outcomes: [yes, no]
@@ -107,15 +129,15 @@ variables:
   - [0, 100] # inf- treat- vacc+
   - [0, 100] # inf- treat- vacc-
   
-- variable: Outbreak cost
-  given: [Outbreak, Herd size]
+- variable: Spread cost
+  given: [Spread, Herd size]
   outcomes: [euros]
   position: [78, 0]
   type: utility
   table:
-  - [-100] # outbreak+ small
-  - [-500] # outbreak+ medium
-  - [-5000] # outbreak+ large
-  - [0] # outbreak- small
-  - [0] # outbreak- medium
-  - [0] # outbreak- large
+  - [-100] # spread+ small
+  - [-500] # spread+ medium
+  - [-5000] # spread+ large
+  - [0] # spread- small
+  - [0] # spread- medium
+  - [0] # spread- large
