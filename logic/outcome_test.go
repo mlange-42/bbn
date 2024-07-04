@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIndexIs(t *testing.T) {
-	idx := IndexIs(0, 0)
+func TestOutcomeIs(t *testing.T) {
+	idx := OutcomeIs(0, 0)
 	err := idx.SetArgs(1, 4)
 	assert.Nil(t, err)
 
@@ -22,8 +22,8 @@ func TestIndexIs(t *testing.T) {
 	}, table)
 }
 
-func TestIndexIsNot(t *testing.T) {
-	idx := IndexIsNot(0, 0)
+func TestOutcomeIsNot(t *testing.T) {
+	idx := OutcomeIsNot(0, 0)
 	err := idx.SetArgs(2, 4)
 	assert.Nil(t, err)
 
@@ -38,8 +38,8 @@ func TestIndexIsNot(t *testing.T) {
 	}, table)
 }
 
-func TestIndexEither(t *testing.T) {
-	idx := IndexEither(nil, 0)
+func TestOutcomeEither(t *testing.T) {
+	idx := OutcomeEither(nil, 0)
 	err := idx.SetArgs(1, 2, 4)
 	assert.Nil(t, err)
 

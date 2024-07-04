@@ -43,7 +43,7 @@ var Factors = map[string]Factor{
 	"given-not":  GivenNot(0),
 	"given-excl": GivenExcl(0),
 
-	"index-is":     IndexIs(0, 0),
-	"index-is-not": IndexIsNot(0, 0),
-	"index-either": IndexEither(nil, 0),
+	"outcome-is":     OutcomeIs(0, 0),
+	"outcome-is-not": OutcomeIsNot(0, 0),
+	"outcome-either": OutcomeEither(nil, 0),
 }

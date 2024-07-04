@@ -12,43 +12,43 @@ variables:
   position: [1, 13]
   given: [Day of week]
   outcomes: [yes, no]
-  logic: index-is 0 7
+  logic: outcome-is 0 7
   
 - variable: Tue
   position: [28, 11]
   given: [Day of week]
   outcomes: [yes, no]
-  logic: index-is 1 7
+  logic: outcome-is 1 7
   
 - variable: Wed
   position: [55, 11]
   given: [Day of week]
   outcomes: [yes, no]
-  logic: index-is 2 7
+  logic: outcome-is 2 7
   
 - variable: Thu-Fri
   position: [82, 13]
   given: [Day of week]
   outcomes: [yes, no]
-  logic: index-either 3 4 7
+  logic: outcome-either 3 4 7
   
 - variable: Sun-1
   position: [2, 19]
   given: [Day of week]
   outcomes: [yes, no]
-  logic: index-is 6 7
+  logic: outcome-is 6 7
   
 - variable: Sun-2
   position: [41, 17]
   given: [Day of week]
   outcomes: [yes, no]
-  logic: index-is 6 7
+  logic: outcome-is 6 7
   
 - variable: NotSun
   position: [81, 19]
   given: [Day of week]
   outcomes: [yes, no]
-  logic: index-is-not 6 7
+  logic: outcome-is-not 6 7
   
 - variable: "Exactly one is correct    "
   position: [39, 25]

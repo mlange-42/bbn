@@ -4,19 +4,19 @@ import (
 	"fmt"
 )
 
-type indexIsFactor struct {
+type outcomeIsFactor struct {
 	Index  int
 	Length int
 }
 
-func IndexIs(idx, ln int) Factor {
-	return &indexIsFactor{
+func OutcomeIs(idx, ln int) Factor {
+	return &outcomeIsFactor{
 		Index:  idx,
 		Length: ln,
 	}
 }
 
-func (f *indexIsFactor) SetArgs(args ...int) error {
+func (f *outcomeIsFactor) SetArgs(args ...int) error {
 	if len(args) != 2 {
 		return fmt.Errorf("logic operator expects 2 argument (index, length), got %d", len(args))
 	}
@@ -25,7 +25,7 @@ func (f *indexIsFactor) SetArgs(args ...int) error {
 	return nil
 }
 
-func (f *indexIsFactor) Table(given int) ([]float64, error) {
+func (f *outcomeIsFactor) Table(given int) ([]float64, error) {
 	if given != 1 {
 		return nil, fmt.Errorf("logic operator requires 1 operand, but %d were given", given)
 	}
@@ -40,19 +40,19 @@ func (f *indexIsFactor) Table(given int) ([]float64, error) {
 	return table, nil
 }
 
-type indexIsNotFactor struct {
+type outcomeIsNotFactor struct {
 	Index  int
 	Length int
 }
 
-func IndexIsNot(idx, ln int) Factor {
-	return &indexIsNotFactor{
+func OutcomeIsNot(idx, ln int) Factor {
+	return &outcomeIsNotFactor{
 		Index:  idx,
 		Length: ln,
 	}
 }
 
-func (f *indexIsNotFactor) SetArgs(args ...int) error {
+func (f *outcomeIsNotFactor) SetArgs(args ...int) error {
 	if len(args) != 2 {
 		return fmt.Errorf("logic operator expects 2 argument (index, length), got %d", len(args))
 	}
@@ -61,7 +61,7 @@ func (f *indexIsNotFactor) SetArgs(args ...int) error {
 	return nil
 }
 
-func (f *indexIsNotFactor) Table(given int) ([]float64, error) {
+func (f *outcomeIsNotFactor) Table(given int) ([]float64, error) {
 	if given != 1 {
 		return nil, fmt.Errorf("logic operator requires 1 operand, but %d were given", given)
 	}
@@ -76,19 +76,19 @@ func (f *indexIsNotFactor) Table(given int) ([]float64, error) {
 	return table, nil
 }
 
-type indexEitherFactor struct {
+type OutcomeEitherFactor struct {
 	Indices []int
 	Length  int
 }
 
-func IndexEither(idx []int, ln int) Factor {
-	return &indexEitherFactor{
+func OutcomeEither(idx []int, ln int) Factor {
+	return &OutcomeEitherFactor{
 		Indices: idx,
 		Length:  ln,
 	}
 }
 
-func (f *indexEitherFactor) SetArgs(args ...int) error {
+func (f *OutcomeEitherFactor) SetArgs(args ...int) error {
 	if len(args) < 2 {
 		return fmt.Errorf("logic operator expects at least 2 argument (index..., length), got %d", len(args))
 	}
@@ -97,7 +97,7 @@ func (f *indexEitherFactor) SetArgs(args ...int) error {
 	return nil
 }
 
-func (f *indexEitherFactor) Table(given int) ([]float64, error) {
+func (f *OutcomeEitherFactor) Table(given int) ([]float64, error) {
 	if given != 1 {
 		return nil, fmt.Errorf("logic operator requires 1 operand, but %d were given", given)
 	}
