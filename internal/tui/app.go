@@ -196,7 +196,7 @@ func (a *App) createMainPanel() *tview.Grid {
 
 	help := tview.NewTextView().
 		SetWrap(false).
-		SetText("Press H for help, I for network info!")
+		SetText("Help: H  Network info: I")
 	grid.AddItem(help, 2, 0, 1, 2, 0, 0, false)
 
 	return grid
