@@ -12,10 +12,12 @@ Bayesian Belief Network library and CLI/TUI tool for [Go](https://go.dev).
 ## Features
 
 * Minimal, fast API for usage as a library.
-* Decision networks with utility and decision nodes.
-* Human-readable YAML format, as well as BIF-XML.
-* Train and query networks from the command line with `bbn`.
 * Visualize, query and explore networks in the interactive TUI app `bbni`.
+* Supports decision networks (aka influence diagrams) for multi-stage decisions.
+* Provides logic nodes for logic inference in addition to probabilistic inference.
+* Train and query networks from the command line with `bbn`.
+* Human-readable YAML format for networks, as well as BIF-XML.
+* Plenty of [examples](https://github.com/mlange-42/bbn/tree/main/_examples) with introductory text, shown in-app.
 
 ## Installation
 

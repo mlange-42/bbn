@@ -132,30 +132,6 @@ func (a *App) moveNode(event *tcell.EventKey) *tcell.EventKey {
 	return event
 }
 
-func (a *App) inputTable(event *tcell.EventKey) *tcell.EventKey {
-	if event.Key() == tcell.KeyEsc {
-		a.pages.HidePage("Table")
-		return nil
-	}
-	return event
-}
-
-func (a *App) inputHelp(event *tcell.EventKey) *tcell.EventKey {
-	if event.Key() == tcell.KeyEsc {
-		a.pages.HidePage("Help")
-		return nil
-	}
-	return event
-}
-
-func (a *App) inputInfo(event *tcell.EventKey) *tcell.EventKey {
-	if event.Key() == tcell.KeyEsc {
-		a.pages.HidePage("Info")
-		return nil
-	}
-	return event
-}
-
 // inputEnter adds the currently selected node and state to the evidence.
 func (a *App) inputEnter() error {
 	node := a.nodes[a.selectedNode]
@@ -280,6 +256,30 @@ func (a *App) mouseInputInfo(action tview.MouseAction, event *tcell.EventMouse) 
 		return tview.MouseConsumed, nil
 	}
 	return action, event
+}
+
+func (a *App) inputTable(event *tcell.EventKey) *tcell.EventKey {
+	if event.Key() == tcell.KeyEsc || event.Key() == tcell.KeyEnter {
+		a.pages.HidePage("Table")
+		return nil
+	}
+	return event
+}
+
+func (a *App) inputHelp(event *tcell.EventKey) *tcell.EventKey {
+	if event.Key() == tcell.KeyEsc || event.Key() == tcell.KeyEnter {
+		a.pages.HidePage("Help")
+		return nil
+	}
+	return event
+}
+
+func (a *App) inputInfo(event *tcell.EventKey) *tcell.EventKey {
+	if event.Key() == tcell.KeyEsc || event.Key() == tcell.KeyEnter {
+		a.pages.HidePage("Info")
+		return nil
+	}
+	return event
 }
 
 func (a *App) mousePosInGraph(x, y int) (int, int) {

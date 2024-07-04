@@ -1,5 +1,16 @@
 name: Oil Drilling Decision
+info: >-
+  A decision network for sequential decisions on oil test drilling and actual drilling.
 
+
+  First, a decision is taken whether to do test drilling.
+  Then, based on the result of the decision and a potential test result,
+  the actual drilling decision is made.
+
+
+  The decision for testing was already in favor, as it does not depend on any observations.
+  To get a definitive drilling decision, set "Test result" (white) to a value by clicking a bar.
+  Also observe the expected test and drill utilities.
 variables:
 
 - variable: Oil
@@ -12,7 +23,7 @@ variables:
 - variable: Test result
   position: [1, 8]
   outcomes: ["closed", "open", "diffuse"]
-  given: [Oil, Do test]
+  given: [Oil, Do test drill]
   table:
   # closed, open, diffuse
   - [0.1,   0.3,   0.6]   # dry, test+
@@ -22,7 +33,7 @@ variables:
   - [0.5,   0.4,   0.1]   # soaking, test+
   - [0.333, 0.333, 0.333] # soaking, test-
 
-- variable: Do test
+- variable: Do test drill
   position: [38, 15]
   outcomes: ["yes", "no"]
   type: decision
@@ -31,7 +42,7 @@ variables:
   position: [38, 8]
   outcomes: ["yes", "no"]
   type: decision
-  given: [Do test, Test result]
+  given: [Do test drill, Test result]
 
 - variable: Drill utility
   position: [36, 0]
@@ -50,7 +61,7 @@ variables:
   position: [0, 17]
   outcomes: ["expected"]
   type: utility
-  given: [Do test]
+  given: [Do test drill]
   table:
   - [-10] # test+
   - [  0] # test-

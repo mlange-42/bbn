@@ -120,7 +120,10 @@ func (a *App) Run() error {
 	a.info.SetMouseCapture(a.mouseInputInfo)
 
 	rooted := a.app.SetRoot(a.pages, true)
-	a.showInfo()
+
+	if a.network.Info() != "" {
+		a.showInfo()
+	}
 
 	if err := rooted.Run(); err != nil {
 		return err
@@ -168,7 +171,7 @@ func (a *App) createWidgets() {
  Navigate nodes     Tab/BackTab
  Navigate bars      Space/Numbers
  Toggle evidence    Enter                 left click
- Show table         T                     right click
+ Show node table    T                     right click
  Ignore policies    P
  Move node          W/A/S/D
  Save network       Ctrl+S
@@ -202,7 +205,7 @@ func (a *App) createMainPanel() *tview.Grid {
 func (a *App) createTablePanel() *tview.Grid {
 	grid := tview.NewGrid().
 		SetColumns(0, 72, 0).
-		SetRows(0, 17, 0)
+		SetRows(0, 20, 0)
 
 	subGrid := tview.NewGrid().
 		SetColumns(0).
@@ -224,7 +227,7 @@ func (a *App) createTablePanel() *tview.Grid {
 func (a *App) createHelpPanel() *tview.Grid {
 	grid := tview.NewGrid().
 		SetColumns(0, 72, 0).
-		SetRows(0, 17, 0)
+		SetRows(0, 20, 0)
 
 	subGrid := tview.NewGrid().
 		SetColumns(0).
@@ -247,7 +250,7 @@ func (a *App) createHelpPanel() *tview.Grid {
 func (a *App) createInfoPanel() *tview.Grid {
 	grid := tview.NewGrid().
 		SetColumns(0, 72, 0).
-		SetRows(0, 17, 0)
+		SetRows(0, 20, 0)
 
 	subGrid := tview.NewGrid().
 		SetColumns(0).

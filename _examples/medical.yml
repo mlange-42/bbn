@@ -1,5 +1,20 @@
 name: Medical Treatment Decision
+info: >-
+  A decision network for the sequential decisions on whether to test a patient,
+  and whether to treat them.
 
+
+  The decision for testing is based on whether the patient exhibits symptoms.
+  Set the "Symptoms" node to a value by clicking a bar.
+
+
+  The decision for treatment is based on symptoms, whether a test was performed, and the test result.
+  Set the test result to get a definitive decision.
+
+
+  Note that the actual infection state of the patient is not known for the decisions.
+  Also note that it is a severe disease, which is very cheap to treat.
+  Therefore, the optimal policy might be unexpected.
 variables:
 
 - variable: Infected
@@ -12,7 +27,7 @@ variables:
 - variable: Symptoms
   outcomes: [yes, no]
   given: [Infected]
-  position: [1, 8]
+  position: [1, 10]
   table:
   - [0.8, 0.2] # infected+
   - [0.05, 0.95] # infected-
@@ -24,7 +39,7 @@ variables:
   type: utility
   table:
   - [ -100] # infected+ treatment+
-  - [-1000] # infected+ treatment-
+  - [-5000] # infected+ treatment-
   - [    0] # infected- treatment+
   - [    0] # infected- treatment-
   
@@ -37,7 +52,7 @@ variables:
 - variable: Test result
   outcomes: [pos, neg]
   given: [Test, Infected]
-  position: [31, 8]
+  position: [31, 7]
   table:
   - [0.95, 0.05] # test+ infected+
   - [0.05, 0.95] # test+ infected-
@@ -50,12 +65,12 @@ variables:
   position: [1, 24]
   type: utility
   table:
-  - [-5] # test+
+  - [-10] # test+
   - [ 0] # test-
   
 - variable: Treatment
   outcomes: [yes, no]
-  given: [Test, Test result]
+  given: [Symptoms, Test, Test result]
   position: [46, 17]
   type: decision
 
@@ -66,5 +81,5 @@ variables:
   type: utility
   table:
   - [-100] # treatment+
-  - [  0] # treatment-
+  - [   0] # treatment-
   

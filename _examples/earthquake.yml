@@ -1,8 +1,23 @@
 name: Earthquake Decision Network
+info: >-
+  A network for the decision on evacuating a city,
+  based on warnings from a seismic sensor.
+
+
+  The actor can observe the sensor warning, as well as the quality of sensor maintenance.
+  To trigger a definitive decision, set these two to some value by clicking on the bars.
+
+
+  In this example, multiple utility nodes (green) are used.
+  "Material damage" depends on the actual earthquake,
+  "Human damage" depends on the earthquake and the decision,
+  and "Evacuation cost" only depends on the decision.
+  The sum of all three is optimized.
 variables:
 
 - variable: Earthquake next week
   position: [1, 0]
+  color: gray
   outcomes: [strong, slight, none]
   table: 
   - [1, 5, 94]

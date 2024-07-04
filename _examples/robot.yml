@@ -1,5 +1,17 @@
 name: Robot Decision
+info:
+  The famous robot decision network example.
 
+
+  the robot has to choose between a short and a long route,
+  where the short route harbours the risk of an accident.
+  Further, the robot decides whether to wear protective pads
+  to reduce damage in case of an accident.
+
+
+  The decision is already taken, as it does not depend on any information.
+  You can set the value of "Accident" by clicking a bar,
+  and observe the expected utility.
 variables:
 
 - variable: Short path

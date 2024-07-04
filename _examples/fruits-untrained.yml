@@ -1,7 +1,6 @@
 # An untrained network.
 # Train with:
 # bbn train _examples/fruits.yml _examples/fruits.csv
-
 name: Fruits
 variables:
 

@@ -1,4 +1,21 @@
 name: Monty-Hall Problem
+info:
+  The good old Monty Hall Problem.
+
+
+  It is a game with three doors, behind one of which is the price (a car),
+  and nothing is behind the two other doors.
+  First, the player chooses a door.
+  Next, the game host opens one of the two doors that were not selected by the player.
+  Finally, the player may choose to change their decision to the other close door.
+
+
+  Should the player change the decision?
+  This question is solved by the network, already without any interaction.
+
+
+  Explore the network by setting some evidence (by clicking bars),
+  and try to understand why the player should change.
 variables:
 
 - variable: Player
