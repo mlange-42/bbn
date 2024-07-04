@@ -3,8 +3,10 @@ package bbn
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/mlange-42/bbn/internal/ve"
+	"github.com/mlange-42/bbn/logic"
 	"gopkg.in/yaml.v3"
 )
 
@@ -30,11 +32,12 @@ var nodeTypeNames = map[ve.NodeType]string{
 type variableYaml struct {
 	Variable string      // Name of the node.
 	Given    []string    `yaml:",flow,omitempty"`
-	Type     string      `yaml:",omitempty"` // Type of the node [nature, decision, utility]
-	Outcomes []string    `yaml:",flow"`      // Names of the node's possible states.
-	Position [2]int      `yaml:",flow"`      // Coordinates for visualization, optional.
-	Color    string      `yaml:",omitempty"` // Node color, optional.
-	Table    [][]float64 `yaml:",flow,omitempty"`
+	Type     string      `yaml:",omitempty"`      // Type of the node [nature, decision, utility]
+	Outcomes []string    `yaml:",flow"`           // Names of the node's possible states.
+	Position [2]int      `yaml:",flow"`           // Coordinates for visualization, optional.
+	Color    string      `yaml:",omitempty"`      // Node color, optional.
+	Logic    string      `yaml:",omitempty"`      // Logic operations, alternative to a table
+	Table    [][]float64 `yaml:",flow,omitempty"` // Table with the variable's factor
 }
 
 type networkYaml struct {
@@ -69,13 +72,11 @@ func FromYAML(content []byte) (*Network, error) {
 			Color:    v.Color,
 		}
 
-		var table []float64
-		if len(v.Table) > 0 {
-			table = make([]float64, 0, len(v.Table)*len(v.Table[0]))
-			for _, row := range v.Table {
-				table = append(table, row...)
-			}
+		table, err := toTable(&v)
+		if err != nil {
+			return nil, err
 		}
+
 		factors = append(factors, Factor{
 			For:   v.Variable,
 			Given: v.Given,
@@ -86,6 +87,33 @@ func FromYAML(content []byte) (*Network, error) {
 	n := New(net.Name, variables, factors)
 
 	return n, nil
+}
+
+func toTable(v *variableYaml) ([]float64, error) {
+	if len(v.Table) > 0 && v.Logic != "" {
+		return nil, fmt.Errorf("node can only have one of 'table' or 'logic'")
+	}
+
+	if v.Logic != "" {
+		l, ok := logic.Factors[strings.ToLower(v.Logic)]
+		if !ok {
+			return nil, fmt.Errorf("unknown logic operator %s; valid operators are e.g.: not, and, or, xor, if-then, if-not-then, if-then-not, if-not-then-not, not-and, etc", v.Logic)
+		}
+		if len(v.Given) != l.Operands() {
+			return nil, fmt.Errorf("logic %s requires %d operands, but %d were given",
+				v.Logic, l.Operands(), len(v.Given))
+		}
+		return l.Table(), nil
+	}
+
+	var table []float64
+	if len(v.Table) > 0 {
+		table = make([]float64, 0, len(v.Table)*len(v.Table[0]))
+		for _, row := range v.Table {
+			table = append(table, row...)
+		}
+	}
+	return table, nil
 }
 
 func ToYAML(network *Network) ([]byte, error) {

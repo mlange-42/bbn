@@ -41,11 +41,7 @@ variables:
   position: [18, 14]
   given: [Has Tuberculosis, Has Lung Cancer]
   outcomes: [yes, no]
-  table:
-  - [1, 0]
-  - [1, 0]
-  - [1, 0]
-  - [0, 1]
+  logic: OR
 
 - variable: XRay Result
   position: [1, 21]

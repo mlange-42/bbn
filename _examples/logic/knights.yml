@@ -1,0 +1,27 @@
+name: Knights and Knaves
+variables:
+
+- variable: A
+  position: [1, 0]
+  outcomes: [knight, knave]
+  table:
+  - [50, 50]
+
+- variable: B
+  position: [50, 0]
+  outcomes: [knight, knave]
+  table:
+  - [50, 50]
+
+- variable: A knave && B knave
+  position: [46, 8]
+  outcomes: [yes, no]
+  given: [A, B]
+  logic: not-and-not
+
+- variable: We are both knaves
+  position: [1, 8]
+  color: blue
+  outcomes: [yes, no]
+  given: [A, A knave && B knave]
+  logic: bicond
