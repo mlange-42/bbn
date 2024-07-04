@@ -4,13 +4,16 @@ import "fmt"
 
 type boolFactor []bool
 
-func (f boolFactor) Table(given int) ([]float64, error) {
-	if given != len(f)/2 {
-		return nil, fmt.Errorf("logic operator requires %d operands, but %d were given", len(f)/2, given)
+func (f *boolFactor) SetArgs(args ...int) {}
+
+func (f *boolFactor) Table(given int) ([]float64, error) {
+	arr := *f
+	if given != len(arr)/2 {
+		return nil, fmt.Errorf("logic operator requires %d operands, but %d were given", len(arr)/2, given)
 	}
 
-	table := make([]float64, len(f)*2)
-	for i, v := range f {
+	table := make([]float64, len(arr)*2)
+	for i, v := range arr {
 		if v {
 			table[i*2] = 1
 		} else {
@@ -22,11 +25,14 @@ func (f boolFactor) Table(given int) ([]float64, error) {
 
 type floatFactor []float64
 
-func (f floatFactor) Table(given int) ([]float64, error) {
-	if given != len(f)/4 {
-		return nil, fmt.Errorf("logic operator requires %d operands, but %d were given", len(f)/4, given)
+func (f *floatFactor) SetArgs(args ...int) {}
+
+func (f *floatFactor) Table(given int) ([]float64, error) {
+	arr := *f
+	if given != len(arr)/4 {
+		return nil, fmt.Errorf("logic operator requires %d operands, but %d were given", len(arr)/4, given)
 	}
-	return f, nil
+	return arr, nil
 }
 
 var Not = boolFactor{

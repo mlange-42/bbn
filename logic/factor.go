@@ -2,35 +2,36 @@ package logic
 
 type Factor interface {
 	Table(given int) ([]float64, error)
+	SetArgs(args ...int)
 }
 
 var Factors = map[string]Factor{
-	"not": Not,
+	"not": &Not,
 
-	"and":         And,
-	"not-and":     NotAnd,
-	"and-not":     AndNot,
-	"not-and-not": NotAndNot,
+	"and":         &And,
+	"not-and":     &NotAnd,
+	"and-not":     &AndNot,
+	"not-and-not": &NotAndNot,
 
-	"or":         Or,
-	"not-or":     NotOr,
-	"or-not":     OrNot,
-	"not-or-not": NotOrNot,
+	"or":         &Or,
+	"not-or":     &NotOr,
+	"or-not":     &OrNot,
+	"not-or-not": &NotOrNot,
 
-	"xor": XOr,
+	"xor": &XOr,
 
-	"cond":         Cond,
-	"not-cond":     NotCond,
-	"cond-not":     CondNot,
-	"not-cond-not": NotCondNot,
+	"cond":         &Cond,
+	"not-cond":     &NotCond,
+	"cond-not":     &CondNot,
+	"not-cond-not": &NotCondNot,
 
-	"bicond": BiCond,
+	"bicond": &BiCond,
 
-	"if-then":         IfThen,
-	"if-not-then":     IfNotThen,
-	"if-then-not":     IfThenNot,
-	"if-not-then-not": IfNotThenNot,
+	"if-then":         &IfThen,
+	"if-not-then":     &IfNotThen,
+	"if-then-not":     &IfThenNot,
+	"if-not-then-not": &IfNotThenNot,
 
-	"equals":     Equals,
-	"equals-not": EqualsNot,
+	"equals":     &Equals,
+	"equals-not": &EqualsNot,
 }
