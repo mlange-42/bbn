@@ -97,11 +97,11 @@ func toTable(v *variableYaml) ([]float64, error) {
 		if !ok {
 			return nil, fmt.Errorf("unknown logic operator %s; valid operators are e.g.: not, and, or, xor, if-then, if-not-then, if-then-not, if-not-then-not, not-and, etc", v.Logic)
 		}
-		if len(v.Given) != l.Operands() {
-			return nil, fmt.Errorf("logic %s requires %d operands, but %d were given",
-				v.Logic, l.Operands(), len(v.Given))
+		table, err := l.Table(len(v.Given))
+		if err != nil {
+			return nil, fmt.Errorf("logic node %s: %s", v.Logic, err.Error())
 		}
-		return l.Table(), nil
+		return table, nil
 	}
 
 	var table []float64

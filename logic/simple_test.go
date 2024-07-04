@@ -7,48 +7,57 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFactorOperands(t *testing.T) {
-	assert.Equal(t, 1, logic.Not.Operands())
-	assert.Equal(t, 2, logic.And.Operands())
-	assert.Equal(t, 1, logic.IfThen.Operands())
-}
-
 func TestFactorTable(t *testing.T) {
+	result, err := logic.Not.Table(1)
+	assert.Nil(t, err)
 	assert.Equal(t, []float64{
 		0, 1,
 		1, 0,
-	}, logic.Not.Table())
+	}, result)
 
-	assert.Equal(t, []float64{
-		1, 0,
-		0, 1,
-		0, 1,
-		0, 1,
-	}, logic.And.Table())
+	_, err = logic.Not.Table(2)
+	assert.NotNil(t, err)
 
-	assert.Equal(t, []float64{
-		1, 0,
-		1, 0,
-		1, 0,
-		0, 1,
-	}, logic.Or.Table())
-
-	assert.Equal(t, []float64{
-		1, 0,
-		0, 1,
-		1, 0,
-		1, 0,
-	}, logic.Cond.Table())
-
+	result, err = logic.And.Table(2)
+	assert.Nil(t, err)
 	assert.Equal(t, []float64{
 		1, 0,
 		0, 1,
 		0, 1,
-		1, 0,
-	}, logic.BiCond.Table())
+		0, 1,
+	}, result)
 
+	result, err = logic.Or.Table(2)
+	assert.Nil(t, err)
+	assert.Equal(t, []float64{
+		1, 0,
+		1, 0,
+		1, 0,
+		0, 1,
+	}, result)
+
+	result, err = logic.Cond.Table(2)
+	assert.Nil(t, err)
+	assert.Equal(t, []float64{
+		1, 0,
+		0, 1,
+		1, 0,
+		1, 0,
+	}, result)
+
+	result, err = logic.BiCond.Table(2)
+	assert.Nil(t, err)
+	assert.Equal(t, []float64{
+		1, 0,
+		0, 1,
+		0, 1,
+		1, 0,
+	}, result)
+
+	result, err = logic.IfThen.Table(1)
+	assert.Nil(t, err)
 	assert.Equal(t, []float64{
 		1, 0,
 		0.5, 0.5,
-	}, logic.IfThen.Table())
+	}, result)
 }
