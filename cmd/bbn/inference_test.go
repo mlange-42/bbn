@@ -7,6 +7,6 @@ import (
 )
 
 func TestRunInferenceCommand(t *testing.T) {
-	_, _, _, err := runInferenceCommand("../../_examples/sprinkler.yml", []string{"Rain=no"})
+	_, _, _, err := runInferenceCommand("../../_examples/bbn/sprinkler.yml", []string{"Rain=no"})
 	assert.Nil(t, err)
 }
