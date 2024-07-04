@@ -5,6 +5,9 @@ import "fmt"
 type boolFactor []bool
 
 func (f *boolFactor) SetArgs(args ...int) error {
+	if len(args) > 0 {
+		return fmt.Errorf("logic operator expects zero arguments, got %d", len(args))
+	}
 	return nil
 }
 
@@ -28,6 +31,9 @@ func (f *boolFactor) Table(given int) ([]float64, error) {
 type floatFactor []float64
 
 func (f *floatFactor) SetArgs(args ...int) error {
+	if len(args) > 0 {
+		return fmt.Errorf("logic operator expects zero arguments, got %d", len(args))
+	}
 	return nil
 }
 

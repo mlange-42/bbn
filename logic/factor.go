@@ -35,7 +35,10 @@ var Factors = map[string]Factor{
 	"equals":     &Equals,
 	"equals-not": &EqualsNot,
 
-	"count-exactly": CountExactly(0),
+	"count-true":  CountTrue(),
+	"count-false": CountFalse(),
+
+	"count-is":      CountIs(0),
 	"count-less":    CountLess(0),
 	"count-greater": CountGreater(0),
 

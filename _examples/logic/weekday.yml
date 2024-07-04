@@ -55,4 +55,4 @@ variables:
   color: blue
   outcomes: [==>, " "]
   given: [Mon, Tue, Wed, Thu-Fri, Sun-1, Sun-2, NotSun]
-  logic: count-exactly 1
+  logic: count-is 1
