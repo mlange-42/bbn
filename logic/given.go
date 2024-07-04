@@ -4,17 +4,17 @@ import (
 	"fmt"
 )
 
-type indexFactor struct {
+type givenFactor struct {
 	Index int
 }
 
-func Index(idx int) Factor {
-	return &indexFactor{
+func Given(idx int) Factor {
+	return &givenFactor{
 		Index: idx,
 	}
 }
 
-func (f *indexFactor) SetArgs(args ...int) error {
+func (f *givenFactor) SetArgs(args ...int) error {
 	if len(args) != 1 {
 		return fmt.Errorf("logic operator expects 1 argument, got %d", len(args))
 	}
@@ -22,7 +22,7 @@ func (f *indexFactor) SetArgs(args ...int) error {
 	return nil
 }
 
-func (f *indexFactor) Table(given int) ([]float64, error) {
+func (f *givenFactor) Table(given int) ([]float64, error) {
 	rows := uint(1) << uint(given) // 2^given
 	table := make([]float64, rows*2)
 
@@ -38,17 +38,17 @@ func (f *indexFactor) Table(given int) ([]float64, error) {
 	return table, nil
 }
 
-type indexNotFactor struct {
+type givenNotFactor struct {
 	Index int
 }
 
-func IndexNot(idx int) Factor {
-	return &indexNotFactor{
+func GivenNot(idx int) Factor {
+	return &givenNotFactor{
 		Index: idx,
 	}
 }
 
-func (f *indexNotFactor) SetArgs(args ...int) error {
+func (f *givenNotFactor) SetArgs(args ...int) error {
 	if len(args) != 1 {
 		return fmt.Errorf("logic operator expects 1 argument, got %d", len(args))
 	}
@@ -56,7 +56,7 @@ func (f *indexNotFactor) SetArgs(args ...int) error {
 	return nil
 }
 
-func (f *indexNotFactor) Table(given int) ([]float64, error) {
+func (f *givenNotFactor) Table(given int) ([]float64, error) {
 	rows := uint(1) << uint(given) // 2^given
 	table := make([]float64, rows*2)
 
@@ -72,17 +72,17 @@ func (f *indexNotFactor) Table(given int) ([]float64, error) {
 	return table, nil
 }
 
-type indexExclFactor struct {
+type givenExclFactor struct {
 	Index int
 }
 
-func IndexExcl(idx int) Factor {
-	return &indexExclFactor{
+func GivenExcl(idx int) Factor {
+	return &givenExclFactor{
 		Index: idx,
 	}
 }
 
-func (f *indexExclFactor) SetArgs(args ...int) error {
+func (f *givenExclFactor) SetArgs(args ...int) error {
 	if len(args) != 1 {
 		return fmt.Errorf("logic operator expects 1 argument, got %d", len(args))
 	}
@@ -90,7 +90,7 @@ func (f *indexExclFactor) SetArgs(args ...int) error {
 	return nil
 }
 
-func (f *indexExclFactor) Table(given int) ([]float64, error) {
+func (f *givenExclFactor) Table(given int) ([]float64, error) {
 	rows := uint(1) << uint(given) // 2^given
 	table := make([]float64, rows*2)
 

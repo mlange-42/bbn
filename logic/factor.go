@@ -39,7 +39,7 @@ var Factors = map[string]Factor{
 	"count-less":    CountLess(0),
 	"count-greater": CountGreater(0),
 
-	"index":      Index(0),
-	"index-not":  IndexNot(0),
-	"index-excl": IndexExcl(0),
+	"given":      Given(0),
+	"given-not":  GivenNot(0),
+	"given-excl": GivenExcl(0),
 }
