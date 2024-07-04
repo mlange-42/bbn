@@ -25,6 +25,10 @@
 * Adds several examples for logic deduction (#65, #66)
 * All examples have a detailed description that shows up in the TUI app (#66, #67)
 
+### Other
+
+* Release downloads now include all examples (#68)
+
 ## [[v0.4.0]](https://github.com/mlange-42/bbn/compare/v0.3.0...v0.4.0)
 
 ### Features
