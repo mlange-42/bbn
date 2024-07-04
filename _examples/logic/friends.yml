@@ -49,7 +49,7 @@ variables:
 - variable: '"Max. two are right"'
   position: [33, 17]
   outcomes: [=>, " "]
-  given: [B, Count <= 3]
+  given: [B, Count <= 2]
   logic: bicond
 
 - variable: '"B is wrong"'
@@ -70,7 +70,7 @@ variables:
   given: [Count correct]
   logic: outcome-is 2 5
 
-- variable: Count <= 3
+- variable: Count <= 2
   position: [4, 29]
   outcomes: [right, wrong]
   given: [Count correct]
