@@ -26,7 +26,7 @@ jobs:
           GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" ./cmd/bbni
       - name: Compress binaries
         run: |
-          tar -czf bbn.tar.gz bbn bbni examples
+          tar -czf bbn.tar.gz bbn bbni _examples
         shell: bash
       - name: Upload binaries
         uses: svenstaro/upload-release-action@v2
@@ -57,7 +57,7 @@ jobs:
           GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" ./cmd/bbni
       - name: Compress binaries
         run: |
-          zip -r bbn.zip bbn.exe bbni.exe examples
+          zip -r bbn.zip bbn.exe bbni.exe _examples
         shell: bash
       - name: Upload binaries
         uses: svenstaro/upload-release-action@v2
@@ -88,7 +88,7 @@ jobs:
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" ./cmd/bbni
       - name: Compress binaries
         run: |
-          zip -r bbn.zip bbn bbni examples
+          zip -r bbn.zip bbn bbni _examples
         shell: bash
       - name: Upload binaries
         uses: svenstaro/upload-release-action@v2
@@ -119,7 +119,7 @@ jobs:
           GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" ./cmd/bbni
       - name: Compress binaries
         run: |
-          zip -r bbn.zip bbn bbni examples
+          zip -r bbn.zip bbn bbni _examples
         shell: bash
       - name: Upload binaries
         uses: svenstaro/upload-release-action@v2
