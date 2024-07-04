@@ -3,103 +3,56 @@ variables:
 
 - variable: Day of week
   position: [41, 0]
+  color: lime
   outcomes: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
   table:
   - [1, 1, 1, 1, 1, 1, 1]
 
 - variable: Mon
-  position: [1, 11]
+  position: [1, 13]
   given: [Day of week]
   outcomes: [yes, no]
-  table:
-  - [1, 0]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
+  logic: index-is 0 7
   
-- variable: Wed
+- variable: Tue
   position: [28, 11]
   given: [Day of week]
   outcomes: [yes, no]
-  table:
-  - [0, 1]
-  - [0, 1]
-  - [1, 0]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
+  logic: index-is 1 7
   
-- variable: Sun-1
+- variable: Wed
   position: [55, 11]
   given: [Day of week]
   outcomes: [yes, no]
-  table:
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [1, 0]
-  
-- variable: Not-Sun
-  position: [82, 11]
-  given: [Day of week]
-  outcomes: [yes, no]
-  table:
-  - [1, 0]
-  - [1, 0]
-  - [1, 0]
-  - [1, 0]
-  - [1, 0]
-  - [1, 0]
-  - [0, 1]
-  
-- variable: Tue
-  position: [2, 17]
-  given: [Day of week]
-  outcomes: [yes, no]
-  table:
-  - [0, 1]
-  - [1, 0]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
+  logic: index-is 2 7
   
 - variable: Thu-Fri
+  position: [82, 13]
+  given: [Day of week]
+  outcomes: [yes, no]
+  logic: index-either 3 4 7
+  
+- variable: Sun-1
+  position: [2, 19]
+  given: [Day of week]
+  outcomes: [yes, no]
+  logic: index-is 6 7
+  
+- variable: Sun-2
   position: [41, 17]
   given: [Day of week]
   outcomes: [yes, no]
-  table:
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [1, 0]
-  - [1, 0]
-  - [0, 1]
-  - [0, 1]
+  logic: index-is 6 7
   
-- variable: Sun-2
-  position: [81, 17]
+- variable: NotSun
+  position: [81, 19]
   given: [Day of week]
   outcomes: [yes, no]
-  table:
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [0, 1]
-  - [1, 0]
+  logic: index-is-not 6 7
   
-- variable: One correct
-  position: [41, 24]
-  outcomes: [yes, no]
-  given: [Mon, Tue, Wed, Thu-Fri, Sun-1, Sun-2, Not-Sun]
+- variable: "Exactly one is correct    "
+  position: [39, 25]
+  color: blue
+  outcomes: [==>, " "]
+  given: [Mon, Tue, Wed, Thu-Fri, Sun-1, Sun-2, NotSun]
   logic: count-exactly 1
