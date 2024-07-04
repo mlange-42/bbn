@@ -72,10 +72,13 @@ jobs:
       run: go build ./cmd/bbn
     - name: Run CLI examples
       run: |
+        ./bbn inference _examples/logic/knights.yml
+        ./bbn inference _examples/logic/weekday.yml
         ./bbn inference _examples/asia.yml
+        ./bbn inference _examples/disease-control.yml
         ./bbn inference _examples/dog-problem.xml
         ./bbn inference _examples/earthquake.yml
-        ./bbn inference _examples/disease-control.yml
+        ./bbn train _examples/fruits-untrained.yml _examples/fruits.csv
         ./bbn inference _examples/medical-treatment.yml
         ./bbn inference _examples/mendel.yml
         ./bbn inference _examples/monty-hall.yml
@@ -84,4 +87,3 @@ jobs:
         ./bbn inference _examples/robot.yml
         ./bbn inference _examples/sprinkler.yml
         ./bbn inference _examples/umbrella.yml
-        ./bbn train _examples/fruits-untrained.yml _examples/fruits.csv

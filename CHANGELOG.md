@@ -21,7 +21,7 @@
 * Adds robot decision example (#50)
 * Adds medical treatment decision example (#60)
 * Adds disease control decision example (#61)
-* Adds several examples for logic deduction (#65)
+* Adds several examples for logic deduction (#65, #66)
 
 ## [[v0.4.0]](https://github.com/mlange-42/bbn/compare/v0.3.0...v0.4.0)
 
