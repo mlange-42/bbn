@@ -13,21 +13,15 @@ variables:
   table:
   - [50, 50]
 
-- variable: Either I am knave or B is knight
-  position: [1, 8]
-  outcomes: [tells, tells not]
-  given: [A]
-  logic: equals
-
-- variable: Tells truth
+- variable: A knave || B knight
   position: [46, 8]
   outcomes: [yes, no]
   given: [A, B]
   logic: not-or
 
-- variable: IFF
+- variable: Either I am knave or B is knight
+  position: [1, 8]
   color: blue
-  position: [25, 16]
   outcomes: [yes, no]
-  given: [Either I am knave or B is knight, Tells truth]
+  given: [A, A knave || B knight]
   logic: bicond

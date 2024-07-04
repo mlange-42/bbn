@@ -94,14 +94,6 @@ var XOr = boolFactor{
 	true,  // F T
 	false, // F F
 }
-var NotXOr = boolFactor{
-	true,  // F T
-	false, // F F
-	false, // T T
-	true,  // T F
-}
-var XOrNot = NotXOr
-var NotXOrNot = XOr
 
 var Cond = boolFactor{
 	true,  // T T
@@ -134,14 +126,6 @@ var BiCond = boolFactor{
 	false, // F T
 	true,  // F F
 }
-var NotBiCond = boolFactor{
-	false, // F T
-	true,  // F F
-	true,  // T T
-	false, // T F
-}
-var BiCondNot = NotBiCond
-var NotBiCondNot = BiCond
 
 var IfThen = floatFactor{
 	1, 0, // T
@@ -182,20 +166,14 @@ var Factors = map[string]Factor{
 	"or-not":     OrNot,
 	"not-or-not": NotOrNot,
 
-	"xor":         XOr,
-	"not-xor":     NotXOr,
-	"xor-not":     XOrNot,
-	"not-xor-not": NotXOrNot,
+	"xor": XOr,
 
 	"cond":         Cond,
 	"not-cond":     NotCond,
 	"cond-not":     CondNot,
 	"not-cond-not": NotCondNot,
 
-	"bicond":         BiCond,
-	"not-bicond":     NotBiCond,
-	"bicond-not":     BiCondNot,
-	"not-bicond-not": NotBiCondNot,
+	"bicond": BiCond,
 
 	"if-then":         IfThen,
 	"if-not-then":     IfNotThen,
