@@ -2,7 +2,7 @@ package logic
 
 type Factor interface {
 	Table(given int) ([]float64, error)
-	SetArgs(args ...int)
+	SetArgs(args ...int) error
 }
 
 var Factors = map[string]Factor{
@@ -34,4 +34,12 @@ var Factors = map[string]Factor{
 
 	"equals":     &Equals,
 	"equals-not": &EqualsNot,
+
+	"count-exactly": CountExactly(0),
+	"count-less":    CountLess(0),
+	"count-greater": CountGreater(0),
+
+	"index":      Index(0),
+	"index-not":  IndexNot(0),
+	"index-excl": IndexExcl(0),
 }

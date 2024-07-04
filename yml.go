@@ -3,6 +3,7 @@ package bbn
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/mlange-42/bbn/internal/ve"
@@ -92,24 +93,38 @@ func toTable(v *variableYaml) ([]float64, error) {
 		return nil, fmt.Errorf("node can only have one of 'table' or 'logic'")
 	}
 
-	if v.Logic != "" {
-		l, ok := logic.Factors[strings.ToLower(v.Logic)]
-		if !ok {
-			return nil, fmt.Errorf("unknown logic operator %s; valid operators are e.g.: not, and, or, xor, if-then, if-not-then, if-then-not, if-not-then-not, not-and, etc", v.Logic)
-		}
-		table, err := l.Table(len(v.Given))
-		if err != nil {
-			return nil, fmt.Errorf("logic node %s: %s", v.Logic, err.Error())
+	if v.Logic == "" {
+		var table []float64
+		if len(v.Table) > 0 {
+			table = make([]float64, 0, len(v.Table)*len(v.Table[0]))
+			for _, row := range v.Table {
+				table = append(table, row...)
+			}
 		}
 		return table, nil
 	}
 
-	var table []float64
-	if len(v.Table) > 0 {
-		table = make([]float64, 0, len(v.Table)*len(v.Table[0]))
-		for _, row := range v.Table {
-			table = append(table, row...)
+	parts := strings.Split(v.Logic, " ")
+	l, ok := logic.Factors[strings.ToLower(parts[0])]
+	if !ok {
+		return nil, fmt.Errorf("unknown logic operator %s; valid operators are e.g.: not, and, or, xor, if-then, if-not-then, if-then-not, if-not-then-not, not-and, etc", v.Logic)
+	}
+	args := make([]int, len(parts)-1)
+	for i := 1; i < len(parts); i++ {
+		v, err := strconv.Atoi(parts[i])
+		if err != nil {
+			return nil, err
 		}
+		args[i-1] = v
+	}
+	err := l.SetArgs(args...)
+	if err != nil {
+		return nil, err
+	}
+
+	table, err := l.Table(len(v.Given))
+	if err != nil {
+		return nil, fmt.Errorf("logic node %s: %s", v.Logic, err.Error())
 	}
 	return table, nil
 }

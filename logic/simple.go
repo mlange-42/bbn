@@ -4,11 +4,13 @@ import "fmt"
 
 type boolFactor []bool
 
-func (f *boolFactor) SetArgs(args ...int) {}
+func (f *boolFactor) SetArgs(args ...int) error {
+	return nil
+}
 
 func (f *boolFactor) Table(given int) ([]float64, error) {
 	arr := *f
-	if given != len(arr)/2 {
+	if len(arr) != 1<<given { // 2^given
 		return nil, fmt.Errorf("logic operator requires %d operands, but %d were given", len(arr)/2, given)
 	}
 
@@ -25,11 +27,13 @@ func (f *boolFactor) Table(given int) ([]float64, error) {
 
 type floatFactor []float64
 
-func (f *floatFactor) SetArgs(args ...int) {}
+func (f *floatFactor) SetArgs(args ...int) error {
+	return nil
+}
 
 func (f *floatFactor) Table(given int) ([]float64, error) {
 	arr := *f
-	if given != len(arr)/4 {
+	if len(arr) != 1<<(given+1) { // 2^(given+1)
 		return nil, fmt.Errorf("logic operator requires %d operands, but %d were given", len(arr)/4, given)
 	}
 	return arr, nil
