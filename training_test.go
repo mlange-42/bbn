@@ -49,7 +49,8 @@ func TestTrainer(t *testing.T) {
 		},
 	}
 
-	net := bbn.New("Sprinkler", vars, factors)
+	net, err := bbn.New("Sprinkler", "", vars, factors)
+	assert.Nil(t, err)
 
 	data := [][]int{
 		{0, 0, 0},
@@ -64,7 +65,7 @@ func TestTrainer(t *testing.T) {
 		trainer.AddSample(row, nil)
 	}
 
-	net, err := trainer.UpdateNetwork()
+	net, err = trainer.UpdateNetwork()
 	assert.Nil(t, err)
 
 	evidence := map[string]string{
@@ -108,7 +109,8 @@ func TestTrainerDecision(t *testing.T) {
 		}},
 	}
 
-	net := bbn.New("umbrella", vars, factors)
+	net, err := bbn.New("umbrella", "", vars, factors)
+	assert.Nil(t, err)
 	trainer := bbn.NewTrainer(net)
 	_ = trainer
 
@@ -129,7 +131,7 @@ func TestTrainerDecision(t *testing.T) {
 		trainer.AddSample(samples[i], utility[i])
 	}
 
-	net, err := trainer.UpdateNetwork()
+	net, err = trainer.UpdateNetwork()
 	assert.Nil(t, err)
 
 	policy, err := net.SolvePolicies(true)

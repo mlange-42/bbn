@@ -45,10 +45,13 @@ func (a *App) inputMainPanel(event *tcell.EventKey) *tcell.EventKey {
 	} else if event.Rune() == 'h' {
 		a.showHelp()
 		return nil
+	} else if event.Rune() == 'i' {
+		a.showInfo()
+		return nil
 	} else if event.Rune() == 't' {
 		a.showTable()
 		return nil
-	} else if event.Rune() == 'i' {
+	} else if event.Rune() == 'p' {
 		a.toggleIgnorePolicy()
 		return nil
 	} else if event.Key() == tcell.KeyCtrlS {
@@ -145,6 +148,14 @@ func (a *App) inputHelp(event *tcell.EventKey) *tcell.EventKey {
 	return event
 }
 
+func (a *App) inputInfo(event *tcell.EventKey) *tcell.EventKey {
+	if event.Key() == tcell.KeyEsc {
+		a.pages.HidePage("Info")
+		return nil
+	}
+	return event
+}
+
 // inputEnter adds the currently selected node and state to the evidence.
 func (a *App) inputEnter() error {
 	node := a.nodes[a.selectedNode]
@@ -195,11 +206,22 @@ func (a *App) showHelp() {
 	a.app.SetFocus(a.help)
 }
 
+func (a *App) showInfo() {
+	a.pages.ShowPage("Info")
+	a.app.SetFocus(a.info)
+}
+
 func (a *App) mouseInputGraph(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
 	if action == tview.MouseLeftClick || action == tview.MouseRightClick {
 		front, _ := a.pages.GetFrontPage()
 		if front == "Table" {
 			a.pages.HidePage("Table")
+			return tview.MouseConsumed, nil
+		} else if front == "Help" {
+			a.pages.HidePage("Help")
+			return tview.MouseConsumed, nil
+		} else if front == "Info" {
+			a.pages.HidePage("Info")
 			return tview.MouseConsumed, nil
 		}
 	}
@@ -239,6 +261,22 @@ func (a *App) mouseInputGraph(action tview.MouseAction, event *tcell.EventMouse)
 func (a *App) mouseInputTable(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
 	if action == tview.MouseLeftClick || action == tview.MouseRightClick {
 		a.pages.HidePage("Table")
+		return tview.MouseConsumed, nil
+	}
+	return action, event
+}
+
+func (a *App) mouseInputHelp(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
+	if action == tview.MouseLeftClick || action == tview.MouseRightClick {
+		a.pages.HidePage("Help")
+		return tview.MouseConsumed, nil
+	}
+	return action, event
+}
+
+func (a *App) mouseInputInfo(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
+	if action == tview.MouseLeftClick || action == tview.MouseRightClick {
+		a.pages.HidePage("Info")
 		return tview.MouseConsumed, nil
 	}
 	return action, event

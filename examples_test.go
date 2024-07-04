@@ -43,7 +43,10 @@ func Example_sprinkler() {
 		},
 	}
 
-	net := bbn.New("Sprinkler", variables, factors)
+	net, err := bbn.New("Sprinkler", "", variables, factors)
+	if err != nil {
+		panic(err)
+	}
 
 	evidence := map[string]string{
 		"GrassWet": "yes",

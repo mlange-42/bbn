@@ -14,6 +14,7 @@
 * Optional total utility node for weighting individual utilities (#59)
 * Adds support for custom node colors in YAML files (#64)
 * Adds shortcuts for logic nodes like, and, or, if-then, etc. (#65)
+* Networks can have a longer info text, also shown in TUI app (#65)
 
 ### Documentation
 
@@ -21,7 +22,7 @@
 * Adds robot decision example (#50)
 * Adds medical treatment decision example (#60)
 * Adds disease control decision example (#61)
-* Adds several examples for logic deduction (#65)
+* Adds several examples for logic deduction (#65, #66)
 
 ## [[v0.4.0]](https://github.com/mlange-42/bbn/compare/v0.3.0...v0.4.0)
 

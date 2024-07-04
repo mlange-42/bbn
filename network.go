@@ -59,6 +59,7 @@ type variable struct {
 
 type Network struct {
 	name              string
+	info              string
 	variables         []Variable
 	factors           []Factor
 	policies          map[string]ve.Factor
@@ -67,23 +68,31 @@ type Network struct {
 	totalUtilityIndex int
 }
 
-func New(name string, variables []Variable, factors []Factor) *Network {
+func New(name string, info string, variables []Variable, factors []Factor) (*Network, error) {
 	net := &Network{
 		name:      name,
+		info:      info,
 		variables: variables,
 		factors:   factors,
 		policies:  map[string]ve.Factor{},
 	}
-	net.prepareVariables()
-	return net
+	err := net.prepareVariables()
+	if err != nil {
+		return nil, err
+	}
+	return net, nil
 }
 
-func (n *Network) prepareVariables() {
+func (n *Network) prepareVariables() error {
 	varNames := map[string]*Variable{}
 	outcomes := make(map[string]int, len(n.variables))
 	for i := range n.variables {
-		outcomes[n.variables[i].Name] = len(n.variables[i].Outcomes)
-		varNames[n.variables[i].Name] = &n.variables[i]
+		v := &n.variables[i]
+		if _, ok := varNames[v.Name]; ok {
+			return fmt.Errorf("duplicate variable name %s", v.Name)
+		}
+		varNames[v.Name] = v
+		outcomes[v.Name] = len(v.Outcomes)
 	}
 
 	for i := range n.variables {
@@ -99,16 +108,16 @@ func (n *Network) prepareVariables() {
 		for i, g := range v.Factor.Given {
 			n, ok := outcomes[g]
 			if !ok {
-				panic(fmt.Sprintf("parent variable %s of %s not found", g, v.Name))
+				return fmt.Errorf("parent variable %s of %s not found", g, v.Name)
 			}
 			v.Factor.outcomes[i] = n
 		}
 	}
 
-	n.prepareUtilityNodes(varNames)
+	return n.prepareUtilityNodes(varNames)
 }
 
-func (n *Network) prepareUtilityNodes(varNames map[string]*Variable) {
+func (n *Network) prepareUtilityNodes(varNames map[string]*Variable) error {
 	n.totalUtilityIndex = -1
 	for i := range n.variables {
 		v := &n.variables[i]
@@ -120,7 +129,7 @@ func (n *Network) prepareUtilityNodes(varNames map[string]*Variable) {
 		for _, parent := range v.Factor.Given {
 			p, ok := varNames[parent]
 			if !ok {
-				panic(fmt.Sprintf("parent node %s for %s not found", parent, v.Name))
+				return fmt.Errorf("parent node %s for %s not found", parent, v.Name)
 			}
 			if p.Type == ve.UtilityNode {
 				hasUtilParents = true
@@ -129,26 +138,31 @@ func (n *Network) prepareUtilityNodes(varNames map[string]*Variable) {
 			}
 		}
 		if hasUtilParents && hasOtherParents {
-			panic(fmt.Sprintf("utility node %s has utility parents and other parents; can only have either or", v.Name))
+			return fmt.Errorf("utility node %s has utility parents and other parents; can only have either or", v.Name)
 		}
 		if !hasUtilParents && !hasOtherParents {
-			panic(fmt.Sprintf("utility node %s has no parents", v.Name))
+			return fmt.Errorf("utility node %s has no parents", v.Name)
 		}
 		if !hasUtilParents {
 			continue
 		}
 		if n.totalUtilityIndex >= 0 {
-			panic("found multiple nodes for total utility")
+			return fmt.Errorf("found multiple nodes for total utility")
 		}
 		if len(v.Outcomes) != len(v.Factor.Given) {
-			panic("invalid total utility node; number of parents and number of outcomes must be the same")
+			return fmt.Errorf("invalid total utility node; number of parents and number of outcomes must be the same")
 		}
 		n.totalUtilityIndex = i
 	}
+	return nil
 }
 
 func (n *Network) Name() string {
 	return n.name
+}
+
+func (n *Network) Info() string {
+	return n.info
 }
 
 func (n *Network) Variables() []Variable {

@@ -1,0 +1,97 @@
+name: Who is right?
+info: >-
+  Four friends A, B, C and D meet and state the quoted facts below.
+  Who is right, and who is wrong?
+  
+
+  Activate the ==> in the blue node to solve.
+variables:
+
+- variable: A
+  position: [1, 0]
+  outcomes: [right, wrong]
+  table:
+  - [50, 50]
+
+- variable: B
+  position: [33, 0]
+  outcomes: [right, wrong]
+  table:
+  - [50, 50]
+
+- variable: C
+  position: [65, 0]
+  outcomes: [right, wrong]
+  table:
+  - [50, 50]
+
+- variable: D
+  position: [97, 0]
+  outcomes: [right, wrong]
+  table:
+  - [50, 50]
+
+- variable: Count correct
+  position: [49, 8]
+  outcomes: [0, 1, 2, 3, 4]
+  given: [A, B, C, D]
+  logic: count-true
+
+- variable: '"Two are right"'
+  position: [1, 17]
+  outcomes: [=>, " "]
+  given: [A, Count == 2]
+  logic: bicond
+
+- variable: '"Max. two are right"'
+  position: [33, 17]
+  outcomes: [=>, " "]
+  given: [B, Count <= 3]
+  logic: bicond
+
+- variable: '"B is wrong"'
+  position: [65, 17]
+  outcomes: [=>, " "]
+  given: [C, B is wrong]
+  logic: bicond
+
+- variable: '"Max. one is right"'
+  position: [97, 17]
+  outcomes: [=>, " "]
+  given: [D, Count <= 1]
+  logic: bicond
+
+- variable: Count == 2
+  position: [3, 24]
+  outcomes: [right, wrong]
+  given: [Count correct]
+  logic: outcome-is 2 5
+
+- variable: Count <= 3
+  position: [4, 29]
+  outcomes: [right, wrong]
+  given: [Count correct]
+  logic: outcome-less 3 5
+
+- variable: B is wrong
+  position: [95, 24]
+  outcomes: [right, wrong]
+  given: ['"Max. two are right"']
+  logic: not
+
+- variable: Count <= 1
+  position: [94, 29]
+  outcomes: [right, wrong]
+  given: [Count correct]
+  logic: outcome-less 2 5
+
+- variable: Trigger
+  position: [49, 24]
+  color: blue
+  outcomes: [==>, " "]
+  given:
+  - '"Two are right"'
+  - '"Max. two are right"'
+  - '"B is wrong"'
+  - '"Max. one is right"'
+  logic: count-is 4

@@ -1,36 +1,48 @@
 package logic
 
-type Factor interface {
-	Operands() int
-	Table() []float64
-}
+import "fmt"
 
 type boolFactor []bool
 
-func (f boolFactor) Operands() int {
-	return len(f) / 2
+func (f *boolFactor) SetArgs(args ...int) error {
+	if len(args) > 0 {
+		return fmt.Errorf("logic operator expects zero arguments, got %d", len(args))
+	}
+	return nil
 }
 
-func (f boolFactor) Table() []float64 {
-	table := make([]float64, len(f)*2)
-	for i, v := range f {
+func (f *boolFactor) Table(given int) ([]float64, error) {
+	arr := *f
+	if len(arr) != 1<<given { // 2^given
+		return nil, fmt.Errorf("logic operator requires %d operands, but %d were given", len(arr)/2, given)
+	}
+
+	table := make([]float64, len(arr)*2)
+	for i, v := range arr {
 		if v {
 			table[i*2] = 1
 		} else {
 			table[i*2+1] = 1
 		}
 	}
-	return table
+	return table, nil
 }
 
 type floatFactor []float64
 
-func (f floatFactor) Operands() int {
-	return len(f) / 4
+func (f *floatFactor) SetArgs(args ...int) error {
+	if len(args) > 0 {
+		return fmt.Errorf("logic operator expects zero arguments, got %d", len(args))
+	}
+	return nil
 }
 
-func (f floatFactor) Table() []float64 {
-	return f
+func (f *floatFactor) Table(given int) ([]float64, error) {
+	arr := *f
+	if len(arr) != 1<<(given+1) { // 2^(given+1)
+		return nil, fmt.Errorf("logic operator requires %d operands, but %d were given", len(arr)/4, given)
+	}
+	return arr, nil
 }
 
 var Not = boolFactor{
@@ -151,35 +163,4 @@ var Equals = boolFactor{
 var EqualsNot = boolFactor{
 	false, // T
 	true,  // F
-}
-
-var Factors = map[string]Factor{
-	"not": Not,
-
-	"and":         And,
-	"not-and":     NotAnd,
-	"and-not":     AndNot,
-	"not-and-not": NotAndNot,
-
-	"or":         Or,
-	"not-or":     NotOr,
-	"or-not":     OrNot,
-	"not-or-not": NotOrNot,
-
-	"xor": XOr,
-
-	"cond":         Cond,
-	"not-cond":     NotCond,
-	"cond-not":     CondNot,
-	"not-cond-not": NotCondNot,
-
-	"bicond": BiCond,
-
-	"if-then":         IfThen,
-	"if-not-then":     IfNotThen,
-	"if-then-not":     IfThenNot,
-	"if-not-then-not": IfNotThenNot,
-
-	"equals":     Equals,
-	"equals-not": EqualsNot,
 }

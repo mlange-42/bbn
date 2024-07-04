@@ -3,6 +3,7 @@ package bbn
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/mlange-42/bbn/internal/ve"
@@ -42,6 +43,7 @@ type variableYaml struct {
 
 type networkYaml struct {
 	Name      string
+	Info      string `yaml:",omitempty"`
 	Variables []variableYaml
 }
 
@@ -84,9 +86,7 @@ func FromYAML(content []byte) (*Network, error) {
 		})
 	}
 
-	n := New(net.Name, variables, factors)
-
-	return n, nil
+	return New(net.Name, net.Info, variables, factors)
 }
 
 func toTable(v *variableYaml) ([]float64, error) {
@@ -94,24 +94,38 @@ func toTable(v *variableYaml) ([]float64, error) {
 		return nil, fmt.Errorf("node can only have one of 'table' or 'logic'")
 	}
 
-	if v.Logic != "" {
-		l, ok := logic.Factors[strings.ToLower(v.Logic)]
-		if !ok {
-			return nil, fmt.Errorf("unknown logic operator %s; valid operators are e.g.: not, and, or, xor, if-then, if-not-then, if-then-not, if-not-then-not, not-and, etc", v.Logic)
+	if v.Logic == "" {
+		var table []float64
+		if len(v.Table) > 0 {
+			table = make([]float64, 0, len(v.Table)*len(v.Table[0]))
+			for _, row := range v.Table {
+				table = append(table, row...)
+			}
 		}
-		if len(v.Given) != l.Operands() {
-			return nil, fmt.Errorf("logic %s requires %d operands, but %d were given",
-				v.Logic, l.Operands(), len(v.Given))
-		}
-		return l.Table(), nil
+		return table, nil
 	}
 
-	var table []float64
-	if len(v.Table) > 0 {
-		table = make([]float64, 0, len(v.Table)*len(v.Table[0]))
-		for _, row := range v.Table {
-			table = append(table, row...)
+	parts := strings.Split(v.Logic, " ")
+	l, ok := logic.Factors[strings.ToLower(parts[0])]
+	if !ok {
+		return nil, fmt.Errorf("unknown logic operator %s; valid operators are e.g.: not, and, or, xor, if-then, if-not-then, if-then-not, if-not-then-not, not-and, etc", v.Logic)
+	}
+	args := make([]int, len(parts)-1)
+	for i := 1; i < len(parts); i++ {
+		v, err := strconv.Atoi(parts[i])
+		if err != nil {
+			return nil, err
 		}
+		args[i-1] = v
+	}
+	err := l.SetArgs(args...)
+	if err != nil {
+		return nil, err
+	}
+
+	table, err := l.Table(len(v.Given))
+	if err != nil {
+		return nil, fmt.Errorf("logic node %s: %s", v.Logic, err.Error())
 	}
 	return table, nil
 }
