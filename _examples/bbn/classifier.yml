@@ -1,0 +1,75 @@
+name: Classification of animals
+info: >-
+  Classifier demo for animal taxa from simple characteristics.
+
+
+  Think of an animal, and set its properties in the white nodes by clocking the bars.
+  Observe the behavior of the green "Animal" node.
+variables:
+
+- variable: Animal
+  color: lime
+  position: [42, 0]
+  outcomes: [mammal, bird, reptile, amphibian, fish, insect, spider, mollusc]
+  table:
+  - [1, 1, 1, 1, 1, 1, 1, 1]
+
+- variable: Legs
+  position: [1, 14]
+  outcomes: [0, 2, 4, 6, 8]
+  given: [Animal]
+  table:
+  #  0  2  4  7  8
+  - [1, 1, 1, 0, 0] # mammal
+  - [0, 1, 0, 0, 0] # bird
+  - [1, 0, 1, 0, 0] # reptile
+  - [0, 0, 1, 0, 0] # amphibian
+  - [1, 0, 0, 0, 0] # fish
+  - [0, 0, 0, 1, 0] # insect
+  - [0, 0, 0, 0, 1] # spider
+  - [1, 0, 0, 0, 0] # mollusc
+
+- variable: Surface
+  position: [27, 14]
+  outcomes: [skin, fur, feathers, scales, shell, slime]
+  given: [Animal]
+  table:
+  # sk fu fe sc sh sl
+  - [1, 1, 0, 0, 0, 0] # mammal
+  - [0, 0, 1, 0, 0, 0] # bird
+  - [0, 0, 0, 1, 0, 0] # reptile
+  - [0, 0, 0, 0, 0, 1] # amphibian
+  - [0, 0, 0, 1, 0, 1] # fish
+  - [0, 0, 0, 0, 1, 0] # insect
+  - [0, 0, 0, 0, 1, 0] # spider
+  - [0, 0, 0, 0, 1, 1] # mollusc
+
+- variable: Wings
+  position: [60, 14]
+  outcomes: [yes, no]
+  given: [Animal]
+  table:
+  #  y  n
+  - [1, 1] # mammal
+  - [1, 0] # bird
+  - [0, 1] # reptile
+  - [0, 1] # amphibian
+  - [0, 1] # fish
+  - [1, 1] # insect
+  - [0, 1] # spider
+  - [0, 1] # mollusc
+
+- variable: Habitat
+  position: [88, 14]
+  outcomes: [land, water, air]
+  given: [Animal]
+  table:
+  #  l  w  a
+  - [1, 1, 1] # mammal
+  - [1, 1, 1] # bird
+  - [1, 1, 0] # reptile
+  - [1, 1, 0] # amphibian
+  - [0, 1, 0] # fish
+  - [1, 1, 1] # insect
+  - [1, 1, 0] # spider
+  - [1, 1, 0] # mollusc

@@ -73,6 +73,7 @@ jobs:
     - name: Run BBN examples
       run: |
         ./bbn inference _examples/bbn/asia.yml
+        ./bbn inference _examples/bbn/classifier.yml
         ./bbn inference _examples/bbn/dog-problem.xml
         ./bbn train _examples/bbn/fruits-untrained.yml _examples/bbn/fruits.csv
         ./bbn inference _examples/bbn/mendel.yml
