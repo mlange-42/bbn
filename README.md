@@ -5,7 +5,7 @@
 [![Go Reference](https://img.shields.io/badge/reference-%23007D9C?logo=go&logoColor=white&labelColor=gray)](https://pkg.go.dev/github.com/mlange-42/bbn)
 [![GitHub](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/mlange-42/bbn)
 
-Bayesian Belief Network library and CLI/TUI tool for [Go](https://go.dev).
+Bayesian Belief Network CLI/TUI tool and [Go](https://go.dev) module.
 
 ![screenshot](https://github.com/mlange-42/bbn/assets/44003176/d81e9225-4480-4e37-a8c0-08ccb02cfe73)
 
@@ -61,10 +61,11 @@ Train a network from data:
 
 ```
 bbn train _examples/bbn/fruits-untrained.yml _examples/bbn/fruits.csv
-bbni _examples/bbn/fruits-untrained.yml --train _examples/bbn/fruits.csv
 ```
 
 Also try the other examples in folder [_examples](https://github.com/mlange-42/bbn/tree/main/_examples).
+Run them with `bbni` and play around, but also view their `.yml` files
+to get an idea how to create Bayesian Networks.
 
 ### Library
 
