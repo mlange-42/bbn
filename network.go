@@ -24,6 +24,14 @@ type Factor struct {
 	columns  int
 }
 
+func (f *Factor) Row(indices []int) ([]float64, bool) {
+	idx, ok := f.RowIndex(indices)
+	if !ok {
+		return nil, false
+	}
+	return f.Table[idx : idx+f.columns], true
+}
+
 func (f *Factor) RowIndex(indices []int) (int, bool) {
 	if len(indices) != len(f.outcomes) {
 		panic(fmt.Sprintf("factor with %d given variables can't use %d indices", len(f.outcomes), len(indices)))
@@ -357,16 +365,17 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 			if _, ok := n.policies[v.Name]; ok {
 				varIDs[i] = variable{
 					Variable:   v,
-					VeVariable: vars.AddVariable(ve.ChanceNode, uint16(len(v.Outcomes))),
+					VeVariable: vars.AddVariable(i, ve.ChanceNode, uint16(len(v.Outcomes))),
 				}
 				varNames[v.Name] = &varIDs[i]
 				continue
 			}
 		}
+
 		// for all other variables
 		varIDs[i] = variable{
 			Variable:   v,
-			VeVariable: vars.AddVariable(v.Type, uint16(len(v.Outcomes))),
+			VeVariable: vars.AddVariable(i, v.Type, uint16(len(v.Outcomes))),
 		}
 		varNames[v.Name] = &varIDs[i]
 	}
