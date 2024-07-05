@@ -215,10 +215,7 @@ func (ve *VE) getDecisionParents(single bool) []bool {
 }
 
 func (ve *VE) summarize() *Factor {
-	result := ve.multiplyAll()
-	resultCopy := *result
-
-	return &resultCopy
+	return ve.multiplyAll()
 }
 
 func (ve *VE) SolveQuery(evidence []Evidence, query []Variable) *Factor {
