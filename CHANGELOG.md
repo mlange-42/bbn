@@ -1,6 +1,6 @@
 # Changelog
 
-## [[unpublished]](https://github.com/mlange-42/bbn/compare/v0.4.0...main)
+## [[v0.5.0]](https://github.com/mlange-42/bbn/compare/v0.4.0...v0.5.0)
 
 ### Features
 
@@ -22,7 +22,7 @@
 * Adds robot decision example (#50)
 * Adds medical treatment decision example (#60)
 * Adds disease control decision example (#61)
-* Adds several examples for logic deduction (#65, #66)
+* Adds three examples for logic induction using well-known logical puzzles (#65, #66)
 * All examples have a detailed description that shows up in the TUI app (#66, #67)
 
 ### Other
