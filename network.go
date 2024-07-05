@@ -348,7 +348,7 @@ func (n *Network) ToEvidence(variable string, value string) ([]float64, error) {
 func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable, error) {
 	vars := ve.NewVariables()
 	varNames := map[string]*variable{}
-	varIDs := make([]variable, 0, len(n.variables))
+	varIDs := make([]variable, len(n.variables))
 	dependencies := map[ve.Variable][]ve.Variable{}
 	totalUtilityName := ""
 
