@@ -11,7 +11,6 @@ Bayesian Belief Network library and CLI/TUI tool for [Go](https://go.dev).
 
 ## Features
 
-* Minimal, fast API for usage as a library.
 * Visualize, query and explore networks in the interactive TUI app `bbni`.
 * Supports decision networks (aka influence diagrams) for multi-stage decisions.
 * Provides logic nodes for logic inference in addition to probabilistic inference.
@@ -33,6 +32,8 @@ Pre-compiled binaries for Linux, Windows and MacOS are available in the
 > ```
 
 ### Library
+
+⚠️ Please be aware that the `bbn` Go module is still under development and highly unstable.
 
 Add BBN to a Go project:
 
@@ -66,6 +67,8 @@ bbni _examples/bbn/fruits-untrained.yml --train _examples/bbn/fruits.csv
 Also try the other examples in folder [_examples](https://github.com/mlange-42/bbn/tree/main/_examples).
 
 ### Library
+
+⚠️ Please be aware that the `bbn` Go module is still under development and highly unstable.
 
 See the examples in the [API reference](https://pkg.go.dev/github.com/mlange-42/bbn).
 
