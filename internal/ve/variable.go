@@ -15,7 +15,8 @@ const (
 )
 
 type Variable struct {
-	Id       uint16
+	Id       int
+	index    uint16
 	outcomes uint16
 	NodeType NodeType
 }
@@ -24,18 +25,25 @@ type Variable struct {
 type Variables struct {
 	factorCounter int
 	variables     variables
+	ids           map[int]bool
 }
 
 // NewVariables creates a new Variables instance.
 func NewVariables() *Variables {
-	return &Variables{}
+	return &Variables{
+		ids: map[int]bool{},
+	}
 }
 
 // AddVariable creates and add a new [Variable].
-func (v *Variables) AddVariable(nodeType NodeType, outcomes uint16) Variable {
+func (v *Variables) AddVariable(id int, nodeType NodeType, outcomes uint16) Variable {
+	if _, ok := v.ids[id]; ok {
+		panic(fmt.Sprintf("there is already a variable with ID %d", id))
+	}
 	v.variables = append(v.variables,
 		Variable{
-			Id:       uint16(len(v.variables)),
+			Id:       id,
+			index:    uint16(len(v.variables)),
 			outcomes: outcomes,
 			NodeType: nodeType,
 		})

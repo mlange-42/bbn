@@ -117,7 +117,7 @@ func (ve *VE) sumUtilities() {
 	sum := ve.Variables.Sum(factors...)
 	for _, u := range utils {
 		sum = ve.Variables.SumOut(&sum, u)
-		ve.eliminated[u.Id] = true
+		ve.eliminated[u.index] = true
 	}
 
 	for _, idx := range indices {
@@ -135,9 +135,9 @@ type variableDegree struct {
 func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, singleDecision bool) {
 	isDecisionParent := ve.getDecisionParents(singleDecision)
 
-	hidden := map[uint16]Variable{}
+	hidden := map[int]Variable{}
 	for i, v := range ve.Variables.variables {
-		if v.NodeType != ChanceNode || ve.eliminated[i] || isDecisionParent[v.Id] {
+		if v.NodeType != ChanceNode || ve.eliminated[i] || isDecisionParent[v.index] {
 			continue
 		}
 		hidden[v.Id] = v
@@ -192,7 +192,7 @@ func (ve *VE) getDecisionParents(single bool) []bool {
 		dec := decisions[i]
 		if vars, ok := ve.dependencies[dec]; ok {
 			for _, v := range vars {
-				isDecisionParent[v.Id] = true
+				isDecisionParent[v.index] = true
 			}
 		}
 		if single {
@@ -293,7 +293,7 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 
 		policies[dec] = [2]*Factor{fac, &policy}
 		ve.factors[policy.id] = &policy
-		ve.Variables.variables[dec.Id].NodeType = ChanceNode
+		ve.Variables.variables[dec.index].NodeType = ChanceNode
 
 		ve.eliminateHidden(nil, nil, single)
 
@@ -402,7 +402,7 @@ func (ve *VE) removeHidden(variable Variable) {
 		delete(ve.factors, idx)
 	}
 
-	ve.eliminated[variable.Id] = true
+	ve.eliminated[variable.index] = true
 	ve.factors[prod.id] = &prod
 }
 

@@ -348,7 +348,7 @@ func (n *Network) ToEvidence(variable string, value string) ([]float64, error) {
 func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable, error) {
 	vars := ve.NewVariables()
 	varNames := map[string]*variable{}
-	varIDs := make([]variable, len(n.variables))
+	varIDs := make([]variable, 0, len(n.variables))
 	dependencies := map[ve.Variable][]ve.Variable{}
 	totalUtilityName := ""
 
@@ -365,16 +365,17 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 			if _, ok := n.policies[v.Name]; ok {
 				varIDs[i] = variable{
 					Variable:   v,
-					VeVariable: vars.AddVariable(ve.ChanceNode, uint16(len(v.Outcomes))),
+					VeVariable: vars.AddVariable(i, ve.ChanceNode, uint16(len(v.Outcomes))),
 				}
 				varNames[v.Name] = &varIDs[i]
 				continue
 			}
 		}
+
 		// for all other variables
 		varIDs[i] = variable{
 			Variable:   v,
-			VeVariable: vars.AddVariable(v.Type, uint16(len(v.Outcomes))),
+			VeVariable: vars.AddVariable(i, v.Type, uint16(len(v.Outcomes))),
 		}
 		varNames[v.Name] = &varIDs[i]
 	}
