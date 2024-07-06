@@ -10,9 +10,9 @@ import (
 )
 
 func TestFactorRow(t *testing.T) {
-	a := Variable{Name: "a", Type: ve.ChanceNode, Outcomes: []string{"yes", "no", "maybe"}}
-	b := Variable{Name: "b", Type: ve.ChanceNode, Outcomes: []string{"yes", "no"}}
-	c := Variable{Name: "c", Type: ve.DecisionNode, Outcomes: []string{"yes", "no", "maybe"}}
+	a := Variable{Name: "a", NodeType: ve.ChanceNode, Outcomes: []string{"yes", "no", "maybe"}}
+	b := Variable{Name: "b", NodeType: ve.ChanceNode, Outcomes: []string{"yes", "no"}}
+	c := Variable{Name: "c", NodeType: ve.DecisionNode, Outcomes: []string{"yes", "no", "maybe"}}
 
 	factor := Factor{
 		For:   "c",
@@ -32,25 +32,25 @@ func TestFactorRow(t *testing.T) {
 
 	variable := net.Variables()[2]
 
-	s, ok := variable.Factor.RowIndex([]int{0, 0})
+	s, ok := variable.Factor.rowIndex([]int{0, 0})
 	assert.True(t, ok)
 	assert.Equal(t, 0, s)
 
-	s, ok = variable.Factor.RowIndex([]int{2, 0})
+	s, ok = variable.Factor.rowIndex([]int{2, 0})
 	assert.True(t, ok)
 	assert.Equal(t, 4, s)
 
-	s, ok = variable.Factor.RowIndex([]int{-1, 0})
+	s, ok = variable.Factor.rowIndex([]int{-1, 0})
 	assert.False(t, ok)
 	_ = s
 }
 
 func TestNetworkToVE(t *testing.T) {
 	vars := []Variable{
-		{Name: "weather", Type: ve.ChanceNode, Outcomes: []string{"rainy", "sunny"}},
-		{Name: "forecast", Type: ve.ChanceNode, Outcomes: []string{"sunny", "cloudy", "rainy"}},
-		{Name: "umbrella", Type: ve.DecisionNode, Outcomes: []string{"yes", "no"}},
-		{Name: "utility", Type: ve.UtilityNode, Outcomes: []string{"utility"}},
+		{Name: "weather", NodeType: ve.ChanceNode, Outcomes: []string{"rainy", "sunny"}},
+		{Name: "forecast", NodeType: ve.ChanceNode, Outcomes: []string{"sunny", "cloudy", "rainy"}},
+		{Name: "umbrella", NodeType: ve.DecisionNode, Outcomes: []string{"yes", "no"}},
+		{Name: "utility", NodeType: ve.UtilityNode, Outcomes: []string{"utility"}},
 	}
 
 	factors := []Factor{
@@ -99,10 +99,10 @@ func TestNetworkToVE(t *testing.T) {
 
 func TestNetworkSolveUmbrella(t *testing.T) {
 	vars := []Variable{
-		{Name: "weather", Type: ve.ChanceNode, Outcomes: []string{"rainy", "sunny"}},
-		{Name: "forecast", Type: ve.ChanceNode, Outcomes: []string{"sunny", "cloudy", "rainy"}},
-		{Name: "umbrella", Type: ve.DecisionNode, Outcomes: []string{"yes", "no"}},
-		{Name: "utility", Type: ve.UtilityNode, Outcomes: []string{"utility"}},
+		{Name: "weather", NodeType: ve.ChanceNode, Outcomes: []string{"rainy", "sunny"}},
+		{Name: "forecast", NodeType: ve.ChanceNode, Outcomes: []string{"sunny", "cloudy", "rainy"}},
+		{Name: "umbrella", NodeType: ve.DecisionNode, Outcomes: []string{"yes", "no"}},
+		{Name: "utility", NodeType: ve.UtilityNode, Outcomes: []string{"utility"}},
 	}
 
 	factors := []Factor{
@@ -170,13 +170,13 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 
 func TestNetworkSolveOil(t *testing.T) {
 	vars := []Variable{
-		{Name: "oil", Type: ve.ChanceNode, Outcomes: []string{"dry", "wet", "soaking"}},
-		{Name: "test", Type: ve.DecisionNode, Outcomes: []string{"yes", "no"}},
-		{Name: "test-result", Type: ve.ChanceNode, Outcomes: []string{"closed", "open", "diffuse"}},
-		{Name: "drill", Type: ve.DecisionNode, Outcomes: []string{"yes", "no"}},
+		{Name: "oil", NodeType: ve.ChanceNode, Outcomes: []string{"dry", "wet", "soaking"}},
+		{Name: "test", NodeType: ve.DecisionNode, Outcomes: []string{"yes", "no"}},
+		{Name: "test-result", NodeType: ve.ChanceNode, Outcomes: []string{"closed", "open", "diffuse"}},
+		{Name: "drill", NodeType: ve.DecisionNode, Outcomes: []string{"yes", "no"}},
 
-		{Name: "drill-utility", Type: ve.UtilityNode, Outcomes: []string{"utility"}},
-		{Name: "test-utility", Type: ve.UtilityNode, Outcomes: []string{"utility"}},
+		{Name: "drill-utility", NodeType: ve.UtilityNode, Outcomes: []string{"utility"}},
+		{Name: "test-utility", NodeType: ve.UtilityNode, Outcomes: []string{"utility"}},
 	}
 
 	factors := []Factor{
@@ -265,10 +265,10 @@ func TestNetworkSolveOil(t *testing.T) {
 
 func TestNetworkRearrange(t *testing.T) {
 	variables := []Variable{
-		{Name: "a", Type: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
-		{Name: "b", Type: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
-		{Name: "c", Type: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
-		{Name: "d", Type: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
+		{Name: "a", NodeType: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
+		{Name: "b", NodeType: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
+		{Name: "c", NodeType: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
+		{Name: "d", NodeType: ve.ChanceNode, Outcomes: []string{"yes", "no"}},
 	}
 
 	fac := Factor{

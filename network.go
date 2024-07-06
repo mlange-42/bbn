@@ -7,32 +7,41 @@ import (
 	"github.com/mlange-42/bbn/ve"
 )
 
+// Variable definition for creating a [Network].
 type Variable struct {
-	Name     string
-	Type     ve.NodeType
-	Outcomes []string
-	Position [2]int
-	Color    string
-	Factor   *Factor // Don't set this, it is initialized when constructing the network.
+	Name     string      // Name of the variable.
+	NodeType ve.NodeType // Node type of the variable.
+	Outcomes []string    // Possible outcomes.
+	Position [2]int      // Position in bbni visualization, in terminal cells.
+	Color    string      // Name of the node color in bbni visualization.
+	Factor   *Factor     // Don't set this, it is initialized when constructing the network.
 }
 
+// Factor definition, encoding a conditional probability or utility table.
 type Factor struct {
-	For      string
-	Given    []string  `yaml:",omitempty"`
-	Table    []float64 `yaml:",omitempty"`
-	outcomes []int
-	columns  int
+	For      string    // Primary variable of the factor.
+	Given    []string  `yaml:",omitempty"` // Names of dependency variables, i.e. parents.
+	Table    []float64 `yaml:",omitempty"` // Flat representation of the factor's table.
+	outcomes []int     // Number of outcomes of parent/given variables.
+	columns  int       // Number of table columns, i.e. of outcomes of the primary variable.
 }
 
+// Row returns a table row of the factor for the
+// given outcome indices of given/parent variables.
+//
+// The returned slice is referencing a range in the original table,
+// so modifications affect the owning factor.
 func (f *Factor) Row(indices []int) ([]float64, bool) {
-	idx, ok := f.RowIndex(indices)
+	idx, ok := f.rowIndex(indices)
 	if !ok {
 		return nil, false
 	}
 	return f.Table[idx : idx+f.columns], true
 }
 
-func (f *Factor) RowIndex(indices []int) (int, bool) {
+// rowIndex returns a row starting index for the
+// given outcome indices of given/parent variables.
+func (f *Factor) rowIndex(indices []int) (int, bool) {
 	if len(indices) != len(f.outcomes) {
 		panic(fmt.Sprintf("factor with %d given variables can't use %d indices", len(f.outcomes), len(indices)))
 	}
@@ -65,17 +74,19 @@ type variable struct {
 	VeVariable ve.Variable
 }
 
+// Network is the primary type for solving bbn networks.
 type Network struct {
-	name              string
-	info              string
-	variables         []Variable
-	factors           []Factor
-	policies          map[string]ve.Factor
-	ve                *ve.VE
-	variableNames     map[string]*variable
-	totalUtilityIndex int
+	name              string               // Name of the network.
+	info              string               // Description.
+	variables         []Variable           // All variables.
+	factors           []Factor             // All factors.
+	policies          map[string]ve.Factor // Policies after solving.
+	ve                *ve.VE               // Current VE instance.
+	variableNames     map[string]*variable // Mapping from names to variables.
+	totalUtilityIndex int                  // Index of the total utility node. -1 if none.
 }
 
+// New creates a new bbn network from the given variables and factors.
 func New(name string, info string, variables []Variable, factors []Factor) (*Network, error) {
 	net := &Network{
 		name:      name,
@@ -91,6 +102,7 @@ func New(name string, info string, variables []Variable, factors []Factor) (*Net
 	return net, nil
 }
 
+// prepareVariables, called from the constructor.
 func (n *Network) prepareVariables() error {
 	varNames := map[string]*Variable{}
 	outcomes := make(map[string]int, len(n.variables))
@@ -125,11 +137,12 @@ func (n *Network) prepareVariables() error {
 	return n.prepareUtilityNodes(varNames)
 }
 
+// prepareUtilityNodes, called from prepareVariables.
 func (n *Network) prepareUtilityNodes(varNames map[string]*Variable) error {
 	n.totalUtilityIndex = -1
 	for i := range n.variables {
 		v := &n.variables[i]
-		if v.Type != ve.UtilityNode {
+		if v.NodeType != ve.UtilityNode {
 			continue
 		}
 		hasUtilParents := false
@@ -139,7 +152,7 @@ func (n *Network) prepareUtilityNodes(varNames map[string]*Variable) error {
 			if !ok {
 				return fmt.Errorf("parent node %s for %s not found", parent, v.Name)
 			}
-			if p.Type == ve.UtilityNode {
+			if p.NodeType == ve.UtilityNode {
 				hasUtilParents = true
 			} else {
 				hasOtherParents = true
@@ -165,23 +178,27 @@ func (n *Network) prepareUtilityNodes(varNames map[string]*Variable) error {
 	return nil
 }
 
+// Name of the network.
 func (n *Network) Name() string {
 	return n.name
 }
 
+// Info for the network.
 func (n *Network) Info() string {
 	return n.info
 }
 
+// Variables of the network.
 func (n *Network) Variables() []Variable {
 	return n.variables
 }
 
+// TotalUtilityIndex return the index of the total utility node. -1 if none.
 func (n *Network) TotalUtilityIndex() int {
 	return n.totalUtilityIndex
 }
 
-// SolvePolicies solves and inserts policies for decisions, using Variable Elimination.
+// SolvePolicies solves and inserts policies for decisions, using variable elimination.
 func (n *Network) SolvePolicies(stepwise bool) (map[string]Factor, error) {
 	clear(n.policies)
 
@@ -248,7 +265,7 @@ func (n *Network) countDecisionSteps(stepwise bool) int {
 	}
 	decisions := 0
 	for i := range n.variables {
-		if n.variables[i].Type == ve.DecisionNode {
+		if n.variables[i].NodeType == ve.DecisionNode {
 			decisions++
 		}
 	}
@@ -258,7 +275,7 @@ func (n *Network) countDecisionSteps(stepwise bool) int {
 	return decisions
 }
 
-// SolveQuery solves a query, using Variable Elimination.
+// SolveQuery solves a query, using variable elimination.
 func (n *Network) SolveQuery(evidence map[string]string, query []string, ignorePolicies bool) (map[string][]float64, *ve.Factor, error) {
 	f, err := n.solve(evidence, query, false, "", ignorePolicies)
 	if err != nil {
@@ -275,12 +292,12 @@ func (n *Network) SolveQuery(evidence map[string]string, query []string, ignoreP
 	return result, f, nil
 }
 
-// SolveUtility solves utility, using Variable Elimination.
+// SolveUtility solves utility, using variable elimination.
 func (n *Network) SolveUtility(evidence map[string]string, query []string, utilityVar string, ignorePolicies bool) (*ve.Factor, error) {
 	return n.solve(evidence, query, true, utilityVar, ignorePolicies)
 }
 
-// solve solves a query or utility, using Variable Elimination.
+// solve solves a query or utility, using variable elimination.
 func (n *Network) solve(evidence map[string]string, query []string, utility bool, utilityVar string, ignorePolicies bool) (*ve.Factor, error) {
 	var decisionEvidence map[string]string
 	if ignorePolicies {
@@ -361,7 +378,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 			continue
 		}
 		// treat decision variables with policy as normal change variables
-		if v.Type == ve.DecisionNode {
+		if v.NodeType == ve.DecisionNode {
 			if _, ok := n.policies[v.Name]; ok {
 				varIDs[i] = variable{
 					Variable:   v,
@@ -375,7 +392,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		// for all other variables
 		varIDs[i] = variable{
 			Variable:   v,
-			VeVariable: vars.AddVariable(i, v.Type, uint16(len(v.Outcomes))),
+			VeVariable: vars.AddVariable(i, v.NodeType, uint16(len(v.Outcomes))),
 		}
 		varNames[v.Name] = &varIDs[i]
 	}
@@ -409,7 +426,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 			continue
 		}
 		// don't add factors for solved decision nodes, done later
-		if forVar.Variable.Type == ve.DecisionNode {
+		if forVar.Variable.NodeType == ve.DecisionNode {
 			continue
 		}
 
@@ -419,7 +436,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		factor := vars.CreateFactor(variables, f.Table)
 
 		// normalize for primary chance variable
-		if forVar.Variable.Type == ve.ChanceNode {
+		if forVar.Variable.NodeType == ve.ChanceNode {
 			factor = vars.NormalizeFor(&factor, variables[len(variables)-1])
 		}
 
@@ -438,6 +455,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 	return ve.New(vars, factors, dependencies, weights), varNames, nil
 }
 
+// prepareUtilityWeights derives utility weights from a potential total utility node.
 func (n *Network) prepareUtilityWeights() ([]float64, error) {
 	utilityNodes := []*Variable{}
 
@@ -448,7 +466,7 @@ func (n *Network) prepareUtilityWeights() ([]float64, error) {
 			continue
 		}
 		// count utility nodes
-		if v.Type == ve.UtilityNode {
+		if v.NodeType == ve.UtilityNode {
 			utilityNodes = append(utilityNodes, &v)
 		}
 	}
@@ -511,14 +529,16 @@ func (n *Network) NormalizeUtility(utility *ve.Factor, probs *ve.Factor) ve.Fact
 	return n.ve.Variables().Product(utility, &inv)
 }
 
-func (n *Network) Marginal(f *ve.Factor, v string) ve.Factor {
-	vv, ok := n.variableNames[v]
+// Marginal calculates marginal probabilities from a factor for a variable.
+func (n *Network) Marginal(f *ve.Factor, variable string) ve.Factor {
+	vv, ok := n.variableNames[variable]
 	if !ok {
-		panic(fmt.Sprintf("marginal: variable %s not found", v))
+		panic(fmt.Sprintf("marginal: variable %s not found", variable))
 	}
 	return n.ve.Variables().Marginal(f, vv.VeVariable)
 }
 
+// Rearrange a factor for the given variable order.
 func (n *Network) Rearrange(f *ve.Factor, variables []string) ve.Factor {
 	vars := n.rearrangeVariables(f, variables)
 	return n.ve.Variables().Rearrange(f, vars)

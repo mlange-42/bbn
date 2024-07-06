@@ -38,7 +38,7 @@ func inferCommand() *cobra.Command {
 				fmt.Printf("\n%30s", node.Name)
 				probs := result[node.Name]
 				for _, p := range probs {
-					if node.Type == ve.UtilityNode {
+					if node.NodeType == ve.UtilityNode {
 						fmt.Printf(" %10.3f", p)
 					} else {
 						fmt.Printf(" %9.3f%%", p*100)
