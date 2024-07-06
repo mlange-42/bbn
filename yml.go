@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mlange-42/bbn/internal/ve"
 	"github.com/mlange-42/bbn/logic"
+	"github.com/mlange-42/bbn/ve"
 	"gopkg.in/yaml.v3"
 )
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/mlange-42/bbn/internal/ve"
+	"github.com/mlange-42/bbn/ve"
 )
 
 type Variable struct {
@@ -209,20 +209,21 @@ func (n *Network) SolvePolicies(stepwise bool) (map[string]Factor, error) {
 
 	result := map[string]Factor{}
 	for name, f := range n.policies {
+		variables := f.Variables()
 		forVar := n.variableNames[name]
-		newVars := make([]ve.Variable, len(f.Variables))
+		newVars := make([]ve.Variable, len(variables))
 		idx := slices.IndexFunc(
-			f.Variables,
+			variables,
 			func(v ve.Variable) bool { return v.Id == forVar.VeVariable.Id },
 		)
 
 		for i := 0; i < idx; i++ {
-			newVars[i] = f.Variables[i]
+			newVars[i] = variables[i]
 		}
-		for i := idx + 1; i < len(f.Variables); i++ {
-			newVars[i-1] = f.Variables[i]
+		for i := idx + 1; i < len(variables); i++ {
+			newVars[i-1] = variables[i]
 		}
-		newVars[len(newVars)-1] = f.Variables[idx]
+		newVars[len(newVars)-1] = variables[idx]
 
 		f := n.ve.Variables.Rearrange(&f, newVars)
 
@@ -234,7 +235,7 @@ func (n *Network) SolvePolicies(stepwise bool) (map[string]Factor, error) {
 		ff := Factor{
 			For:   name,
 			Given: given,
-			Table: f.Data,
+			Table: f.Data(),
 		}
 		result[name] = ff
 	}
@@ -268,7 +269,8 @@ func (n *Network) SolveQuery(evidence map[string]string, query []string, ignoreP
 	result := map[string][]float64{}
 	for _, q := range query {
 		m := n.Marginal(f, q)
-		result[q] = n.Normalize(&m).Data
+		n := n.Normalize(&m)
+		result[q] = n.Data()
 	}
 
 	return result, f, nil
@@ -481,8 +483,8 @@ func (n *Network) policyFactors(vars *ve.Variables, varIDs []variable, evidence 
 			continue
 		}
 		// collect variables
-		variables := make([]ve.Variable, len(f.Variables))
-		for i, v := range f.Variables {
+		variables := make([]ve.Variable, len(f.Variables()))
+		for i, v := range f.Variables() {
 			// treat solved decision nodes as chance nodes
 			if v.NodeType == ve.DecisionNode {
 				vv := varIDs[v.Id]
@@ -494,7 +496,7 @@ func (n *Network) policyFactors(vars *ve.Variables, varIDs []variable, evidence 
 			variables[i] = v
 		}
 		// add to list of factors
-		factors = append(factors, vars.CreateFactor(variables, f.Data))
+		factors = append(factors, vars.CreateFactor(variables, f.Data()))
 	}
 
 	return factors
@@ -525,14 +527,15 @@ func (n *Network) Rearrange(f *ve.Factor, variables []string) ve.Factor {
 }
 
 func (n *Network) rearrangeVariables(f *ve.Factor, variables []string) []ve.Variable {
-	vars := make([]ve.Variable, 0, len(f.Variables))
-	done := make([]bool, len(f.Variables))
+	fVariables := f.Variables()
+	vars := make([]ve.Variable, 0, len(fVariables))
+	done := make([]bool, len(fVariables))
 	for i := 0; i < len(variables)-1; i++ {
 		idx, ok := n.variableIndex(f, variables[i])
 		if !ok {
 			panic(fmt.Sprintf("variable %s to rearrange not in factor", variables[i]))
 		}
-		vars = append(vars, f.Variables[idx])
+		vars = append(vars, fVariables[idx])
 		done[idx] = true
 	}
 
@@ -540,13 +543,13 @@ func (n *Network) rearrangeVariables(f *ve.Factor, variables []string) []ve.Vari
 	if !ok {
 		panic(fmt.Sprintf("variable %s to rearrange not in factor", variables[len(variables)-1]))
 	}
-	last := f.Variables[idx]
+	last := fVariables[idx]
 
 	for i, d := range done {
-		if d || f.Variables[i].Id == last.Id {
+		if d || fVariables[i].Id == last.Id {
 			continue
 		}
-		vars = append(vars, f.Variables[i])
+		vars = append(vars, fVariables[i])
 	}
 
 	vars = append(vars, last)
@@ -559,7 +562,7 @@ func (n *Network) variableIndex(f *ve.Factor, v string) (int, bool) {
 	if !ok {
 		panic(fmt.Sprintf("variable %s not found in network", v))
 	}
-	idx := slices.IndexFunc(f.Variables, func(vv ve.Variable) bool { return vv.Id == variable.VeVariable.Id })
+	idx := slices.IndexFunc(f.Variables(), func(vv ve.Variable) bool { return vv.Id == variable.VeVariable.Id })
 	if idx < 0 {
 		return -1, false
 	}

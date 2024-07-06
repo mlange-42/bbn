@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/mlange-42/bbn/internal/ve"
+	"github.com/mlange-42/bbn/ve"
 )
 
 // Trainer is a utility type to train a [Network].

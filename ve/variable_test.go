@@ -22,27 +22,27 @@ func TestVariablesCreateFactor(t *testing.T) {
 func TestVariablesNormalize(t *testing.T) {
 	v := NewVariables()
 	f := Factor{
-		Variables: []Variable{
+		variables: []Variable{
 			{Id: 0, outcomes: 3},
 		},
-		Data: []float64{
+		data: []float64{
 			2, 1, 1,
 		},
 	}
 
 	f2 := v.Normalize(&f)
 
-	assert.Equal(t, []float64{0.5, 0.25, 0.25}, f2.Data)
+	assert.Equal(t, []float64{0.5, 0.25, 0.25}, f2.Data())
 }
 
 func TestVariablesNormalizeFor(t *testing.T) {
 	v := NewVariables()
 	f := Factor{
-		Variables: []Variable{
+		variables: []Variable{
 			{Id: 0, outcomes: 2},
 			{Id: 1, outcomes: 3},
 		},
-		Data: []float64{
+		data: []float64{
 			2, 1, 1,
 			6, 4, 0,
 		},
@@ -50,19 +50,19 @@ func TestVariablesNormalizeFor(t *testing.T) {
 
 	f2 := v.NormalizeFor(&f, Variable{Id: 1, outcomes: 3})
 
-	assert.Equal(t, variables{
+	assert.Equal(t, []Variable{
 		{Id: 0, outcomes: 2},
 		{Id: 1, outcomes: 3},
-	}, f2.Variables)
-	assert.Equal(t, []float64{0.5, 0.25, 0.25, 0.6, 0.4, 0.0}, f2.Data)
+	}, f2.Variables())
+	assert.Equal(t, []float64{0.5, 0.25, 0.25, 0.6, 0.4, 0.0}, f2.Data())
 
 	f2 = v.NormalizeFor(&f, Variable{Id: 0, outcomes: 2})
 
-	assert.Equal(t, variables{
+	assert.Equal(t, []Variable{
 		{Id: 1, outcomes: 3},
 		{Id: 0, outcomes: 2},
-	}, f2.Variables)
-	assert.Equal(t, []float64{0.25, 0.75, 0.2, 0.8, 1.0, 0.0}, f2.Data)
+	}, f2.Variables())
+	assert.Equal(t, []float64{0.25, 0.75, 0.2, 0.8, 1.0, 0.0}, f2.Data())
 
 }
 
@@ -75,12 +75,12 @@ func TestVariablesRestrict(t *testing.T) {
 	f := v.CreateFactor([]Variable{v1, v2}, []float64{0.1, 0.2, 0.7, 0.6, 0.2, 0.2})
 
 	f2 := v.Restrict(&f, v1, 1)
-	assert.Equal(t, variables{v2}, f2.Variables)
-	assert.Equal(t, []float64{0.6, 0.2, 0.2}, f2.Data)
+	assert.Equal(t, []Variable{v2}, f2.Variables())
+	assert.Equal(t, []float64{0.6, 0.2, 0.2}, f2.Data())
 
 	f2 = v.Restrict(&f, v2, 2)
-	assert.Equal(t, variables{v1}, f2.Variables)
-	assert.Equal(t, []float64{0.7, 0.2}, f2.Data)
+	assert.Equal(t, []Variable{v1}, f2.Variables())
+	assert.Equal(t, []float64{0.7, 0.2}, f2.Data())
 }
 
 func TestVariablesSumOut(t *testing.T) {
@@ -95,12 +95,12 @@ func TestVariablesSumOut(t *testing.T) {
 	})
 
 	f2 := v.SumOut(&f, v1)
-	assert.Equal(t, variables{v2}, f2.Variables)
-	assert.Equal(t, []float64{7, 4, 9}, f2.Data)
+	assert.Equal(t, []Variable{v2}, f2.Variables())
+	assert.Equal(t, []float64{7, 4, 9}, f2.Data())
 
 	f2 = v.SumOut(&f, v2)
-	assert.Equal(t, variables{v1}, f2.Variables)
-	assert.Equal(t, []float64{10, 10}, f2.Data)
+	assert.Equal(t, []Variable{v1}, f2.Variables())
+	assert.Equal(t, []float64{10, 10}, f2.Data())
 }
 
 func TestVariablesProduct(t *testing.T) {
@@ -123,7 +123,7 @@ func TestVariablesProduct(t *testing.T) {
 
 	f3 := v.Product(&f1, &f2)
 
-	assert.Equal(t, variables{v1, v2, v3}, f3.Variables)
+	assert.Equal(t, []Variable{v1, v2, v3}, f3.Variables())
 
 	assert.Equal(t, f3.Get([]int{0, 0, 0}), f1.Get([]int{0, 0})*f2.Get([]int{0, 0}))
 
@@ -160,7 +160,7 @@ func TestVariablesProductMulti1(t *testing.T) {
 		12, 15, // + -
 		16, 20, // - +
 		24, 30, // - -
-	}, prod.Data)
+	}, prod.Data())
 }
 
 func TestVariablesProductMulti2(t *testing.T) {
@@ -186,7 +186,7 @@ func TestVariablesProductMulti2(t *testing.T) {
 	assert.Equal(t, []float64{
 		8, 15,
 		16, 30,
-	}, prod.Data)
+	}, prod.Data())
 }
 
 func TestVariablesProductMulti3(t *testing.T) {
@@ -226,10 +226,10 @@ func TestVariablesProductMulti3(t *testing.T) {
 		2.8, 14, // rain-, cloudy
 		1.4, 7, // rain-, rainy
 	}
-	assert.Equal(t, len(expected), len(prod.Data))
+	assert.Equal(t, len(expected), len(prod.Data()))
 
 	for i := range expected {
-		assert.Less(t, math.Abs(expected[i]-prod.Data[i]), 0.0001)
+		assert.Less(t, math.Abs(expected[i]-prod.Data()[i]), 0.0001)
 	}
 }
 
@@ -254,9 +254,9 @@ func TestVariablesProductScalar(t *testing.T) {
 
 	f3 := v.Product(&f1, &f2)
 
-	assert.Equal(t, variables{v1, v2}, f3.Variables)
+	assert.Equal(t, []Variable{v1, v2}, f3.Variables())
 
-	assert.Equal(t, []float64{2, 18, 10, 10, 16, 4}, f3.Data)
+	assert.Equal(t, []float64{2, 18, 10, 10, 16, 4}, f3.Data())
 }
 
 func TestVariablesPolicy(t *testing.T) {
@@ -275,19 +275,19 @@ func TestVariablesPolicy(t *testing.T) {
 	})
 
 	p := v.Policy(&f1, v2)
-	assert.Equal(t, variables{v1, v2}, p.Variables)
+	assert.Equal(t, []Variable{v1, v2}, p.Variables())
 	assert.Equal(t, []float64{
 		0, 1,
 		1, 0,
 		0, 1,
-	}, p.Data)
+	}, p.Data())
 
 	p = v.Policy(&f1, v1)
-	assert.Equal(t, variables{v2, v1}, p.Variables)
+	assert.Equal(t, []Variable{v2, v1}, p.Variables())
 	assert.Equal(t, []float64{
 		0, 1, 0,
 		0, 0, 1,
-	}, p.Data)
+	}, p.Data())
 }
 
 func TestRearrange(t *testing.T) {
@@ -310,14 +310,14 @@ func TestRearrange(t *testing.T) {
 	}
 
 	f1 := v.CreateFactor([]Variable{v1, v2}, original)
-	assert.Equal(t, variables{v1, v2}, f1.Variables)
+	assert.Equal(t, []Variable{v1, v2}, f1.Variables())
 
 	f2 := v.Rearrange(&f1, []Variable{v2, v1})
-	assert.Equal(t, variables{v2, v1}, f2.Variables)
-	assert.Equal(t, rearranged, f2.Data)
+	assert.Equal(t, []Variable{v2, v1}, f2.Variables())
+	assert.Equal(t, rearranged, f2.Data())
 
 	f3 := v.Rearrange(&f2, []Variable{v1, v2})
-	assert.Equal(t, variables{v1, v2}, f3.Variables)
-	assert.Equal(t, original, f3.Data)
+	assert.Equal(t, []Variable{v1, v2}, f3.Variables())
+	assert.Equal(t, original, f3.Data())
 
 }

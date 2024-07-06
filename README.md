@@ -12,7 +12,7 @@ Bayesian Belief Network CLI/TUI tool and [Go](https://go.dev) module.
 ## Features
 
 * Visualize, query and explore networks in the interactive TUI app `bbni`.
-* Supports decision networks (aka influence diagrams) for multi-stage decisions.
+* Supports decision networks (aka influence diagrams), including sequential decisions.
 * Provides logic nodes for logic inference in addition to probabilistic inference.
 * Train and query networks from the command line with `bbn`.
 * Human-readable YAML format for networks, as well as BIF-XML.

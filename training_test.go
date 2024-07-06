@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/mlange-42/bbn"
-	"github.com/mlange-42/bbn/internal/ve"
+	"github.com/mlange-42/bbn/ve"
 	"github.com/stretchr/testify/assert"
 )
 

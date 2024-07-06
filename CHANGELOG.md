@@ -1,5 +1,11 @@
 # Changelog
 
+## [[unpublished]](https://github.com/mlange-42/bbn/compare/v0.5.0...main)
+
+### Features
+
+* Makes sub-package `ve` for low-level variable elimination public (#73)
+
 ## [[v0.5.0]](https://github.com/mlange-42/bbn/compare/v0.4.0...v0.5.0)
 
 ### Features
