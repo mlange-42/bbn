@@ -85,7 +85,7 @@ func TestDecisionUmbrella(t *testing.T) {
 	fmt.Println("Summarize")
 	fmt.Println(result1)
 
-	result := ve.Variables.Rearrange(result1, []Variable{forecast, umbrella})
+	result := ve.variables.Rearrange(result1, []Variable{forecast, umbrella})
 	expected := []float64{
 		12.95, 49, // sunny
 		8.05, 14, // cloudy

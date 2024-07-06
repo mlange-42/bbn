@@ -224,7 +224,7 @@ func (n *Network) SolvePolicies(stepwise bool) (map[string]Factor, error) {
 		}
 		newVars[len(newVars)-1] = variables[idx]
 
-		f := n.ve.Variables.Rearrange(&f, newVars)
+		f := n.ve.Variables().Rearrange(&f, newVars)
 
 		given := make([]string, len(newVars)-1)
 		for i := 0; i < len(newVars)-1; i++ {
@@ -502,13 +502,13 @@ func (n *Network) policyFactors(vars *ve.Variables, varIDs []variable, evidence 
 
 // Normalize a factor.
 func (n *Network) Normalize(f *ve.Factor) ve.Factor {
-	return n.ve.Variables.Normalize(f)
+	return n.ve.Variables().Normalize(f)
 }
 
 // NormalizeUtility normalizes utility factor by dividing it by a probability factor.
 func (n *Network) NormalizeUtility(utility *ve.Factor, probs *ve.Factor) ve.Factor {
-	inv := n.ve.Variables.Invert(probs)
-	return n.ve.Variables.Product(utility, &inv)
+	inv := n.ve.Variables().Invert(probs)
+	return n.ve.Variables().Product(utility, &inv)
 }
 
 func (n *Network) Marginal(f *ve.Factor, v string) ve.Factor {
@@ -516,12 +516,12 @@ func (n *Network) Marginal(f *ve.Factor, v string) ve.Factor {
 	if !ok {
 		panic(fmt.Sprintf("marginal: variable %s not found", v))
 	}
-	return n.ve.Variables.Marginal(f, vv.VeVariable)
+	return n.ve.Variables().Marginal(f, vv.VeVariable)
 }
 
 func (n *Network) Rearrange(f *ve.Factor, variables []string) ve.Factor {
 	vars := n.rearrangeVariables(f, variables)
-	return n.ve.Variables.Rearrange(f, vars)
+	return n.ve.Variables().Rearrange(f, vars)
 }
 
 func (n *Network) rearrangeVariables(f *ve.Factor, variables []string) []ve.Variable {

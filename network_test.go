@@ -83,7 +83,7 @@ func TestNetworkToVE(t *testing.T) {
 	fmt.Println("Summarize")
 	fmt.Println(result1)
 
-	result := v.Variables.Rearrange(result1, []ve.Variable{variables["forecast"].VeVariable, variables["umbrella"].VeVariable})
+	result := v.Variables().Rearrange(result1, []ve.Variable{variables["forecast"].VeVariable, variables["umbrella"].VeVariable})
 	expected := []float64{
 		12.95, 49, // sunny
 		8.05, 14, // cloudy

@@ -12,7 +12,7 @@ type Evidence struct {
 }
 
 type VE struct {
-	Variables    *Variables
+	variables    *Variables
 	eliminated   []bool
 	dependencies map[Variable][]Variable
 	factors      map[int]*Factor
@@ -26,7 +26,7 @@ func New(variables *Variables, factors []Factor, dependencies map[Variable][]Var
 	}
 
 	return &VE{
-		Variables:    variables,
+		variables:    variables,
 		eliminated:   make([]bool, len(variables.variables)),
 		dependencies: dependencies,
 		factors:      fac,
@@ -34,9 +34,13 @@ func New(variables *Variables, factors []Factor, dependencies map[Variable][]Var
 	}
 }
 
+func (ve *VE) Variables() *Variables {
+	return ve.variables
+}
+
 func (ve *VE) getDecisions() []Variable {
 	dec := []Variable{}
-	for _, v := range ve.Variables.variables {
+	for _, v := range ve.variables.variables {
 		if v.NodeType() == DecisionNode {
 			dec = append(dec, v)
 		}
@@ -52,7 +56,7 @@ func (ve *VE) eliminateEvidence(evidence []Evidence) {
 
 func (ve *VE) removeUtilities(except *Variable) {
 	utils := []Variable{}
-	for _, u := range ve.Variables.variables {
+	for _, u := range ve.variables.variables {
 		if u.NodeType() == UtilityNode && (except == nil || u.id != except.id) {
 			utils = append(utils, u)
 		}
@@ -80,7 +84,7 @@ func (ve *VE) removeUtilities(except *Variable) {
 
 func (ve *VE) sumUtilities() {
 	utils := []Variable{}
-	for _, u := range ve.Variables.variables {
+	for _, u := range ve.variables.variables {
 		if u.NodeType() != UtilityNode {
 			continue
 		}
@@ -99,7 +103,7 @@ func (ve *VE) sumUtilities() {
 			if slices.Contains(f.variables, u) {
 				scaled := f
 				if ve.weights != nil {
-					ff := ve.Variables.Product(scaled, &Factor{data: []float64{ve.weights[i]}})
+					ff := ve.variables.Product(scaled, &Factor{data: []float64{ve.weights[i]}})
 					scaled = &ff
 				}
 				indices = append(indices, k)
@@ -109,9 +113,9 @@ func (ve *VE) sumUtilities() {
 		}
 	}
 
-	sum := ve.Variables.Sum(factors...)
+	sum := ve.variables.Sum(factors...)
 	for _, u := range utils {
-		sum = ve.Variables.SumOut(&sum, u)
+		sum = ve.variables.SumOut(&sum, u)
 		ve.eliminated[u.index] = true
 	}
 
@@ -131,7 +135,7 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, singleDecis
 	isDecisionParent := ve.getDecisionParents(singleDecision)
 
 	hidden := map[int]Variable{}
-	for i, v := range ve.Variables.variables {
+	for i, v := range ve.variables.variables {
 		if v.NodeType() != ChanceNode || ve.eliminated[i] || isDecisionParent[v.index] {
 			continue
 		}
@@ -176,7 +180,7 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, singleDecis
 }
 
 func (ve *VE) getDecisionParents(single bool) []bool {
-	isDecisionParent := make([]bool, len(ve.Variables.variables))
+	isDecisionParent := make([]bool, len(ve.variables.variables))
 
 	decisions := ve.getDecisions()
 	if len(decisions) == 0 {
@@ -196,7 +200,7 @@ func (ve *VE) getDecisionParents(single bool) []bool {
 	}
 
 	/*
-		for _, v := range ve.Variables.variables {
+		for _, v := range ve.variables.variables {
 			if ve.eliminated[v.id] || v.NodeType() != DecisionNode {
 				continue
 			}
@@ -274,7 +278,7 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 		if len(factors) == 1 {
 			fac = factors[0]
 		} else {
-			f := ve.Variables.Product(factors...)
+			f := ve.variables.Product(factors...)
 			fac = &f
 		}
 		/*fmt.Println("Selected factors")
@@ -284,11 +288,11 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 		fmt.Println("Factor product")
 		fmt.Println(fac)*/
 
-		policy := ve.Variables.Policy(fac, dec)
+		policy := ve.variables.Policy(fac, dec)
 
 		policies[dec] = [2]*Factor{fac, &policy}
 		ve.factors[policy.id] = &policy
-		ve.Variables.variables[dec.index].nodeType = ChanceNode
+		ve.variables.variables[dec.index].nodeType = ChanceNode
 
 		ve.eliminateHidden(nil, nil, single)
 
@@ -353,7 +357,7 @@ func (ve *VE) restrictEvidence(evidence Evidence) {
 		fac := ve.factors[idx]
 		delete(ve.factors, idx)
 
-		fac2 := ve.Variables.Restrict(fac, evidence.Variable, evidence.Value)
+		fac2 := ve.variables.Restrict(fac, evidence.Variable, evidence.Value)
 
 		ve.factors[fac2.id] = &fac2
 	}
@@ -384,14 +388,14 @@ func (ve *VE) removeHidden(variable Variable) {
 	}
 
 	/*if len(utilityFactors) > 1 {
-		sum := ve.Variables.Sum(utilityFactors...)
+		sum := ve.variables.Sum(utilityFactors...)
 		factors = append(factors, &sum)
 	} else if len(utilityFactors) == 1 {
 		factors = append(factors, utilityFactors[0])
 	}*/
 
-	prod := ve.Variables.Product(factors...)
-	prod = ve.Variables.SumOut(&prod, variable)
+	prod := ve.variables.Product(factors...)
+	prod = ve.variables.SumOut(&prod, variable)
 
 	for _, idx := range indices {
 		delete(ve.factors, idx)
@@ -428,7 +432,7 @@ func (ve *VE) multiplyAll() *Factor {
 		factors = append(factors, utilityFactors[0])
 	}*/
 
-	f := ve.Variables.Product(factors...)
+	f := ve.variables.Product(factors...)
 	ve.factors[f.id] = &f
 
 	return &f
