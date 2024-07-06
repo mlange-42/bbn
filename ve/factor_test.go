@@ -9,8 +9,8 @@ import (
 func TestFactorIndex(t *testing.T) {
 	f := Factor{
 		variables: []Variable{
-			{Id: 0, outcomes: 3},
-			{Id: 1, outcomes: 2},
+			{id: 0, outcomes: 3},
+			{id: 1, outcomes: 2},
 		},
 		data: make([]float64, 6),
 	}
@@ -24,9 +24,9 @@ func TestFactorIndex(t *testing.T) {
 func TestFactorRowIndex(t *testing.T) {
 	f := Factor{
 		variables: []Variable{
-			{Id: 0, outcomes: 3},
-			{Id: 1, outcomes: 2},
-			{Id: 2, outcomes: 4},
+			{id: 0, outcomes: 3},
+			{id: 1, outcomes: 2},
+			{id: 2, outcomes: 4},
 		},
 		data: make([]float64, 24),
 	}
@@ -51,8 +51,8 @@ func TestFactorRowIndex(t *testing.T) {
 func TestFactorOutcomes(t *testing.T) {
 	f := Factor{
 		variables: []Variable{
-			{Id: 0, outcomes: 3},
-			{Id: 1, outcomes: 2},
+			{id: 0, outcomes: 3},
+			{id: 1, outcomes: 2},
 		},
 		data: make([]float64, 6),
 	}

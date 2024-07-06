@@ -198,7 +198,7 @@ func (n *Network) SolvePolicies(stepwise bool) (map[string]Factor, error) {
 		}
 
 		for name, v := range n.variableNames {
-			if v.VeVariable.NodeType != ve.DecisionNode {
+			if v.VeVariable.NodeType() != ve.DecisionNode {
 				continue
 			}
 			if p, ok := policies[v.VeVariable]; ok {
@@ -213,8 +213,7 @@ func (n *Network) SolvePolicies(stepwise bool) (map[string]Factor, error) {
 		forVar := n.variableNames[name]
 		newVars := make([]ve.Variable, len(variables))
 		idx := slices.IndexFunc(
-			variables,
-			func(v ve.Variable) bool { return v.Id == forVar.VeVariable.Id },
+			variables, forVar.VeVariable.Is,
 		)
 
 		for i := 0; i < idx; i++ {
@@ -225,11 +224,11 @@ func (n *Network) SolvePolicies(stepwise bool) (map[string]Factor, error) {
 		}
 		newVars[len(newVars)-1] = variables[idx]
 
-		f := n.ve.Variables.Rearrange(&f, newVars)
+		f := n.ve.Variables().Rearrange(&f, newVars)
 
 		given := make([]string, len(newVars)-1)
 		for i := 0; i < len(newVars)-1; i++ {
-			given[i] = n.variables[newVars[i].Id].Name
+			given[i] = n.variables[newVars[i].Id()].Name
 		}
 
 		ff := Factor{
@@ -405,7 +404,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 		}
 
 		// don't add factors for unsolved decision nodes, but add dependencies
-		if forVar.VeVariable.NodeType == ve.DecisionNode {
+		if forVar.VeVariable.NodeType() == ve.DecisionNode {
 			dependencies[forVar.VeVariable] = variables
 			continue
 		}
@@ -485,10 +484,10 @@ func (n *Network) policyFactors(vars *ve.Variables, varIDs []variable, evidence 
 		variables := make([]ve.Variable, len(f.Variables()))
 		for i, v := range f.Variables() {
 			// treat solved decision nodes as chance nodes
-			if v.NodeType == ve.DecisionNode {
-				vv := varIDs[v.Id]
+			if v.NodeType() == ve.DecisionNode {
+				vv := varIDs[v.Id()]
 				if _, ok := n.policies[vv.Variable.Name]; ok {
-					v.NodeType = ve.ChanceNode
+					v = v.WithNodeType(ve.ChanceNode)
 				}
 			}
 			// add to list of variables
@@ -503,13 +502,13 @@ func (n *Network) policyFactors(vars *ve.Variables, varIDs []variable, evidence 
 
 // Normalize a factor.
 func (n *Network) Normalize(f *ve.Factor) ve.Factor {
-	return n.ve.Variables.Normalize(f)
+	return n.ve.Variables().Normalize(f)
 }
 
 // NormalizeUtility normalizes utility factor by dividing it by a probability factor.
 func (n *Network) NormalizeUtility(utility *ve.Factor, probs *ve.Factor) ve.Factor {
-	inv := n.ve.Variables.Invert(probs)
-	return n.ve.Variables.Product(utility, &inv)
+	inv := n.ve.Variables().Invert(probs)
+	return n.ve.Variables().Product(utility, &inv)
 }
 
 func (n *Network) Marginal(f *ve.Factor, v string) ve.Factor {
@@ -517,12 +516,12 @@ func (n *Network) Marginal(f *ve.Factor, v string) ve.Factor {
 	if !ok {
 		panic(fmt.Sprintf("marginal: variable %s not found", v))
 	}
-	return n.ve.Variables.Marginal(f, vv.VeVariable)
+	return n.ve.Variables().Marginal(f, vv.VeVariable)
 }
 
 func (n *Network) Rearrange(f *ve.Factor, variables []string) ve.Factor {
 	vars := n.rearrangeVariables(f, variables)
-	return n.ve.Variables.Rearrange(f, vars)
+	return n.ve.Variables().Rearrange(f, vars)
 }
 
 func (n *Network) rearrangeVariables(f *ve.Factor, variables []string) []ve.Variable {
@@ -545,7 +544,7 @@ func (n *Network) rearrangeVariables(f *ve.Factor, variables []string) []ve.Vari
 	last := fVariables[idx]
 
 	for i, d := range done {
-		if d || fVariables[i].Id == last.Id {
+		if d || fVariables[i].Is(last) {
 			continue
 		}
 		vars = append(vars, fVariables[i])
@@ -561,7 +560,7 @@ func (n *Network) variableIndex(f *ve.Factor, v string) (int, bool) {
 	if !ok {
 		panic(fmt.Sprintf("variable %s not found in network", v))
 	}
-	idx := slices.IndexFunc(f.Variables(), func(vv ve.Variable) bool { return vv.Id == variable.VeVariable.Id })
+	idx := slices.IndexFunc(f.Variables(), variable.VeVariable.Is)
 	if idx < 0 {
 		return -1, false
 	}
