@@ -35,7 +35,7 @@ variables:
 - variable: Disease cost
   given: [Infected, Treatment]
   outcomes: [euros]
-  position: [44, 0]
+  position: [49, 0]
   type: utility
   table:
   - [ -100] # infected+ treatment+
@@ -62,7 +62,7 @@ variables:
 - variable: Test cost
   given: [Test]
   outcomes: [euros]
-  position: [1, 24]
+  position: [3, 24]
   type: utility
   table:
   - [-10] # test+
@@ -77,7 +77,7 @@ variables:
 - variable: Treatment cost
   given: [Treatment]
   outcomes: [euros]
-  position: [44, 24]
+  position: [49, 24]
   type: utility
   table:
   - [-100] # treatment+

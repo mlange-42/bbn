@@ -47,7 +47,7 @@ variables:
   given: [Sensor maintenance, Sensor warning]
 
 - variable: Material damage
-  position: [36, 0]
+  position: [40, 0]
   given: [Earthquake next week]
   type: utility
   outcomes: [value]
@@ -57,7 +57,7 @@ variables:
   - [    0] # none
 
 - variable: Human damage
-  position: [36, 4]
+  position: [40, 4]
   given: [Evacuate, Earthquake next week]
   type: utility
   outcomes: [value]
@@ -70,7 +70,7 @@ variables:
   - [    0] # none, e-
 
 - variable: Evacuation cost
-  position: [36, 20]
+  position: [40, 20]
   given: [Evacuate]
   type: utility
   outcomes: [value]
