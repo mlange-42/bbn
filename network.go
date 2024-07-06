@@ -362,8 +362,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 			continue
 		}
 		// treat decision variables with policy as normal change variables
-		_, isEvidence := evidence[v.Name]
-		if v.Type == ve.DecisionNode && !isEvidence {
+		if v.Type == ve.DecisionNode {
 			if _, ok := n.policies[v.Name]; ok {
 				varIDs[i] = variable{
 					Variable:   v,

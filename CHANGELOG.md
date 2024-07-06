@@ -5,10 +5,7 @@
 ### Features
 
 * Makes sub-package `ve` for low-level variable elimination public (#73)
-
-### Bugfixes
-
-* Nodes with incompletely solved utility show "???" instead of the first utility value (#74)
+* Solve utility nodes even when there are ignored policies, overwritten by "evidence" (#74, #75)
 
 ## [[v0.5.0]](https://github.com/mlange-42/bbn/compare/v0.4.0...v0.5.0)
 

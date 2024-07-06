@@ -179,7 +179,10 @@ func (n *node) drawStateLabels() {
 
 func (n *node) drawBars(probs []float64, selected bool, state int, evidence bool) {
 	for i, p := range probs {
-		full, frac := math.Modf(p * 10)
+		var full, frac float64
+		if !math.IsNaN(p) {
+			full, frac = math.Modf(p * 10)
+		}
 		for j := 0; j < int(full); j++ {
 			n.runes[i+2][n.barsX+j] = Full
 		}
@@ -192,7 +195,13 @@ func (n *node) drawBars(probs []float64, selected bool, state int, evidence bool
 		for j := int(full); j < maxBars; j++ {
 			n.runes[i+2][n.barsX+j] = Shade
 		}
-		text := []rune(fmt.Sprintf("%7.3f", p*100))
+		var text []rune
+		if math.IsNaN(p) {
+			text = []rune("    ???")
+		} else {
+			text = []rune(fmt.Sprintf("%7.3f", p*100))
+		}
+
 		copy(n.runes[i+2][n.barsX+maxBars+1:], text)
 
 		if selected && state == i {
@@ -212,9 +221,9 @@ func (n *node) drawUtility(probs []float64) {
 	for i, p := range probs {
 		var text []rune
 		if math.IsNaN(p) {
-			text = []rune("    ???")
+			text = []rune("           ???")
 		} else {
-			text = []rune(fmt.Sprintf("%7.3f", p))
+			text = []rune(fmt.Sprintf("%14.3f", p))
 		}
 		copy(n.runes[i+2][n.barsX+1:], text)
 	}
