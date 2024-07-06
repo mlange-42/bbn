@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mlange-42/bbn"
-	"github.com/mlange-42/bbn/internal/ve"
+	"github.com/mlange-42/bbn/ve"
 )
 
 func Solve(network *bbn.Network, evidence map[string]string, nodes []Node, ignorePolicies bool) (map[string][]float64, error) {

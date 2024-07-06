@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/mlange-42/bbn"
-	"github.com/mlange-42/bbn/internal/ve"
+	"github.com/mlange-42/bbn/ve"
 )
 
 func TrainNetwork(net *bbn.Network, nodes []bbn.Variable, dataFile, noData string, delimiter rune) (*bbn.Network, error) {
