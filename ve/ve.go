@@ -11,11 +11,6 @@ type Evidence struct {
 	Value    int
 }
 
-type Policy struct {
-	Decision Variable
-	Factor   *Factor
-}
-
 type VE struct {
 	Variables    *Variables
 	eliminated   []bool
