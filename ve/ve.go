@@ -37,7 +37,7 @@ func New(variables *Variables, factors []Factor, dependencies map[Variable][]Var
 func (ve *VE) getDecisions() []Variable {
 	dec := []Variable{}
 	for _, v := range ve.Variables.variables {
-		if v.NodeType == DecisionNode {
+		if v.NodeType() == DecisionNode {
 			dec = append(dec, v)
 		}
 	}
@@ -53,7 +53,7 @@ func (ve *VE) eliminateEvidence(evidence []Evidence) {
 func (ve *VE) removeUtilities(except *Variable) {
 	utils := []Variable{}
 	for _, u := range ve.Variables.variables {
-		if u.NodeType == UtilityNode && (except == nil || u.Id != except.Id) {
+		if u.NodeType() == UtilityNode && (except == nil || u.id != except.id) {
 			utils = append(utils, u)
 		}
 	}
@@ -81,7 +81,7 @@ func (ve *VE) removeUtilities(except *Variable) {
 func (ve *VE) sumUtilities() {
 	utils := []Variable{}
 	for _, u := range ve.Variables.variables {
-		if u.NodeType != UtilityNode {
+		if u.NodeType() != UtilityNode {
 			continue
 		}
 		utils = append(utils, u)
@@ -132,16 +132,16 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, singleDecis
 
 	hidden := map[int]Variable{}
 	for i, v := range ve.Variables.variables {
-		if v.NodeType != ChanceNode || ve.eliminated[i] || isDecisionParent[v.index] {
+		if v.NodeType() != ChanceNode || ve.eliminated[i] || isDecisionParent[v.index] {
 			continue
 		}
-		hidden[v.Id] = v
+		hidden[v.id] = v
 	}
 	for _, ev := range evidence {
-		delete(hidden, ev.Variable.Id)
+		delete(hidden, ev.Variable.id)
 	}
 	for _, v := range query {
-		delete(hidden, v.Id)
+		delete(hidden, v.id)
 	}
 
 	// TODO: check elimination order of hidden variables
@@ -150,11 +150,11 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, singleDecis
 	newVars := []Variable{}
 	for _, v := range hidden {
 		for _, f := range ve.factors {
-			if !slices.ContainsFunc(f.variables, func(v2 Variable) bool { return v2.Id == v.Id }) {
+			if !slices.ContainsFunc(f.variables, func(v2 Variable) bool { return v2.id == v.id }) {
 				continue
 			}
 			for _, vv := range f.variables {
-				if !slices.ContainsFunc(newVars, func(v2 Variable) bool { return v2.Id == vv.Id }) {
+				if !slices.ContainsFunc(newVars, func(v2 Variable) bool { return v2.id == vv.id }) {
 					newVars = append(newVars, vv)
 				}
 			}
@@ -167,7 +167,7 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, singleDecis
 		}
 		i++
 	}
-	slices.SortFunc(hiddenList, func(a, b variableDegree) int { return cmp.Compare(a.Variable.Id, b.Variable.Id) })
+	slices.SortFunc(hiddenList, func(a, b variableDegree) int { return cmp.Compare(a.Variable.id, b.Variable.id) })
 	slices.SortStableFunc(hiddenList, func(a, b variableDegree) int { return cmp.Compare(a.Degree, b.Degree) })
 
 	for _, v := range hiddenList {
@@ -197,12 +197,12 @@ func (ve *VE) getDecisionParents(single bool) []bool {
 
 	/*
 		for _, v := range ve.Variables.variables {
-			if ve.eliminated[v.Id] || v.NodeType != DecisionNode {
+			if ve.eliminated[v.id] || v.NodeType() != DecisionNode {
 				continue
 			}
 			if vars, ok := ve.dependencies[v]; ok {
 				for _, v := range vars {
-					isDecisionParent[v.Id] = true
+					isDecisionParent[v.id] = true
 				}
 			}
 		}*/
@@ -266,7 +266,7 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 		}*/
 
 		if len(factors) == 0 {
-			panic(fmt.Sprintf("found no factors containing variable %d and its parents", dec.Id))
+			panic(fmt.Sprintf("found no factors containing variable %d and its parents", dec.id))
 		}
 
 		// TODO: check that multiplying when multiple factors are remaining is correct!
@@ -288,7 +288,7 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 
 		policies[dec] = [2]*Factor{fac, &policy}
 		ve.factors[policy.id] = &policy
-		ve.Variables.variables[dec.index].NodeType = ChanceNode
+		ve.Variables.variables[dec.index].nodeType = ChanceNode
 
 		ve.eliminateHidden(nil, nil, single)
 
@@ -365,12 +365,12 @@ func (ve *VE) removeHidden(variable Variable) {
 	//utilityFactors := []*Factor{}
 
 	for k, f := range ve.factors {
-		if slices.ContainsFunc(f.variables, func(v Variable) bool { return v.Id == variable.Id }) {
+		if slices.ContainsFunc(f.variables, func(v Variable) bool { return v.id == variable.id }) {
 			indices = append(indices, k)
 
 			/*hasUtility := false
 			for _, v := range f.Variables {
-				if v.NodeType == UtilityNode {
+				if v.NodeType() == UtilityNode {
 					hasUtility = true
 					break
 				}
@@ -407,7 +407,7 @@ func (ve *VE) multiplyAll() *Factor {
 	for _, f := range ve.factors {
 		/*hasUtility := false
 		for _, v := range f.Variables {
-			if v.NodeType == UtilityNode {
+			if v.NodeType() == UtilityNode {
 				hasUtility = true
 				break
 			}
@@ -454,9 +454,9 @@ func sortTopologicalRecursive(dec []Variable, index int, deps map[Variable][]Var
 
 	v := dec[index]
 	for id, vars := range deps {
-		if id.Id == v.Id {
+		if id.id == v.id {
 			for _, p := range vars {
-				if p.NodeType != DecisionNode {
+				if p.NodeType() != DecisionNode {
 					continue
 				}
 				idx := slices.Index(dec, p)

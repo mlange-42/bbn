@@ -15,10 +15,27 @@ const (
 )
 
 type Variable struct {
-	Id       int
+	id       int
 	index    uint16
 	outcomes uint16
-	NodeType NodeType
+	nodeType NodeType
+}
+
+func (v *Variable) Id() int {
+	return v.id
+}
+
+func (v *Variable) NodeType() NodeType {
+	return v.nodeType
+}
+
+func (v Variable) WithNodeType(tp NodeType) Variable {
+	v.nodeType = tp
+	return v
+}
+
+func (v Variable) Is(other Variable) bool {
+	return v.id == other.id
 }
 
 // Variables provides variable and factor creation functionality, as well as factor operations.
@@ -42,10 +59,10 @@ func (v *Variables) AddVariable(id int, nodeType NodeType, outcomes uint16) Vari
 	}
 	v.variables = append(v.variables,
 		Variable{
-			Id:       id,
+			id:       id,
 			index:    uint16(len(v.variables)),
 			outcomes: outcomes,
-			NodeType: nodeType,
+			nodeType: nodeType,
 		})
 	return v.variables[len(v.variables)-1]
 }
@@ -87,7 +104,7 @@ func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Fact
 
 	rows := 1
 	for i := range f.variables {
-		if f.variables[i].Id == variable.Id {
+		if f.variables[i].id == variable.id {
 			idx = i
 		} else {
 			newVars = append(newVars, f.variables[i])
@@ -96,7 +113,7 @@ func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Fact
 	}
 
 	if idx < 0 {
-		panic(fmt.Sprintf("variable %d not in this factor", variable.Id))
+		panic(fmt.Sprintf("variable %d not in this factor", variable.id))
 	}
 
 	fNew := v.CreateFactor(newVars, nil)
@@ -127,7 +144,7 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 
 	rows := 1
 	for i := range f.variables {
-		if f.variables[i].Id == variable.Id {
+		if f.variables[i].id == variable.id {
 			idx = i
 		} else {
 			newVars = append(newVars, f.variables[i])
@@ -136,7 +153,7 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 	}
 
 	if idx < 0 {
-		panic(fmt.Sprintf("variable %d not in this factor", variable.Id))
+		panic(fmt.Sprintf("variable %d not in this factor", variable.id))
 	}
 
 	fNew := v.CreateFactor(newVars, nil)
@@ -165,7 +182,7 @@ func (v *Variables) Policy(f *Factor, variable Variable) Factor {
 	idx := -1
 
 	for i := range f.variables {
-		if f.variables[i].Id == variable.Id {
+		if f.variables[i].id == variable.id {
 			idx = i
 		} else {
 			newVars = append(newVars, f.variables[i])
@@ -173,7 +190,7 @@ func (v *Variables) Policy(f *Factor, variable Variable) Factor {
 	}
 
 	if idx < 0 {
-		panic(fmt.Sprintf("variable %d not in this factor", variable.Id))
+		panic(fmt.Sprintf("variable %d not in this factor", variable.id))
 	}
 	newVars = append(newVars, f.variables[idx])
 
@@ -249,7 +266,7 @@ func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
 	for i, vv := range variables {
 		idx := slices.Index(f.variables, vv)
 		if idx < 0 {
-			panic(fmt.Sprintf("variable %d not in original factor", vv.Id))
+			panic(fmt.Sprintf("variable %d not in original factor", vv.id))
 		}
 		indices[i] = idx
 	}
@@ -367,14 +384,14 @@ func (v *Variables) Sum(factors ...*Factor) Factor {
 func (v *Variables) Marginal(f *Factor, variable Variable) Factor {
 	idx := -1
 	for i := range f.variables {
-		if f.variables[i].Id == variable.Id {
+		if f.variables[i].id == variable.id {
 			idx = i
 			break
 		}
 	}
 
 	if idx < 0 {
-		panic(fmt.Sprintf("variable %d not in this factor", variable.Id))
+		panic(fmt.Sprintf("variable %d not in this factor", variable.id))
 	}
 
 	newVars := []Variable{variable}
@@ -413,14 +430,14 @@ func (v *Variables) Normalize(f *Factor) Factor {
 func (v *Variables) NormalizeFor(f *Factor, variable Variable) Factor {
 	idx := -1
 	for i := range f.variables {
-		if f.variables[i].Id == variable.Id {
+		if f.variables[i].id == variable.id {
 			idx = i
 			break
 		}
 	}
 
 	if idx < 0 {
-		panic(fmt.Sprintf("variable %d not in this factor", variable.Id))
+		panic(fmt.Sprintf("variable %d not in this factor", variable.id))
 	}
 
 	newVars := make([]Variable, len(f.variables))
