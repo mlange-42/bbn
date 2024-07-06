@@ -90,10 +90,10 @@ func TestNetworkToVE(t *testing.T) {
 		14, 7, // rainy
 	}
 
-	assert.Equal(t, len(expected), len(result.Data))
+	assert.Equal(t, len(expected), len(result.Data()))
 
 	for i := range expected {
-		assert.Less(t, math.Abs(expected[i]-result.Data[i]), 0.0001)
+		assert.Less(t, math.Abs(expected[i]-result.Data()[i]), 0.0001)
 	}
 }
 
@@ -161,10 +161,10 @@ func TestNetworkSolveUmbrella(t *testing.T) {
 	fmt.Println("--> NormalizeUtility", normUtil)
 
 	expected := []float64{70, 20}
-	assert.Equal(t, len(expected), len(normUtil.Data))
+	assert.Equal(t, len(expected), len(normUtil.Data()))
 
 	for i := range expected {
-		assert.Less(t, math.Abs(expected[i]-normUtil.Data[i]), 0.0001)
+		assert.Less(t, math.Abs(expected[i]-normUtil.Data()[i]), 0.0001)
 	}
 }
 
@@ -282,7 +282,7 @@ func TestNetworkRearrange(t *testing.T) {
 	_, f, err := net.SolveQuery(map[string]string{}, []string{"a", "b", "c", "d"}, true)
 	assert.Nil(t, err)
 
-	vars := []ve.Variable(f.Variables)
+	vars := []ve.Variable(f.Variables())
 	a, b, c, d := vars[0], vars[1], vars[2], vars[3]
 
 	result := net.rearrangeVariables(f, []string{"a", "b", "c", "d"})

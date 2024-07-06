@@ -56,7 +56,7 @@ func solveQueries(network *bbn.Network, evidence map[string]string, queries []st
 	if err != nil {
 		return 0, err
 	}
-	totalProb := f.Data[0]
+	totalProb := f.Data()[0]
 
 	for _, q := range queries {
 		r, _, err := network.SolveQuery(evidence, []string{q}, ignorePolicies)
@@ -90,7 +90,7 @@ func solveUtility(network *bbn.Network, nodes []Node, evidence map[string]string
 	if err != nil {
 		return err
 	}
-	totalUtility := f.Data[0]
+	totalUtility := f.Data()[0]
 	if totalProb != 0 {
 		totalUtility /= totalProb
 	}
@@ -100,7 +100,7 @@ func solveUtility(network *bbn.Network, nodes []Node, evidence map[string]string
 		if err != nil {
 			return err
 		}
-		nodeUtility := f.Data[0]
+		nodeUtility := f.Data()[0]
 		if totalProb != 0 {
 			nodeUtility /= totalProb
 		}

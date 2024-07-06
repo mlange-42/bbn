@@ -44,7 +44,7 @@ func TestEliminate(t *testing.T) {
 
 	pRain := vars.Marginal(result, rain)
 	pRain = vars.Normalize(&pRain)
-	assert.Equal(t, []float64{1, 0}, pRain.Data)
+	assert.Equal(t, []float64{1, 0}, pRain.Data())
 }
 
 func TestDecisionUmbrella(t *testing.T) {
@@ -92,10 +92,10 @@ func TestDecisionUmbrella(t *testing.T) {
 		14, 7, // rainy
 	}
 
-	assert.Equal(t, len(expected), len(result.Data))
+	assert.Equal(t, len(expected), len(result.Data()))
 
 	for i := range expected {
-		assert.Less(t, math.Abs(expected[i]-result.Data[i]), 0.0001)
+		assert.Less(t, math.Abs(expected[i]-result.Data()[i]), 0.0001)
 	}
 }
 
@@ -139,7 +139,7 @@ func TestDecisionUmbrella2(t *testing.T) {
 	}
 
 	policy := result[umbrella][1]
-	assert.Equal(t, factorVariables{weather, umbrella}, policy.Variables)
+	assert.Equal(t, []Variable{weather, umbrella}, policy.Variables())
 }
 
 func TestDecisionEvacuate(t *testing.T) {
@@ -197,7 +197,7 @@ func TestDecisionEvacuate(t *testing.T) {
 	fmt.Println(result)
 
 	expectedUtility := v.Marginal(result, evacuate)
-	assert.Equal(t, []float64{-124.5, -85.0}, expectedUtility.Data)
+	assert.Equal(t, []float64{-124.5, -85.0}, expectedUtility.Data())
 }
 
 func TestDecisionOil(t *testing.T) {
@@ -257,7 +257,7 @@ func TestDecisionOil(t *testing.T) {
 	expTest := []float64{
 		1, 0,
 	}
-	assert.Equal(t, expTest, testPolicy.Data)
+	assert.Equal(t, expTest, testPolicy.Data())
 
 	expDrill := []float64{
 		// drill + -
@@ -268,7 +268,7 @@ func TestDecisionOil(t *testing.T) {
 		1, 0, // test+, open
 		1, 0, // test+, diffuse
 	}
-	assert.Equal(t, expDrill, drillPolicy.Data)
+	assert.Equal(t, expDrill, drillPolicy.Data())
 
 }
 
@@ -313,7 +313,7 @@ func TestDecisionRobot(t *testing.T) {
 	fmt.Println(result)
 
 	expected := []float64{8 - 6*accidentProb, 10 - 10*accidentProb, 4, 6}
-	assert.Equal(t, expected, result.Data)
+	assert.Equal(t, expected, result.Data())
 }
 
 func TestSortDecisions(t *testing.T) {

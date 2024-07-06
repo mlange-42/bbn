@@ -71,7 +71,7 @@ func (ve *VE) removeUtilities(except *Variable) {
 
 	for k, f := range ve.factors {
 		for _, u := range utils {
-			if slices.Contains(f.Variables, u) {
+			if slices.Contains(f.variables, u) {
 				indices = append(indices, k)
 				break
 			}
@@ -101,10 +101,10 @@ func (ve *VE) sumUtilities() {
 
 	for k, f := range ve.factors {
 		for i, u := range utils {
-			if slices.Contains(f.Variables, u) {
+			if slices.Contains(f.variables, u) {
 				scaled := f
 				if ve.weights != nil {
-					ff := ve.Variables.Product(scaled, &Factor{Data: []float64{ve.weights[i]}})
+					ff := ve.Variables.Product(scaled, &Factor{data: []float64{ve.weights[i]}})
 					scaled = &ff
 				}
 				indices = append(indices, k)
@@ -155,10 +155,10 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, singleDecis
 	newVars := []Variable{}
 	for _, v := range hidden {
 		for _, f := range ve.factors {
-			if !slices.ContainsFunc(f.Variables, func(v2 Variable) bool { return v2.Id == v.Id }) {
+			if !slices.ContainsFunc(f.variables, func(v2 Variable) bool { return v2.Id == v.Id }) {
 				continue
 			}
-			for _, vv := range f.Variables {
+			for _, vv := range f.variables {
 				if !slices.ContainsFunc(newVars, func(v2 Variable) bool { return v2.Id == vv.Id }) {
 					newVars = append(newVars, vv)
 				}
@@ -310,16 +310,16 @@ func (ve *VE) solvePolicies(decisions []Variable, single bool) map[Variable][2]*
 func (ve *VE) findDecisionFactors(decision Variable, result []*Factor) []*Factor {
 	deps := ve.dependencies[decision]
 	for _, f := range ve.factors {
-		if !slices.Contains(f.Variables, decision) {
+		if !slices.Contains(f.variables, decision) {
 			continue
 		}
-		if len(deps) == 0 && len(f.Variables) == 1 {
+		if len(deps) == 0 && len(f.variables) == 1 {
 			result = append(result, f)
 			continue
 		}
 		hasParent := true
 		//hasNonParent := false
-		for _, v := range f.Variables {
+		for _, v := range f.variables {
 			if slices.Contains(deps, v) {
 				hasParent = true
 			} /*else if v != dec {
@@ -333,10 +333,10 @@ func (ve *VE) findDecisionFactors(decision Variable, result []*Factor) []*Factor
 	}
 	if len(result) == 0 {
 		for _, f := range ve.factors {
-			if !slices.Contains(f.Variables, decision) {
+			if !slices.Contains(f.variables, decision) {
 				continue
 			}
-			if len(f.Variables) > 1 {
+			if len(f.variables) > 1 {
 				continue
 			}
 			result = append(result, f)
@@ -349,7 +349,7 @@ func (ve *VE) findDecisionFactors(decision Variable, result []*Factor) []*Factor
 func (ve *VE) restrictEvidence(evidence Evidence) {
 	indices := []int{}
 	for k, v := range ve.factors {
-		if slices.Contains(v.Variables, evidence.Variable) {
+		if slices.Contains(v.variables, evidence.Variable) {
 			indices = append(indices, k)
 		}
 	}
@@ -370,7 +370,7 @@ func (ve *VE) removeHidden(variable Variable) {
 	//utilityFactors := []*Factor{}
 
 	for k, f := range ve.factors {
-		if slices.ContainsFunc(f.Variables, func(v Variable) bool { return v.Id == variable.Id }) {
+		if slices.ContainsFunc(f.variables, func(v Variable) bool { return v.Id == variable.Id }) {
 			indices = append(indices, k)
 
 			/*hasUtility := false

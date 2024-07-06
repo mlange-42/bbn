@@ -72,8 +72,8 @@ func (v *Variables) CreateFactor(vars []Variable, data []float64) Factor {
 
 	return Factor{
 		id:        v.factorCounter - 1,
-		Variables: variables,
-		Data:      data,
+		variables: variables,
+		data:      data,
 	}
 }
 
@@ -86,12 +86,12 @@ func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Fact
 	idx := -1
 
 	rows := 1
-	for i := range f.Variables {
-		if f.Variables[i].Id == variable.Id {
+	for i := range f.variables {
+		if f.variables[i].Id == variable.Id {
 			idx = i
 		} else {
-			newVars = append(newVars, f.Variables[i])
-			rows *= int(f.Variables[i].outcomes)
+			newVars = append(newVars, f.variables[i])
+			rows *= int(f.variables[i].outcomes)
 		}
 	}
 
@@ -101,9 +101,9 @@ func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Fact
 
 	fNew := v.CreateFactor(newVars, nil)
 
-	oldIndex := make([]int, len(f.Variables))
+	oldIndex := make([]int, len(f.variables))
 	newIndex := make([]int, len(newVars))
-	for i, v := range f.Data {
+	for i, v := range f.data {
 		f.Outcomes(i, oldIndex)
 		if oldIndex[idx] != observation {
 			continue
@@ -126,12 +126,12 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 	idx := -1
 
 	rows := 1
-	for i := range f.Variables {
-		if f.Variables[i].Id == variable.Id {
+	for i := range f.variables {
+		if f.variables[i].Id == variable.Id {
 			idx = i
 		} else {
-			newVars = append(newVars, f.Variables[i])
-			rows *= int(f.Variables[i].outcomes)
+			newVars = append(newVars, f.variables[i])
+			rows *= int(f.variables[i].outcomes)
 		}
 	}
 
@@ -141,10 +141,10 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 
 	fNew := v.CreateFactor(newVars, nil)
 
-	oldIndex := make([]int, len(f.Variables))
+	oldIndex := make([]int, len(f.variables))
 	newIndex := make([]int, len(newVars))
 
-	for i, v := range f.Data {
+	for i, v := range f.data {
 		f.Outcomes(i, oldIndex)
 		for j := 0; j < idx; j++ {
 			newIndex[j] = oldIndex[j]
@@ -153,7 +153,7 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 			newIndex[j-1] = oldIndex[j]
 		}
 		idx := fNew.Index(newIndex)
-		fNew.Data[idx] += v
+		fNew.data[idx] += v
 	}
 
 	return fNew
@@ -164,27 +164,27 @@ func (v *Variables) Policy(f *Factor, variable Variable) Factor {
 	newVars := []Variable{}
 	idx := -1
 
-	for i := range f.Variables {
-		if f.Variables[i].Id == variable.Id {
+	for i := range f.variables {
+		if f.variables[i].Id == variable.Id {
 			idx = i
 		} else {
-			newVars = append(newVars, f.Variables[i])
+			newVars = append(newVars, f.variables[i])
 		}
 	}
 
 	if idx < 0 {
 		panic(fmt.Sprintf("variable %d not in this factor", variable.Id))
 	}
-	newVars = append(newVars, f.Variables[idx])
+	newVars = append(newVars, f.variables[idx])
 
 	fNew := v.CreateFactor(newVars, nil)
 
-	oldIndex := make([]int, len(f.Variables))
+	oldIndex := make([]int, len(f.variables))
 	newIndex := make([]int, len(newVars))
 	idxNew := len(newVars) - 1
 
-	cols := int(f.Variables[idx].outcomes)
-	rows := len(f.Data) / cols
+	cols := int(f.variables[idx].outcomes)
+	rows := len(f.data) / cols
 
 	rowData := make([]float64, cols)
 	maxIndices := make([]int, 0, 8)
@@ -231,23 +231,23 @@ func (v *Variables) Policy(f *Factor, variable Variable) Factor {
 
 // Rearrange changes the [Variable] order of a [Factor].
 func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
-	if len(f.Variables) != len(variables) {
+	if len(f.variables) != len(variables) {
 		panic("number of old and new variables doesn't match")
 	}
 	varsEqual := true
 	for i, vv := range variables {
-		if vv != f.Variables[i] {
+		if vv != f.variables[i] {
 			varsEqual = false
 			break
 		}
 	}
 	if varsEqual {
-		return v.CreateFactor(f.Variables, append([]float64{}, f.Data...))
+		return v.CreateFactor(f.variables, append([]float64{}, f.data...))
 	}
 
 	indices := make([]int, len(variables))
 	for i, vv := range variables {
-		idx := slices.Index(f.Variables, vv)
+		idx := slices.Index(f.variables, vv)
 		if idx < 0 {
 			panic(fmt.Sprintf("variable %d not in original factor", vv.Id))
 		}
@@ -256,14 +256,14 @@ func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
 
 	fNew := v.CreateFactor(variables, nil)
 	newIndex := make([]int, len(variables))
-	oldIndex := make([]int, len(f.Variables))
+	oldIndex := make([]int, len(f.variables))
 
-	for i := range fNew.Data {
+	for i := range fNew.data {
 		fNew.Outcomes(i, newIndex)
 		for j, idx := range newIndex {
 			oldIndex[indices[j]] = idx
 		}
-		fNew.Data[i] = f.Get(oldIndex)
+		fNew.data[i] = f.Get(oldIndex)
 	}
 
 	return fNew
@@ -272,14 +272,14 @@ func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
 // Product multiplies factors.
 func (v *Variables) Product(factors ...*Factor) Factor {
 	if len(factors) == 1 {
-		return v.CreateFactor(factors[0].Variables, append([]float64{}, factors[0].Data...))
+		return v.CreateFactor(factors[0].variables, append([]float64{}, factors[0].data...))
 	}
 
 	newVars := []Variable{}
 	maps := make([][]int, len(factors))
 	for i, f := range factors {
-		m := make([]int, len(f.Variables))
-		for j, v := range f.Variables {
+		m := make([]int, len(f.variables))
+		for j, v := range f.variables {
 			idx := slices.Index(newVars, v)
 			if idx < 0 {
 				idx = len(newVars)
@@ -294,11 +294,11 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 
 	oldIndex := make([][]int, len(factors))
 	for i, f := range factors {
-		oldIndex[i] = make([]int, len(f.Variables))
+		oldIndex[i] = make([]int, len(f.variables))
 	}
 
-	newIndex := make([]int, len(f.Variables))
-	for i := range f.Data {
+	newIndex := make([]int, len(f.variables))
+	for i := range f.data {
 		f.Outcomes(i, newIndex)
 
 		product := 1.0
@@ -310,7 +310,7 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 			}
 			product *= fOld.Get(oldIdx)
 		}
-		f.Data[i] = product
+		f.data[i] = product
 	}
 
 	return f
@@ -319,14 +319,14 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 // Sum sums up factors, similar to [Variables.Product].
 func (v *Variables) Sum(factors ...*Factor) Factor {
 	if len(factors) == 1 {
-		return v.CreateFactor(factors[0].Variables, append([]float64{}, factors[0].Data...))
+		return v.CreateFactor(factors[0].variables, append([]float64{}, factors[0].data...))
 	}
 
 	newVars := []Variable{}
 	maps := make([][]int, len(factors))
 	for i, f := range factors {
-		m := make([]int, len(f.Variables))
-		for j, v := range f.Variables {
+		m := make([]int, len(f.variables))
+		for j, v := range f.variables {
 			idx := slices.Index(newVars, v)
 			if idx < 0 {
 				idx = len(newVars)
@@ -341,11 +341,11 @@ func (v *Variables) Sum(factors ...*Factor) Factor {
 
 	oldIndex := make([][]int, len(factors))
 	for i, f := range factors {
-		oldIndex[i] = make([]int, len(f.Variables))
+		oldIndex[i] = make([]int, len(f.variables))
 	}
 
-	newIndex := make([]int, len(f.Variables))
-	for i := range f.Data {
+	newIndex := make([]int, len(f.variables))
+	for i := range f.data {
 		f.Outcomes(i, newIndex)
 
 		sum := 0.0
@@ -357,7 +357,7 @@ func (v *Variables) Sum(factors ...*Factor) Factor {
 			}
 			sum += fOld.Get(oldIdx)
 		}
-		f.Data[i] = sum
+		f.data[i] = sum
 	}
 
 	return f
@@ -366,8 +366,8 @@ func (v *Variables) Sum(factors ...*Factor) Factor {
 // Marginal calculates marginal probabilities from a [Factor] for the given [Variable].
 func (v *Variables) Marginal(f *Factor, variable Variable) Factor {
 	idx := -1
-	for i := range f.Variables {
-		if f.Variables[i].Id == variable.Id {
+	for i := range f.variables {
+		if f.variables[i].Id == variable.Id {
 			idx = i
 			break
 		}
@@ -380,29 +380,29 @@ func (v *Variables) Marginal(f *Factor, variable Variable) Factor {
 	newVars := []Variable{variable}
 	fNew := v.CreateFactor(newVars, nil)
 
-	oldIndex := make([]int, len(f.Variables))
+	oldIndex := make([]int, len(f.variables))
 
-	for i, v := range f.Data {
+	for i, v := range f.data {
 		f.Outcomes(i, oldIndex)
-		fNew.Data[oldIndex[idx]] += v
+		fNew.data[oldIndex[idx]] += v
 	}
 	return fNew
 }
 
 // Normalize normalizes a [Factor].
 func (v *Variables) Normalize(f *Factor) Factor {
-	fNew := v.CreateFactor(f.Variables, append([]float64{}, f.Data...))
+	fNew := v.CreateFactor(f.variables, append([]float64{}, f.data...))
 
 	sum := 0.0
-	for _, v := range fNew.Data {
+	for _, v := range fNew.data {
 		sum += v
 	}
 	if sum == 0 {
 		return fNew
 	}
 
-	for i := range fNew.Data {
-		fNew.Data[i] /= sum
+	for i := range fNew.data {
+		fNew.data[i] /= sum
 	}
 
 	return fNew
@@ -412,8 +412,8 @@ func (v *Variables) Normalize(f *Factor) Factor {
 // It also re-arranges the new factor to have the normalized variable as the last one.
 func (v *Variables) NormalizeFor(f *Factor, variable Variable) Factor {
 	idx := -1
-	for i := range f.Variables {
-		if f.Variables[i].Id == variable.Id {
+	for i := range f.variables {
+		if f.variables[i].Id == variable.Id {
 			idx = i
 			break
 		}
@@ -423,29 +423,29 @@ func (v *Variables) NormalizeFor(f *Factor, variable Variable) Factor {
 		panic(fmt.Sprintf("variable %d not in this factor", variable.Id))
 	}
 
-	newVars := make([]Variable, len(f.Variables))
+	newVars := make([]Variable, len(f.variables))
 	for i := 0; i < idx; i++ {
-		newVars[i] = f.Variables[i]
+		newVars[i] = f.variables[i]
 	}
-	for i := idx + 1; i < len(f.Variables); i++ {
-		newVars[i-1] = f.Variables[i]
+	for i := idx + 1; i < len(f.variables); i++ {
+		newVars[i-1] = f.variables[i]
 	}
-	newVars[len(newVars)-1] = f.Variables[idx]
+	newVars[len(newVars)-1] = f.variables[idx]
 
 	fNew := v.Rearrange(f, newVars)
 	values := int(variable.outcomes)
-	bins := len(fNew.Data) / values
+	bins := len(fNew.data) / values
 
 	for i := 0; i < bins; i++ {
 		sum := 0.0
 		for j := 0; j < values; j++ {
-			sum += fNew.Data[i*values+j]
+			sum += fNew.data[i*values+j]
 		}
 		if sum == 0 {
 			continue
 		}
 		for j := 0; j < values; j++ {
-			fNew.Data[i*values+j] /= sum
+			fNew.data[i*values+j] /= sum
 		}
 	}
 
@@ -454,11 +454,11 @@ func (v *Variables) NormalizeFor(f *Factor, variable Variable) Factor {
 
 // Invert a [Factor] by applying 1/x for each element (if x != 0).
 func (v *Variables) Invert(f *Factor) Factor {
-	fNew := v.CreateFactor(f.Variables, append([]float64{}, f.Data...))
+	fNew := v.CreateFactor(f.variables, append([]float64{}, f.data...))
 
-	for i, v := range fNew.Data {
+	for i, v := range fNew.data {
 		if v != 0 {
-			fNew.Data[i] = 1.0 / v
+			fNew.data[i] = 1.0 / v
 		}
 	}
 
