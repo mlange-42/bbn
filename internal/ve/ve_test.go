@@ -139,7 +139,7 @@ func TestDecisionUmbrella2(t *testing.T) {
 	}
 
 	policy := result[umbrella][1]
-	assert.Equal(t, variables{weather, umbrella}, policy.Variables)
+	assert.Equal(t, factorVariables{weather, umbrella}, policy.Variables)
 }
 
 func TestDecisionEvacuate(t *testing.T) {

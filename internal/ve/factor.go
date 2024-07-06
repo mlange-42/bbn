@@ -5,7 +5,7 @@ import "fmt"
 type Factor struct {
 	id        int
 	Data      []float64
-	Variables variables
+	Variables factorVariables
 }
 
 func (f *Factor) Index(indices []int) int {
@@ -49,4 +49,81 @@ func (f *Factor) Set(indices []int, value float64) {
 func (f *Factor) GetRow(indices []int) []float64 {
 	idx, ln := f.RowIndex(indices)
 	return f.Data[idx : idx+ln]
+}
+
+// Helper type for a list of variables for a factor
+type factorVariables []Variable
+
+// Index creates a flat [Factor] index from a multi-dimensional index.
+func (v factorVariables) Index(indices []int) int {
+	if len(indices) != len(v) {
+		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(v), len(indices)))
+	}
+	if len(v) == 0 {
+		return 0
+	}
+
+	curr := len(v) - 1
+	idx := indices[curr]
+	stride := 1
+
+	curr--
+	for curr >= 0 {
+		stride *= int(v[curr+1].outcomes)
+		idx += indices[curr] * stride
+		curr--
+	}
+	return idx
+}
+
+func (v factorVariables) IndexWithNoData(indices []int) (int, bool) {
+	if len(indices) != len(v) {
+		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(v), len(indices)))
+	}
+	if len(v) == 0 {
+		return 0, true
+	}
+
+	curr := len(v) - 1
+	idx := indices[curr]
+	if idx < 0 {
+		return 0, false
+	}
+
+	stride := 1
+
+	curr--
+	for curr >= 0 {
+		currIdx := indices[curr]
+		if currIdx < 0 {
+			return 0, false
+		}
+		stride *= int(v[curr+1].outcomes)
+		idx += currIdx * stride
+		curr--
+	}
+	return idx, true
+}
+
+// Index creates multi-dimensional index from a flat [Factor] index.
+func (v factorVariables) Outcomes(index int, indices []int) {
+	if len(indices) != len(v) {
+		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(v), len(indices)))
+	}
+	if len(v) == 0 {
+		return
+	}
+
+	curr := len(v) - 1
+
+	n := int(v[curr].outcomes)
+	indices[curr] = index % n
+	index /= n
+	curr--
+	for curr >= 0 {
+		n := int(v[curr].outcomes)
+		indices[curr] = index % n
+		index /= n
+		curr--
+	}
 }
