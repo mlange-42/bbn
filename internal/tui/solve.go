@@ -100,9 +100,7 @@ func solveUtility(network *bbn.Network, nodes []Node, evidence map[string]string
 		totalUtility = f.Data()[0]
 	}
 
-	if totalProb != 0 {
-		totalUtility /= totalProb
-	}
+	totalUtility /= totalProb
 
 	for _, n := range utilities {
 		f, err = network.SolveUtility(evidence, []string{}, n, ignorePolicies)
@@ -114,9 +112,7 @@ func solveUtility(network *bbn.Network, nodes []Node, evidence map[string]string
 			nodeUtility = f.Data()[0]
 		}
 
-		if totalProb != 0 {
-			nodeUtility /= totalProb
-		}
+		nodeUtility /= totalProb
 
 		result[n] = []float64{nodeUtility, totalUtility}
 	}

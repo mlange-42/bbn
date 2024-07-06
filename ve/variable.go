@@ -397,9 +397,9 @@ func (v *Variables) Normalize(f *Factor) Factor {
 	for _, v := range fNew.data {
 		sum += v
 	}
-	if sum == 0 {
-		return fNew
-	}
+	//if sum == 0 {
+	//	return fNew
+	//}
 
 	for i := range fNew.data {
 		fNew.data[i] /= sum
@@ -457,9 +457,10 @@ func (v *Variables) Invert(f *Factor) Factor {
 	fNew := v.CreateFactor(f.variables, append([]float64{}, f.data...))
 
 	for i, v := range fNew.data {
-		if v != 0 {
-			fNew.data[i] = 1.0 / v
-		}
+		//if v == 0 {
+		//	continue
+		//}
+		fNew.data[i] = 1.0 / v
 	}
 
 	return fNew
