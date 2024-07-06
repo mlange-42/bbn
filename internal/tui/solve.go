@@ -12,7 +12,7 @@ func Solve(network *bbn.Network, evidence map[string]string, nodes []Node, ignor
 	queries := []string{}
 
 	for _, n := range nodes {
-		if n.Node().Type == ve.UtilityNode {
+		if n.Node().NodeType == ve.UtilityNode {
 			continue
 		}
 		if _, ok := evidence[n.Node().Name]; ok {
@@ -85,7 +85,7 @@ func solveUtility(network *bbn.Network, nodes []Node, evidence map[string]string
 			totalUtilityNode = n.Node()
 			continue
 		}
-		if n.Node().Type == ve.UtilityNode {
+		if n.Node().NodeType == ve.UtilityNode {
 			utilities = append(utilities, n.Node().Name)
 		}
 	}

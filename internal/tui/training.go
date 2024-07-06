@@ -94,7 +94,7 @@ func prepare(nodes []bbn.Variable, header []string, noData string) (indices []in
 		}
 		outcomes[i][noData] = -1
 
-		isUtility[i] = node.Type == ve.UtilityNode
+		isUtility[i] = node.NodeType == ve.UtilityNode
 	}
 	return
 }

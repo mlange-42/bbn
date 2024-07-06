@@ -63,7 +63,7 @@ func (t *Table) GetCell(row, column int) *tview.TableCell {
 
 	values := node.Node().Factor.Table[row*t.columns : (row+1)*t.columns]
 
-	if node.Node().Type == ve.UtilityNode {
+	if node.Node().NodeType == ve.UtilityNode {
 		text = fmt.Sprintf("%9.3f", values[column-numParents])
 	} else {
 		sum := 0.0

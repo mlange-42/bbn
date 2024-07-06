@@ -6,11 +6,13 @@ import (
 	"slices"
 )
 
+// Evidence for one variable.
 type Evidence struct {
 	Variable Variable
 	Value    int
 }
 
+// VE performs the variable elimination algorithm.
 type VE struct {
 	variables    *Variables
 	eliminated   []bool
@@ -19,6 +21,11 @@ type VE struct {
 	weights      []float64
 }
 
+// New creates a [VE] instance from the given variables, factors
+// decision dependencies and utility weights.
+//
+// Weights should nil, be  as long as the number of utility variables.
+// Order of weights is the same the order of utility variable in all variables.
 func New(variables *Variables, factors []Factor, dependencies map[Variable][]Variable, weights []float64) *VE {
 	fac := map[int]*Factor{}
 	for _, f := range factors {
@@ -34,10 +41,12 @@ func New(variables *Variables, factors []Factor, dependencies map[Variable][]Var
 	}
 }
 
+// Variables for the VE.
 func (ve *VE) Variables() *Variables {
 	return ve.variables
 }
 
+// getDecisions finds all decision variables and returns them in topological order.
 func (ve *VE) getDecisions() []Variable {
 	dec := []Variable{}
 	for _, v := range ve.variables.variables {
@@ -48,6 +57,7 @@ func (ve *VE) getDecisions() []Variable {
 	return sortTopological(dec, ve.dependencies)
 }
 
+// Eliminate all evidence from all factors
 func (ve *VE) eliminateEvidence(evidence []Evidence) {
 	for _, ev := range evidence {
 		ve.restrictEvidence(ev)
@@ -217,10 +227,15 @@ func (ve *VE) summarize() *Factor {
 	return ve.multiplyAll()
 }
 
+// SolveQuery solves marginal probabilities for the given query variables, and the given evidence.
 func (ve *VE) SolveQuery(evidence []Evidence, query []Variable) *Factor {
 	return ve.solve(evidence, query, false, nil)
 }
 
+// SolveQuery solves utilities for the given query variables, and the given evidence.
+//
+// Argument utilityVar can be used to solve for only this variable, dropping all other utilities.
+// Solves total utility if utilityVar is nil.
 func (ve *VE) SolveUtility(evidence []Evidence, query []Variable, utilityVar *Variable) *Factor {
 	return ve.solve(evidence, query, true, utilityVar)
 }
@@ -243,6 +258,9 @@ func (ve *VE) solve(evidence []Evidence, query []Variable, utility bool, utility
 	return ve.summarize()
 }
 
+// SolvePolicies solves decision policies.
+//
+// Solves only the last decision if single is true.
 func (ve *VE) SolvePolicies(single bool) map[Variable][2]*Factor {
 	decisions := ve.getDecisions()
 	if len(decisions) == 0 {

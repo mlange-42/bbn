@@ -68,7 +68,7 @@ func FromYAML(content []byte) (*Network, error) {
 		}
 		variables[i] = Variable{
 			Name:     v.Variable,
-			Type:     tp,
+			NodeType: tp,
 			Outcomes: v.Outcomes,
 			Position: v.Position,
 			Color:    v.Color,
@@ -143,7 +143,7 @@ func ToYAML(network *Network) ([]byte, error) {
 		variables[i] = variableYaml{
 			Variable: v.Name,
 			Given:    v.Factor.Given,
-			Type:     nodeTypeNames[v.Type],
+			Type:     nodeTypeNames[v.NodeType],
 			Outcomes: v.Outcomes,
 			Position: v.Position,
 			Table:    table,

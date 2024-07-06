@@ -71,7 +71,7 @@ func (t *Trainer) AddSample(sample []int, utility []float64) {
 	nodes := t.network.Variables()
 
 	for i, node := range nodes {
-		if node.Type == ve.DecisionNode {
+		if node.NodeType == ve.DecisionNode {
 			continue
 		}
 
@@ -87,12 +87,12 @@ func (t *Trainer) AddSample(sample []int, utility []float64) {
 			}
 		}
 
-		idx, ok := node.Factor.RowIndex(t.sample)
+		idx, ok := node.Factor.rowIndex(t.sample)
 		if !ok {
 			continue
 		}
 
-		if node.Type == ve.UtilityNode {
+		if node.NodeType == ve.UtilityNode {
 			u := utility[i]
 			if math.IsNaN(u) {
 				continue

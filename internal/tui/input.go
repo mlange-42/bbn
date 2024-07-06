@@ -135,7 +135,7 @@ func (a *App) moveNode(event *tcell.EventKey) *tcell.EventKey {
 // inputEnter adds the currently selected node and state to the evidence.
 func (a *App) inputEnter() error {
 	node := a.nodes[a.selectedNode]
-	if node.Node().Type == ve.UtilityNode {
+	if node.Node().NodeType == ve.UtilityNode {
 		return nil
 	}
 

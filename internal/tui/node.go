@@ -43,7 +43,7 @@ func NewNode(n bbn.Variable) Node {
 	}
 	titleLength := min(utf8.RuneCountInString(n.Name), maxNodeLabelWidth)
 	bars := maxBars
-	if n.Type == ve.UtilityNode {
+	if n.NodeType == ve.UtilityNode {
 		bars = extraUtilityWidth
 	}
 
@@ -54,7 +54,7 @@ func NewNode(n bbn.Variable) Node {
 		H: len(n.Outcomes) + 3,
 	}
 
-	if n.Type == ve.UtilityNode {
+	if n.NodeType == ve.UtilityNode {
 		bounds.H++
 	}
 
@@ -94,7 +94,7 @@ func NewNode(n bbn.Variable) Node {
 func nodeColor(n *bbn.Variable) (Color, error) {
 	color := White
 	if n.Color == "" {
-		switch n.Type {
+		switch n.NodeType {
 		case ve.ChanceNode:
 			color = White
 		case ve.UtilityNode:
@@ -122,7 +122,7 @@ func (n *node) Bounds() *Bounds {
 
 func (n *node) Render(probs []float64, selected bool, state int, evidence bool) ([][]rune, [][]Color) {
 	n.drawBorder(selected)
-	if n.node.Type == ve.UtilityNode {
+	if n.node.NodeType == ve.UtilityNode {
 		n.drawUtility(probs)
 	} else {
 		n.drawBars(probs, selected, state, evidence)
@@ -166,9 +166,9 @@ func (n *node) drawTitle() {
 	runes := []rune(n.node.Name)
 	copy(n.runes[1][2:n.bounds.W-2], runes)
 
-	if n.node.Type == ve.DecisionNode {
+	if n.node.NodeType == ve.DecisionNode {
 		n.runes[1][n.bounds.W-3] = '!'
-	} else if n.node.Type == ve.UtilityNode {
+	} else if n.node.NodeType == ve.UtilityNode {
 		n.runes[1][n.bounds.W-3] = '$'
 	}
 }
@@ -177,7 +177,7 @@ func (n *node) drawStateLabels() {
 	for i, label := range n.node.Outcomes {
 		copy(n.runes[i+2][2:n.barsX-1], []rune(label))
 	}
-	if n.node.Type == ve.UtilityNode {
+	if n.node.NodeType == ve.UtilityNode {
 		copy(n.runes[len(n.node.Outcomes)+2][2:n.barsX-1], []rune("total"))
 	}
 }

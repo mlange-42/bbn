@@ -83,10 +83,10 @@ func TestTrainer(t *testing.T) {
 func TestTrainerDecision(t *testing.T) {
 
 	vars := []bbn.Variable{
-		{Name: "weather", Type: ve.ChanceNode, Outcomes: []string{"rainy", "sunny"}},
-		{Name: "forecast", Type: ve.ChanceNode, Outcomes: []string{"sunny", "cloudy", "rainy"}},
-		{Name: "umbrella", Type: ve.DecisionNode, Outcomes: []string{"yes", "no"}},
-		{Name: "utility", Type: ve.UtilityNode, Outcomes: []string{"utility"}},
+		{Name: "weather", NodeType: ve.ChanceNode, Outcomes: []string{"rainy", "sunny"}},
+		{Name: "forecast", NodeType: ve.ChanceNode, Outcomes: []string{"sunny", "cloudy", "rainy"}},
+		{Name: "umbrella", NodeType: ve.DecisionNode, Outcomes: []string{"yes", "no"}},
+		{Name: "utility", NodeType: ve.UtilityNode, Outcomes: []string{"utility"}},
 	}
 
 	factors := []bbn.Factor{
