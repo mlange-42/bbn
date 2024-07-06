@@ -13,6 +13,7 @@ import (
 const maxNodeLabelWidth = 48
 const maxStateLabelWidth = 16
 const maxBars = 10
+const extraUtilityWidth = 5
 
 type Node interface {
 	Node() *bbn.Variable
@@ -41,11 +42,15 @@ func NewNode(n bbn.Variable) Node {
 		maxStateLen = maxStateLabelWidth
 	}
 	titleLength := min(utf8.RuneCountInString(n.Name), maxNodeLabelWidth)
+	bars := maxBars
+	if n.Type == ve.UtilityNode {
+		bars = extraUtilityWidth
+	}
 
 	bounds := Bounds{
 		X: n.Position[0],
 		Y: n.Position[1],
-		W: max(maxStateLen+maxBars+9, titleLength) + 4,
+		W: max(maxStateLen+bars+9, titleLength) + 4,
 		H: len(n.Outcomes) + 3,
 	}
 
@@ -221,9 +226,9 @@ func (n *node) drawUtility(probs []float64) {
 	for i, p := range probs {
 		var text []rune
 		if math.IsNaN(p) {
-			text = []rune("           ???")
+			text = []rune("         ???")
 		} else {
-			text = []rune(fmt.Sprintf("%14.3f", p))
+			text = []rune(fmt.Sprintf("%12.3f", p))
 		}
 		copy(n.runes[i+2][n.barsX+1:], text)
 	}

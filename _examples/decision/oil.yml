@@ -45,7 +45,7 @@ variables:
   given: [Do test drill, Test result]
 
 - variable: Drill utility
-  position: [36, 0]
+  position: [38, 0]
   outcomes: ["expected"]
   type: utility
   given: [Oil, Do drill]
