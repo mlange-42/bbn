@@ -210,7 +210,12 @@ func (n *node) drawBars(probs []float64, selected bool, state int, evidence bool
 
 func (n *node) drawUtility(probs []float64) {
 	for i, p := range probs {
-		text := []rune(fmt.Sprintf("%7.3f", p))
+		var text []rune
+		if math.IsNaN(p) {
+			text = []rune("    ???")
+		} else {
+			text = []rune(fmt.Sprintf("%7.3f", p))
+		}
 		copy(n.runes[i+2][n.barsX+1:], text)
 	}
 }
