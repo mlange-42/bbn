@@ -1,10 +1,16 @@
 package logic
 
+// Factor is an interface for logic factors.
 type Factor interface {
+	// Table returns the CPT for the given number of parent variables.
 	Table(given int) ([]float64, error)
+	// SetArgs sets factor arguments.
 	SetArgs(args ...int) error
 }
 
+// Get logic factors by their name.
+//
+// Used for deserialization
 func Get(name string) (Factor, bool) {
 	f, ok := factors[name]
 	return f, ok

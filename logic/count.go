@@ -10,6 +10,7 @@ type countFactor struct {
 	Rule  func(count, value int) bool
 }
 
+// CountIs compares the number of parents with outcome True against value for equality.
 func CountIs(value int) Factor {
 	return &countFactor{
 		Value: value,
@@ -19,6 +20,7 @@ func CountIs(value int) Factor {
 	}
 }
 
+// CountIs compares the number of parents with outcome True to be less than value.
 func CountLess(value int) Factor {
 	return &countFactor{
 		Value: value,
@@ -28,6 +30,7 @@ func CountLess(value int) Factor {
 	}
 }
 
+// CountIs compares the number of parents with outcome True to be greater than value.
 func CountGreater(value int) Factor {
 	return &countFactor{
 		Value: value,
@@ -63,6 +66,7 @@ func (f *countFactor) Table(given int) ([]float64, error) {
 
 type countTrueFactor struct{}
 
+// CountTrue counts the number of parents with outcome True.
 func CountTrue() Factor {
 	return &countTrueFactor{}
 }
@@ -89,6 +93,7 @@ func (f *countTrueFactor) Table(given int) ([]float64, error) {
 
 type countFalseFactor struct{}
 
+// CountFalse counts the number of parents with outcome False.
 func CountFalse() Factor {
 	return &countFalseFactor{}
 }
