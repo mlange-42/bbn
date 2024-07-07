@@ -86,6 +86,7 @@ jobs:
         ./bbn inference _examples/decision/medical.yml
         ./bbn inference _examples/decision/oil.yml
         ./bbn inference _examples/decision/robot.yml
+        ./bbn inference _examples/decision/test-selection.yml
         ./bbn inference _examples/decision/umbrella.yml
     - name: Run logic examples
       run: |

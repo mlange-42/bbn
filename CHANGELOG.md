@@ -10,6 +10,7 @@
 ### Documentation
 
 * Adds more documentation and code examples for library usage (#78, #79, #80, #81)
+* Adds a decision example for selecting a diagnostic test (#82)
 
 ## [[v0.5.0]](https://github.com/mlange-42/bbn/compare/v0.4.0...v0.5.0)
 
