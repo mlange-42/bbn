@@ -8,6 +8,7 @@ type givenFactor struct {
 	Index int
 }
 
+// Given checks whether the parent at the given index has outcome True.
 func Given(idx int) Factor {
 	return &givenFactor{
 		Index: idx,
@@ -42,6 +43,7 @@ type givenNotFactor struct {
 	Index int
 }
 
+// GivenNot checks whether the parent at the given index has outcome False.
 func GivenNot(idx int) Factor {
 	return &givenNotFactor{
 		Index: idx,
@@ -76,6 +78,7 @@ type givenExclFactor struct {
 	Index int
 }
 
+// GivenExcl checks whether exclusively the parent at the given index has outcome True.
 func GivenExcl(idx int) Factor {
 	return &givenExclFactor{
 		Index: idx,

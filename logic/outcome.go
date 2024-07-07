@@ -9,10 +9,12 @@ type outcomeIsFactor struct {
 	Length int
 }
 
-func OutcomeIs(idx, ln int) Factor {
+// OutcomeIs checks whether the parent node has the given index as outcome.
+// Argument count is the total number of possible outcomes of the parent.
+func OutcomeIs(idx, count int) Factor {
 	return &outcomeIsFactor{
 		Index:  idx,
-		Length: ln,
+		Length: count,
 	}
 }
 
@@ -45,10 +47,12 @@ type outcomeIsNotFactor struct {
 	Length int
 }
 
-func OutcomeIsNot(idx, ln int) Factor {
+// OutcomeIsNot checks whether the parent node does not have the given index as outcome.
+// Argument count is the total number of possible outcomes of the parent.
+func OutcomeIsNot(idx, count int) Factor {
 	return &outcomeIsNotFactor{
 		Index:  idx,
-		Length: ln,
+		Length: count,
 	}
 }
 
@@ -76,19 +80,21 @@ func (f *outcomeIsNotFactor) Table(given int) ([]float64, error) {
 	return table, nil
 }
 
-type OutcomeEitherFactor struct {
+type outcomeEitherFactor struct {
 	Indices []int
 	Length  int
 }
 
-func OutcomeEither(idx []int, ln int) Factor {
-	return &OutcomeEitherFactor{
+// OutcomeEither checks whether the parent node has one of the given indices as outcome.
+// Argument count is the total number of possible outcomes of the parent.
+func OutcomeEither(idx []int, count int) Factor {
+	return &outcomeEitherFactor{
 		Indices: idx,
-		Length:  ln,
+		Length:  count,
 	}
 }
 
-func (f *OutcomeEitherFactor) SetArgs(args ...int) error {
+func (f *outcomeEitherFactor) SetArgs(args ...int) error {
 	if len(args) < 2 {
 		return fmt.Errorf("logic operator expects at least 2 argument (index..., length), got %d", len(args))
 	}
@@ -97,7 +103,7 @@ func (f *OutcomeEitherFactor) SetArgs(args ...int) error {
 	return nil
 }
 
-func (f *OutcomeEitherFactor) Table(given int) ([]float64, error) {
+func (f *outcomeEitherFactor) Table(given int) ([]float64, error) {
 	if given != 1 {
 		return nil, fmt.Errorf("logic operator requires 1 operand, but %d were given", given)
 	}
@@ -119,10 +125,13 @@ type outcomeLessFactor struct {
 	Length int
 }
 
-func OutcomeLess(idx, ln int) Factor {
+// OutcomeLess checks whether the parent node has an index as outcome
+// that is less then the given index.
+// Argument count is the total number of possible outcomes of the parent.
+func OutcomeLess(idx, count int) Factor {
 	return &outcomeLessFactor{
 		Index:  idx,
-		Length: ln,
+		Length: count,
 	}
 }
 
@@ -156,10 +165,13 @@ type outcomeGreaterFactor struct {
 	Length int
 }
 
-func OutcomeGreater(idx, ln int) Factor {
+// OutcomeLess checks whether the parent node has an index as outcome
+// that is greater then the given index.
+// Argument count is the total number of possible outcomes of the parent.
+func OutcomeGreater(idx, count int) Factor {
 	return &outcomeGreaterFactor{
 		Index:  idx,
-		Length: ln,
+		Length: count,
 	}
 }
 

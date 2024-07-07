@@ -45,122 +45,261 @@ func (f *floatFactor) Table(given int) ([]float64, error) {
 	return arr, nil
 }
 
-var Not = boolFactor{
+var not = boolFactor{
 	false, // T
 	true,  // F
 }
 
-var And = boolFactor{
+// Not performs logic NOT on the parent variable.
+// B = !A
+func Not() Factor {
+	return &not
+}
+
+var and = boolFactor{
 	true,  // T T
 	false, // T F
 	false, // F T
 	false, // F F
 }
-var NotAnd = boolFactor{
+
+// And performs logic AND on two parent variables.
+// C = A AND B
+func And() Factor {
+	return &and
+}
+
+var notAnd = boolFactor{
 	false, // F T
 	false, // F F
 	true,  // T T
 	false, // T F
 }
-var AndNot = boolFactor{
+
+// And performs logic AND on two parent variables, negating the first parent.
+// C = !A AND B
+func NotAnd() Factor {
+	return &notAnd
+}
+
+var andNot = boolFactor{
 	false, // T F
 	true,  // T T
 	false, // F F
 	false, // F T
 }
-var NotAndNot = boolFactor{
+
+// And performs logic AND on two parent variables, negating the second parent.
+// C = A AND !B
+func AndNot() Factor {
+	return &andNot
+}
+
+var notAndNot = boolFactor{
 	false, // F F
 	false, // F T
 	false, // T F
 	true,  // T T
 }
 
-var Or = boolFactor{
+// And performs logic AND on two parent variables, negating the both parents.
+// C = !A AND !B
+func NotAndNot() Factor {
+	return &notAndNot
+}
+
+var or = boolFactor{
 	true,  // T T
 	true,  // T F
 	true,  // F T
 	false, // F F
 }
-var NotOr = boolFactor{
+
+// And performs logic OR on two parent variables.
+// C = A OR B
+func Or() Factor {
+	return &or
+}
+
+var notOr = boolFactor{
 	true,  // F T
 	false, // F F
 	true,  // T T
 	true,  // T F
 }
-var OrNot = boolFactor{
+
+// And performs logic OR on two parent variables, negating the first parent.
+// C = !A OR B
+func NotOr() Factor {
+	return &notOr
+}
+
+var orNot = boolFactor{
 	true,  // T F
 	true,  // T T
 	false, // F F
 	true,  // F T
 }
-var NotOrNot = boolFactor{
+
+// And performs logic OR on two parent variables, negating the second parent.
+// C = A OR !B
+func OrNot() Factor {
+	return &orNot
+}
+
+var notOrNot = boolFactor{
 	false, // F F
 	true,  // F T
 	true,  // T F
 	true,  // T T
 }
 
-var XOr = boolFactor{
+// And performs logic OR on two parent variables, negating the both parents.
+// C = !A OR !B
+func NotOrNot() Factor {
+	return &notOrNot
+}
+
+var xOr = boolFactor{
 	false, // T T
 	true,  // T F
 	true,  // F T
 	false, // F F
 }
 
-var Cond = boolFactor{
+// And performs logic XOR on two parent variables.
+// C = A XOR B
+func XOr() Factor {
+	return &xOr
+}
+
+var cond = boolFactor{
 	true,  // T T
 	false, // T F
 	true,  // F T
 	true,  // F F
 }
-var NotCond = boolFactor{
+
+// Cond checks two parent variable for a conditional relation.
+// C = A => B
+func Cond() Factor {
+	return &cond
+}
+
+var notCond = boolFactor{
 	true,  // F T
 	true,  // F F
 	true,  // T T
 	false, // T F
 }
-var CondNot = boolFactor{
+
+// NotCond checks two parent variable for a conditional relation, negating the first parent.
+// C = !A => B
+func NotCond() Factor {
+	return &notCond
+}
+
+var condNot = boolFactor{
 	false, // T F
 	true,  // T T
 	true,  // F F
 	true,  // F T
 }
-var NotCondNot = boolFactor{
+
+// CondNot checks two parent variable for a conditional relation, negating the second parent.
+// C = A => !B
+func CondNot() Factor {
+	return &condNot
+}
+
+var notCondNot = boolFactor{
 	true,  // F F
 	true,  // F T
 	false, // T F
 	true,  // T T
 }
 
-var BiCond = boolFactor{
+// NotCondNot checks two parent variable for a conditional relation, negating the both parents.
+// C = !A => !B
+func NotCondNot() Factor {
+	return &notCondNot
+}
+
+var biCond = boolFactor{
 	true,  // T T
 	false, // T F
 	false, // F T
 	true,  // F F
 }
 
-var IfThen = floatFactor{
+// BiCond checks two parent variable for a bi-conditional relation.
+// C = A <=> B
+func BiCond() Factor {
+	return &biCond
+}
+
+var ifThen = floatFactor{
 	1, 0, // T
 	0.5, 0.5, // F
 }
-var IfNotThen = floatFactor{
+
+// IfThen is the condition, given one parent.
+// A => B
+func IfThen() Factor {
+	return &ifThen
+}
+
+var ifNotThen = floatFactor{
 	0.5, 0.5, // T
 	1, 0, // F
 }
-var IfThenNot = floatFactor{
+
+// IfNotThen is the condition, given the negation of one parent.
+// !A => B
+func IfNotThen() Factor {
+	return &ifNotThen
+}
+
+var ifThenNot = floatFactor{
 	0, 1, // T
 	0.5, 0.5, // F
 }
-var IfNotThenNot = floatFactor{
+
+// IfThen is the condition, given one parent, and negating the outcome.
+// A => !B
+func IfThenNot() Factor {
+	return &ifThenNot
+}
+
+var ifNotThenNot = floatFactor{
 	0.5, 0.5, // T
 	0, 1, // F
 }
 
-var Equals = boolFactor{
+// IfNotThenNot is the condition, given the negation of one parent, and negating the outcome.
+// !A => !B
+func IfNotThenNot() Factor {
+	return &ifNotThenNot
+}
+
+var equals = boolFactor{
 	true,  // T
 	false, // F
 }
-var EqualsNot = boolFactor{
+
+// Equals is the bi-condition, given one parent.
+// A <=> B
+func Equals() Factor {
+	return &equals
+}
+
+var equalsNot = boolFactor{
 	false, // T
 	true,  // F
+}
+
+// Equals is the bi-condition, given the negation of one parent.
+// A <=> !B
+func EqualsNot() Factor {
+	return &equalsNot
 }
