@@ -1,0 +1,88 @@
+name: Test Selection
+info: >-
+  Decision network for selecting a diagnostic test.
+
+
+  There are three tests available, one particularly sensitive (few false-negatives),
+  one particularly specific (few false-positives) and one intermediate.
+
+
+  The decision for a test is based on the infection risk and the cost of treatment,
+  relative to the cost of an untreated infection (white nodes).
+  Set the values of these two (by clicking the bars) to get a definitive decision.
+
+
+  Note that, for simplicity, all tests cost the same here, or have a negligible price compared
+  to treatment and untreated infections.
+variables:
+
+- variable: Infection risk
+  position: [1, 0]
+  outcomes:
+  - high   20%
+  - medium  5%
+  - low     1%
+  table:
+  - [1, 1, 1]
+
+- variable: Infection
+  position: [30, 8]
+  color: gray
+  outcomes: [yes, no]
+  given: [Infection risk]
+  table:
+  - [20, 80] # high
+  - [ 5, 95] # medium
+  - [ 1, 99] # low
+
+- variable: Test result
+  position: [30, 16]
+  color: gray
+  outcomes: [pos, neg]
+  given: [Test, Infection]
+  table:
+  - [ 99,   1] # A Inf+
+  - [ 10,  90] # A Inf-
+  - [ 95,   5] # B Inf+
+  - [  5,  95] # B Inf-
+  - [ 90,  10] # C Inf+
+  - [  1,  99] # C Inf-
+
+- variable: Test
+  position: [17, 24]
+  outcomes: [A (sensitive), B (intermediate), C (specific)]
+  given: [Infection risk, Rel. treatment cost]
+  type: decision
+
+- variable: Rel. treatment cost
+  position: [62, 24]
+  outcomes: 
+  - high   20%
+  - medium  5%
+  - low     1%
+  table:
+  - [1, 1, 1]
+
+- variable: Treatment cost
+  position: [62, 16]
+  outcomes: [euros]
+  given: [Test result, Rel. treatment cost]
+  type: utility
+  table:
+  - [-200] # pos, high
+  - [ -50] # pos, medium
+  - [ -10] # pos, low
+  - [   0] # neg, high
+  - [   0] # neg, medium
+  - [   0] # neg, low
+
+- variable: Infection cost
+  position: [60, 8]
+  outcomes: [euros]
+  given: [Infection, Test result]
+  type: utility
+  table:
+  - [    0] # Inf+ pos
+  - [-1000] # Inf+ neg
+  - [    0] # Inf- pos
+  - [    0] # Inf- neg
