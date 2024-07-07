@@ -10,7 +10,7 @@ type Factor interface {
 
 // Get logic factors by their name.
 //
-// Used for deserialization
+// Primarily used for deserialization.
 func Get(name string) (Factor, bool) {
 	f, ok := factors[name]
 	return f, ok

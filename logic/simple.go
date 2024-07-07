@@ -42,7 +42,7 @@ func (f *floatFactor) Table(given int) ([]float64, error) {
 	if len(arr) != 1<<(given+1) { // 2^(given+1)
 		return nil, fmt.Errorf("logic operator requires %d operands, but %d were given", len(arr)/4, given)
 	}
-	return arr, nil
+	return append([]float64{}, arr...), nil
 }
 
 var not = boolFactor{
