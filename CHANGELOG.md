@@ -7,6 +7,10 @@
 * Makes sub-package `ve` for low-level variable elimination public (#73)
 * Solve utility nodes even when there are ignored policies, overwritten by "evidence" (#74, #75)
 
+### Documentation
+
+* Adds more documentation and code examples for library usage (#78, #79)
+
 ## [[v0.5.0]](https://github.com/mlange-42/bbn/compare/v0.4.0...v0.5.0)
 
 ### Features
