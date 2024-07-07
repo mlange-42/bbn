@@ -93,4 +93,5 @@ jobs:
         ./bbn inference _examples/logic/bits.yml
         ./bbn inference _examples/logic/friends.yml
         ./bbn inference _examples/logic/knights.yml
+        ./bbn inference _examples/logic/simple.yml
         ./bbn inference _examples/logic/weekday.yml
