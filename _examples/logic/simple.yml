@@ -1,0 +1,48 @@
+name: Simple boolean logic
+info: >-
+  Example for simple boolean logic operators.
+
+
+  Play with setting the white nodes to some values by clicking the bars.
+  Observe which combinations of A, B and C result in which outcome of the right-most node.
+  Also try setting the right-most node's outcome to T (True), and observe which combinations of
+  A, B and C are valid when you set some of these incoming variables.
+variables:
+
+- variable: A
+  position: [1, 0]
+  outcomes: [T, F]
+  table: 
+  - [1, 1]
+  
+- variable: B
+  position: [1, 6]
+  outcomes: [T, F]
+  table: 
+  - [1, 1]
+  
+- variable: C
+  position: [1, 12]
+  outcomes: [T, F]
+  table: 
+  - [1, 1]
+  
+- variable: A and B
+  position: [33, 3]
+  color: gray
+  outcomes: [T, F]
+  given: [A, B]
+  logic: and
+
+- variable: "!B and C"
+  position: [33, 9]
+  color: gray
+  outcomes: [T, F]
+  given: [B, C]
+  logic: not-and
+
+- variable: (A and B) or (!B and C)
+  position: [65, 6]
+  outcomes: [T, F]
+  given: [A and B, "!B and C"]
+  logic: or

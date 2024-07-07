@@ -12,7 +12,7 @@
 
 * Adds more documentation and code examples for library usage (#78, #79, #80, #81)
 * Adds a decision example for selecting a diagnostic test (#82)
-* Adds a binary/decimal converter logic example (#83)
+* Adds more logic example (#83, #84)
 
 ## [[v0.5.0]](https://github.com/mlange-42/bbn/compare/v0.4.0...v0.5.0)
 
