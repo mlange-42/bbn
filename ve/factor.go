@@ -10,6 +10,13 @@ type Factor struct {
 	variables factorVariables
 }
 
+// Id of the factor.
+//
+// Unique for factors created using the same [Variables] instance.
+func (f *Factor) Id() int {
+	return f.id
+}
+
 // Data of the factor.
 func (f *Factor) Data() []float64 {
 	return f.data
