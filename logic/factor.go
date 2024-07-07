@@ -5,35 +5,40 @@ type Factor interface {
 	SetArgs(args ...int) error
 }
 
-var Factors = map[string]Factor{
-	"not": &Not,
+func Get(name string) (Factor, bool) {
+	f, ok := factors[name]
+	return f, ok
+}
 
-	"and":         &And,
-	"not-and":     &NotAnd,
-	"and-not":     &AndNot,
-	"not-and-not": &NotAndNot,
+var factors = map[string]Factor{
+	"not": Not(),
 
-	"or":         &Or,
-	"not-or":     &NotOr,
-	"or-not":     &OrNot,
-	"not-or-not": &NotOrNot,
+	"and":         And(),
+	"not-and":     NotAnd(),
+	"and-not":     AndNot(),
+	"not-and-not": NotAndNot(),
 
-	"xor": &XOr,
+	"or":         Or(),
+	"not-or":     NotOr(),
+	"or-not":     OrNot(),
+	"not-or-not": NotOrNot(),
 
-	"cond":         &Cond,
-	"not-cond":     &NotCond,
-	"cond-not":     &CondNot,
-	"not-cond-not": &NotCondNot,
+	"xor": XOr(),
 
-	"bicond": &BiCond,
+	"cond":         Cond(),
+	"not-cond":     NotCond(),
+	"cond-not":     CondNot(),
+	"not-cond-not": NotCondNot(),
 
-	"if-then":         &IfThen,
-	"if-not-then":     &IfNotThen,
-	"if-then-not":     &IfThenNot,
-	"if-not-then-not": &IfNotThenNot,
+	"bicond": BiCond(),
 
-	"equals":     &Equals,
-	"equals-not": &EqualsNot,
+	"if-then":         IfThen(),
+	"if-not-then":     IfNotThen(),
+	"if-then-not":     IfThenNot(),
+	"if-not-then-not": IfNotThenNot(),
+
+	"equals":     Equals(),
+	"equals-not": EqualsNot(),
 
 	"count-true":  CountTrue(),
 	"count-false": CountFalse(),

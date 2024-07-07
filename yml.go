@@ -106,7 +106,7 @@ func toTable(v *variableYaml) ([]float64, error) {
 	}
 
 	parts := strings.Split(v.Logic, " ")
-	l, ok := logic.Factors[strings.ToLower(parts[0])]
+	l, ok := logic.Get(strings.ToLower(parts[0]))
 	if !ok {
 		return nil, fmt.Errorf("unknown logic operator %s; valid operators are e.g.: not, and, or, xor, if-then, if-not-then, if-then-not, if-not-then-not, not-and, etc", v.Logic)
 	}

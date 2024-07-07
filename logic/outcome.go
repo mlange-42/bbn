@@ -76,19 +76,19 @@ func (f *outcomeIsNotFactor) Table(given int) ([]float64, error) {
 	return table, nil
 }
 
-type OutcomeEitherFactor struct {
+type outcomeEitherFactor struct {
 	Indices []int
 	Length  int
 }
 
 func OutcomeEither(idx []int, ln int) Factor {
-	return &OutcomeEitherFactor{
+	return &outcomeEitherFactor{
 		Indices: idx,
 		Length:  ln,
 	}
 }
 
-func (f *OutcomeEitherFactor) SetArgs(args ...int) error {
+func (f *outcomeEitherFactor) SetArgs(args ...int) error {
 	if len(args) < 2 {
 		return fmt.Errorf("logic operator expects at least 2 argument (index..., length), got %d", len(args))
 	}
@@ -97,7 +97,7 @@ func (f *OutcomeEitherFactor) SetArgs(args ...int) error {
 	return nil
 }
 
-func (f *OutcomeEitherFactor) Table(given int) ([]float64, error) {
+func (f *outcomeEitherFactor) Table(given int) ([]float64, error) {
 	if given != 1 {
 		return nil, fmt.Errorf("logic operator requires 1 operand, but %d were given", given)
 	}
