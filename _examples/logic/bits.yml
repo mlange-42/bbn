@@ -1,0 +1,39 @@
+name: Decimal/binary converter
+info: >-
+  A simple logic network to combine a list of binary nodes
+  to a decimal integer number.
+
+
+  Select an integer value (by clicking a bar) to get its bit.
+  Alternatively, set individual bits to get the resulting decimal integer value.
+variables:
+
+- variable: Bit-1
+  position: [1, 0]
+  outcomes: [T, F]
+  table: 
+  - [1, 1]
+  
+- variable: Bit-2
+  position: [1, 6]
+  outcomes: [T, F]
+  table: 
+  - [1, 1]
+  
+- variable: Bit-3
+  position: [1, 12]
+  outcomes: [T, F]
+  table: 
+  - [1, 1]
+  
+- variable: Bit-4
+  position: [1, 18]
+  outcomes: [T, F]
+  table: 
+  - [1, 1]
+
+- variable: Integer
+  position: [33, 2]
+  outcomes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+  given: [Bit-1, Bit-2, Bit-3, Bit-4]
+  logic: bits
