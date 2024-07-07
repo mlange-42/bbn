@@ -90,6 +90,7 @@ jobs:
         ./bbn inference _examples/decision/umbrella.yml
     - name: Run logic examples
       run: |
+        ./bbn inference _examples/logic/bits.yml
         ./bbn inference _examples/logic/friends.yml
         ./bbn inference _examples/logic/knights.yml
         ./bbn inference _examples/logic/weekday.yml

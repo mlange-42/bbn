@@ -62,4 +62,6 @@ var factors = map[string]Factor{
 	"outcome-either":  OutcomeEither(nil, 0),
 	"outcome-less":    OutcomeLess(0, 0),
 	"outcome-greater": OutcomeGreater(0, 0),
+
+	"bits": Bits(),
 }

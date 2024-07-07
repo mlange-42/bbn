@@ -6,11 +6,13 @@
 
 * Makes sub-package `ve` for low-level variable elimination public (#73)
 * Solve utility nodes even when there are ignored policies, overwritten by "evidence" (#74, #75)
+* Adds a logic factor to combine bits from parents to a decimal integer (#83)
 
 ### Documentation
 
 * Adds more documentation and code examples for library usage (#78, #79, #80, #81)
 * Adds a decision example for selecting a diagnostic test (#82)
+* Adds a binary/decimal converter logic example (#83)
 
 ## [[v0.5.0]](https://github.com/mlange-42/bbn/compare/v0.4.0...v0.5.0)
 
