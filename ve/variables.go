@@ -86,20 +86,21 @@ func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Fact
 
 	fNew := v.CreateFactor(newVars, nil)
 
+	// TODO: this can be optimized to not use f.Outcomes
 	oldIndex := make([]int, len(f.variables))
 	newIndex := make([]int, len(newVars))
-	for i, v := range f.data {
-		f.Outcomes(i, oldIndex)
-		if oldIndex[idx] != observation {
-			continue
+	for _, v := range f.data {
+		if oldIndex[idx] == observation {
+			for j := 0; j < idx; j++ {
+				newIndex[j] = oldIndex[j]
+			}
+			for j := idx + 1; j < len(oldIndex); j++ {
+				newIndex[j-1] = oldIndex[j]
+			}
+			fNew.Set(newIndex, v)
 		}
-		for j := 0; j < idx; j++ {
-			newIndex[j] = oldIndex[j]
-		}
-		for j := idx + 1; j < len(oldIndex); j++ {
-			newIndex[j-1] = oldIndex[j]
-		}
-		fNew.Set(newIndex, v)
+
+		f.variables.increment(oldIndex)
 	}
 
 	return fNew
@@ -129,8 +130,7 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 	oldIndex := make([]int, len(f.variables))
 	newIndex := make([]int, len(newVars))
 
-	for i, v := range f.data {
-		f.Outcomes(i, oldIndex)
+	for _, v := range f.data {
 		for j := 0; j < idx; j++ {
 			newIndex[j] = oldIndex[j]
 		}
@@ -139,6 +139,8 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 		}
 		idx := fNew.Index(newIndex)
 		fNew.data[idx] += v
+
+		f.variables.increment(oldIndex)
 	}
 
 	return fNew
@@ -244,11 +246,12 @@ func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
 	oldIndex := make([]int, len(f.variables))
 
 	for i := range fNew.data {
-		fNew.Outcomes(i, newIndex)
 		for j, idx := range newIndex {
 			oldIndex[indices[j]] = idx
 		}
 		fNew.data[i] = f.Get(oldIndex)
+
+		fNew.variables.increment(newIndex)
 	}
 
 	return fNew
@@ -284,8 +287,6 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 
 	newIndex := make([]int, len(f.variables))
 	for i := range f.data {
-		f.Outcomes(i, newIndex)
-
 		product := 1.0
 		for j, fOld := range factors {
 			m := maps[j]
@@ -296,6 +297,8 @@ func (v *Variables) Product(factors ...*Factor) Factor {
 			product *= fOld.Get(oldIdx)
 		}
 		f.data[i] = product
+
+		f.variables.increment(newIndex)
 	}
 
 	return f
@@ -331,8 +334,6 @@ func (v *Variables) Sum(factors ...*Factor) Factor {
 
 	newIndex := make([]int, len(f.variables))
 	for i := range f.data {
-		f.Outcomes(i, newIndex)
-
 		sum := 0.0
 		for j, fOld := range factors {
 			m := maps[j]
@@ -343,6 +344,8 @@ func (v *Variables) Sum(factors ...*Factor) Factor {
 			sum += fOld.Get(oldIdx)
 		}
 		f.data[i] = sum
+
+		f.variables.increment(newIndex)
 	}
 
 	return f
@@ -367,9 +370,9 @@ func (v *Variables) Marginal(f *Factor, variable Variable) Factor {
 
 	oldIndex := make([]int, len(f.variables))
 
-	for i, v := range f.data {
-		f.Outcomes(i, oldIndex)
+	for _, v := range f.data {
 		fNew.data[oldIndex[idx]] += v
+		f.variables.increment(oldIndex)
 	}
 	return fNew
 }

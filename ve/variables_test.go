@@ -259,6 +259,37 @@ func TestVariablesProductScalar(t *testing.T) {
 	assert.Equal(t, []float64{2, 18, 10, 10, 16, 4}, f3.Data())
 }
 
+func TestVariablesSum(t *testing.T) {
+	v := NewVariables()
+
+	v1 := v.AddVariable(0, ChanceNode, 3)
+	v3 := v.AddVariable(1, ChanceNode, 2)
+	v2 := v.AddVariable(2, ChanceNode, 2)
+
+	f1 := v.CreateFactor([]Variable{v1, v2}, []float64{
+		0.1, 0.9,
+		0.5, 0.5,
+		0.8, 0.2,
+	})
+
+	f2 := v.CreateFactor([]Variable{v2, v3}, []float64{
+		0.1, 0.9,
+		0.8, 0.2,
+	})
+
+	f3 := v.Sum(&f1, &f2)
+
+	assert.Equal(t, []Variable{v1, v2, v3}, f3.Variables())
+
+	assert.Equal(t, f3.Get([]int{0, 0, 0}), f1.Get([]int{0, 0})+f2.Get([]int{0, 0}))
+
+	assert.Equal(t, f3.Get([]int{0, 0, 1}), f1.Get([]int{0, 0})+f2.Get([]int{0, 1}))
+	assert.Equal(t, f3.Get([]int{0, 1, 0}), f1.Get([]int{0, 1})+f2.Get([]int{1, 0}))
+	assert.Equal(t, f3.Get([]int{1, 0, 0}), f1.Get([]int{1, 0})+f2.Get([]int{0, 0}))
+
+	assert.Equal(t, f3.Get([]int{2, 1, 1}), f1.Get([]int{2, 1})+f2.Get([]int{1, 1}))
+}
+
 func TestVariablesPolicy(t *testing.T) {
 	v := NewVariables()
 

@@ -163,3 +163,16 @@ func (v factorVariables) Outcomes(index int, indices []int) {
 		curr--
 	}
 }
+
+func (v factorVariables) increment(indices []int) {
+	curr := len(v) - 1
+	for curr >= 0 {
+		indices[curr]++
+		if indices[curr] >= int(v[curr].outcomes) {
+			indices[curr] = 0
+			curr--
+		} else {
+			break
+		}
+	}
+}
