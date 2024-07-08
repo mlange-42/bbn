@@ -108,7 +108,7 @@ func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Fact
 	if observation < 0 || observation >= int(variable.outcomes) {
 		panic(fmt.Sprintf("observation %d out of range for variable with %d possible observation values", observation, variable.outcomes))
 	}
-	newVars := []Variable{}
+	newVars := make([]Variable, 0, len(f.variables)-1)
 	idx := -1
 
 	rows := 1
@@ -148,7 +148,7 @@ func (v *Variables) Restrict(f *Factor, variable Variable, observation int) Fact
 
 // SumOut a [Variable] from a [Factor].
 func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
-	newVars := []Variable{}
+	newVars := make([]Variable, 0, len(f.variables)-1)
 	idx := -1
 
 	rows := 1
@@ -187,7 +187,7 @@ func (v *Variables) SumOut(f *Factor, variable Variable) Factor {
 
 // Policy derives a policy from a [Factor].
 func (v *Variables) Policy(f *Factor, variable Variable) Factor {
-	newVars := []Variable{}
+	newVars := make([]Variable, 0, len(f.variables))
 	idx := -1
 
 	for i := range f.variables {

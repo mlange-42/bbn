@@ -161,7 +161,7 @@ func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, singleDecis
 	// TODO: check elimination order of hidden variables
 	hiddenList := make([]variableDegree, len(hidden))
 	i := 0
-	newVars := []Variable{}
+	newVars := make([]Variable, 0, len(ve.factors))
 	for _, v := range hidden {
 		for _, f := range ve.factors {
 			if !slices.ContainsFunc(f.variables, func(v2 Variable) bool { return v2.id == v.id }) {
@@ -364,7 +364,7 @@ func (ve *VE) findDecisionFactors(decision Variable, result []*Factor) []*Factor
 }
 
 func (ve *VE) restrictEvidence(evidence Evidence) {
-	indices := []int{}
+	indices := make([]int, 0, len(ve.factors))
 	for k, v := range ve.factors {
 		if slices.Contains(v.variables, evidence.Variable) {
 			indices = append(indices, k)
@@ -382,8 +382,8 @@ func (ve *VE) restrictEvidence(evidence Evidence) {
 }
 
 func (ve *VE) removeHidden(variable Variable) {
-	indices := []int{}
-	factors := []*Factor{}
+	indices := make([]int, 0, len(ve.factors))
+	factors := make([]*Factor, 0, len(ve.factors))
 	//utilityFactors := []*Factor{}
 
 	for k, f := range ve.factors {
@@ -424,7 +424,7 @@ func (ve *VE) removeHidden(variable Variable) {
 }
 
 func (ve *VE) multiplyAll() *Factor {
-	factors := []*Factor{}
+	factors := make([]*Factor, 0, len(ve.factors))
 	//utilityFactors := []*Factor{}
 	for _, f := range ve.factors {
 		/*hasUtility := false
