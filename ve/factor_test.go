@@ -71,3 +71,71 @@ func TestFactorOutcomes(t *testing.T) {
 	f.Outcomes(5, result)
 	assert.Equal(t, []int{2, 1}, result)
 }
+
+func BenchmarkFactorIndex(b *testing.B) {
+	b.StopTimer()
+
+	vars := NewVariables()
+
+	v1 := vars.AddVariable(0, ChanceNode, 2)
+	v2 := vars.AddVariable(1, ChanceNode, 2)
+	v3 := vars.AddVariable(2, ChanceNode, 2)
+
+	f1 := vars.CreateFactor([]Variable{v1, v2, v3}, make([]float64, 8))
+
+	var v int
+	indices := []int{1, 0, 1}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		v = f1.Index(indices)
+	}
+	b.StopTimer()
+
+	vv := v + 1
+	_ = vv
+}
+
+func BenchmarkFactorIndexWithNoData(b *testing.B) {
+	b.StopTimer()
+
+	vars := NewVariables()
+
+	v1 := vars.AddVariable(0, ChanceNode, 2)
+	v2 := vars.AddVariable(1, ChanceNode, 2)
+	v3 := vars.AddVariable(2, ChanceNode, 2)
+
+	f1 := vars.CreateFactor([]Variable{v1, v2, v3}, make([]float64, 8))
+
+	var v int
+	indices := []int{1, 0, 1}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		v, _ = f1.IndexWithNoData(indices)
+	}
+	b.StopTimer()
+
+	vv := v + 1
+	_ = vv
+}
+
+func BenchmarkFactorOutcome(b *testing.B) {
+	b.StopTimer()
+
+	vars := NewVariables()
+
+	v1 := vars.AddVariable(0, ChanceNode, 2)
+	v2 := vars.AddVariable(1, ChanceNode, 2)
+	v3 := vars.AddVariable(2, ChanceNode, 2)
+
+	f1 := vars.CreateFactor([]Variable{v1, v2, v3}, make([]float64, 8))
+
+	indices := []int{0, 0, 0}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		f1.Outcomes(7, indices)
+	}
+	b.StopTimer()
+
+	indices[0] = 1
+	_ = indices
+}

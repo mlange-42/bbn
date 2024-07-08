@@ -6,6 +6,10 @@
 
 * Simplifies return types of `bbn.FromFile` function (#88)
 
+### Performance
+
+* Speed up factor operations by up to factor 2, through faster factor indexing (#90)
+
 ### Other
 
 * Removes unused type `ConflictingEvidenceError` (#87)
