@@ -61,7 +61,7 @@ func inferCommand() *cobra.Command {
 }
 
 func runInferenceCommand(path string, evidence []string) ([]bbn.Variable, map[string]string, map[string][]float64, error) {
-	net, nodes, err := bbn.FromFile(path)
+	net, err := bbn.FromFile(path)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -71,6 +71,7 @@ func runInferenceCommand(path string, evidence []string) ([]bbn.Variable, map[st
 		return nil, nil, nil, err
 	}
 
+	nodes := net.Variables()
 	tuiNodes := make([]tui.Node, len(nodes))
 	for i, n := range nodes {
 		tuiNodes[i] = tui.NewNode(n)

@@ -2,6 +2,10 @@
 
 ## [[unpublished]](https://github.com/mlange-42/bbn/compare/v0.6.0...main)
 
+### Breaking changes
+
+* Simplifies return types of `bbn.FromFile` function (#88)
+
 ### Other
 
 * Removes unused type `ConflictingEvidenceError` (#87)
