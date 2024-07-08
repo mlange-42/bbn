@@ -290,7 +290,7 @@ func TestVariablesPolicy(t *testing.T) {
 	}, p.Data())
 }
 
-func TestRearrange(t *testing.T) {
+func TestVariablesRearrange(t *testing.T) {
 	v := NewVariables()
 
 	_ = v.AddVariable(0, ChanceNode, 3)
