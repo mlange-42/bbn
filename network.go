@@ -199,6 +199,8 @@ func (n *Network) TotalUtilityIndex() int {
 }
 
 // SolvePolicies solves and inserts policies for decisions, using variable elimination.
+//
+// Returns a map of policies for each decision variable, by variable name.
 func (n *Network) SolvePolicies(stepwise bool) (map[string]Factor, error) {
 	clear(n.policies)
 
@@ -276,6 +278,9 @@ func (n *Network) countDecisionSteps(stepwise bool) int {
 }
 
 // SolveQuery solves a query, using variable elimination.
+//
+// Returns a map of normalized marginal probabilities for each query variable, by variable name.
+// Further, it returns the resulting factor containing the query variables.
 func (n *Network) SolveQuery(evidence map[string]string, query []string, ignorePolicies bool) (map[string][]float64, *ve.Factor, error) {
 	f, err := n.solve(evidence, query, false, "", ignorePolicies)
 	if err != nil {
@@ -293,6 +298,14 @@ func (n *Network) SolveQuery(evidence map[string]string, query []string, ignoreP
 }
 
 // SolveUtility solves utility, using variable elimination.
+//
+// Argument utilityVar can be used to solve only the utility for a certain variable.
+// With utilityVar set to an empty sting (""), the total utility is solved.
+//
+// If there is a variable for total utility, defined by having utility variables as parents,
+// utility nodes are weighted according to the total utility variable's factor.
+//
+// Returns a factor for utility, containing the query variables.
 func (n *Network) SolveUtility(evidence map[string]string, query []string, utilityVar string, ignorePolicies bool) (*ve.Factor, error) {
 	return n.solve(evidence, query, true, utilityVar, ignorePolicies)
 }
@@ -347,7 +360,10 @@ func (n *Network) solve(evidence map[string]string, query []string, utility bool
 	}
 }
 
-// ToEvidence converts a string variable/value pair to probabilities.
+// ToEvidence converts a string variable/value pair to marginal probabilities for the evidence variable.
+//
+// As an example, say we have a variable with outcomes [yes, no]. Given evidence "yes" (index 0):
+// we get the following probabilities: [1, 0].
 func (n *Network) ToEvidence(variable string, value string) ([]float64, error) {
 	vv, ok := n.variableNames[variable]
 	if !ok {
