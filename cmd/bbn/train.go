@@ -32,11 +32,12 @@ func trainCommand() *cobra.Command {
 				return fmt.Errorf("argument for --delim must be a single rune; got '%s'", delim)
 			}
 
-			net, nodes, err := bbn.FromFile(netFile)
+			net, err := bbn.FromFile(netFile)
 			if err != nil {
 				return err
 			}
 
+			nodes := net.Variables()
 			net, err = tui.TrainNetwork(net, nodes, datafile, noData, delimRunes[0])
 			if err != nil {
 				return err

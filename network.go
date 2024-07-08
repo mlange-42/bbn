@@ -106,10 +106,10 @@ func New(name string, info string, variables []Variable, factors []Factor) (*Net
 }
 
 // FromFile reads a [Network] from an YAML or XML file.
-func FromFile(path string) (*Network, []Variable, error) {
+func FromFile(path string) (*Network, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	ext := filepath.Ext(path)
 
@@ -117,17 +117,17 @@ func FromFile(path string) (*Network, []Variable, error) {
 	case ".yml":
 		n, err := FromYAML(data)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
-		return n, n.variables, nil
+		return n, nil
 	case ".xml", ".bifxml":
 		n, err := FromBIFXML(data)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
-		return n, n.variables, nil
+		return n, nil
 	default:
-		return nil, nil, fmt.Errorf("unsupported file format '%s'", ext)
+		return nil, fmt.Errorf("unsupported file format '%s'", ext)
 	}
 }
 

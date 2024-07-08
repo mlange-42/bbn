@@ -49,12 +49,13 @@ func New(path string, evidence map[string]string, trainingFile, noData string, c
 }
 
 func (a *App) Run() error {
-	net, nodes, err := bbn.FromFile(a.file)
+	net, err := bbn.FromFile(a.file)
 	if err != nil {
 		return err
 	}
 
 	a.network = net
+	nodes := a.network.Variables()
 
 	if a.trainingFile != "" {
 		a.network, err = TrainNetwork(net, nodes, a.trainingFile, a.noData, a.csvDelimiter)
