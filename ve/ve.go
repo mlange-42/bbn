@@ -144,6 +144,7 @@ type variableDegree struct {
 func (ve *VE) eliminateHidden(evidence []Evidence, query []Variable, singleDecision bool) {
 	isDecisionParent := ve.getDecisionParents(singleDecision)
 
+	// TODO: try to optimize by avoiding this map.
 	hidden := map[int]Variable{}
 	for i, v := range ve.variables.variables {
 		if v.NodeType() != ChanceNode || ve.eliminated[i] || isDecisionParent[v.index] {

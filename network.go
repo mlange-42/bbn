@@ -443,7 +443,7 @@ func (n *Network) toVE(evidence map[string]string) (*ve.VE, map[string]*variable
 	}
 
 	// create factors from tables
-	factors := []ve.Factor{}
+	factors := make([]ve.Factor, 0, len(n.factors))
 	for _, f := range n.factors {
 		// skip factor for total utility
 		if f.For == totalUtilityName {
