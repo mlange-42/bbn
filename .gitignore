@@ -4,4 +4,5 @@
 *.png
 *.svg
 *.txt
+*.pprof
 /out/
