@@ -45,6 +45,8 @@ func (f *Factor) Row(indices []int) ([]float64, bool) {
 // rowIndex returns a row starting index for the
 // given outcome indices of given/parent variables.
 //
+// Returns False as second argument in case of missing data in the argument (i.e. -1).
+//
 // The last variable in the factor (i.e. f.For) is not considered,
 // and the returned index refers to the two-dimensional representation of the table.
 func (f *Factor) rowIndex(indices []int) (int, bool) {
