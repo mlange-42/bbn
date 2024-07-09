@@ -9,6 +9,7 @@
 ### Performance
 
 * Speed up factor operations by up to factor 2, through faster factor indexing (#90)
+* Optimize rearranging factors, with 10-20% speedup, also in methods using it (#92)
 
 ### Other
 
