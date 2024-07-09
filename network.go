@@ -44,6 +44,9 @@ func (f *Factor) Row(indices []int) ([]float64, bool) {
 
 // rowIndex returns a row starting index for the
 // given outcome indices of given/parent variables.
+//
+// The last variable in the factor (i.e. f.For) is not considered,
+// and the returned index refers to the two-dimensional representation of the table.
 func (f *Factor) rowIndex(indices []int) (int, bool) {
 	if len(indices) != len(f.outcomes) {
 		panic(fmt.Sprintf("factor with %d given variables can't use %d indices", len(f.outcomes), len(indices)))
@@ -53,22 +56,16 @@ func (f *Factor) rowIndex(indices []int) (int, bool) {
 		return 0, true
 	}
 
-	curr := len(f.outcomes) - 1
-	idx := indices[curr]
-	if idx < 0 {
-		return 0, false
-	}
+	idx := 0
 	stride := 1
-	curr--
-	for curr >= 0 {
-		currIdx := indices[curr]
-		if currIdx < 0 {
+	for i := len(indices) - 1; i >= 0; i-- {
+		if indices[i] < 0 {
 			return 0, false
 		}
-		stride *= int(f.outcomes[curr+1])
-		idx += currIdx * stride
-		curr--
+		idx += indices[i] * stride
+		stride *= int(f.outcomes[i])
 	}
+
 	return idx, true
 }
 

@@ -53,13 +53,13 @@ func (f *Factor) RowIndex(indices []int) (int, int) {
 		panic(fmt.Sprintf("factor with %d variables can't use %d row indices", len(f.variables), len(indices)))
 	}
 	idx := 0
-	stride := 1
-	curr := len(f.variables) - 2
-	for curr >= 0 {
-		stride *= int(f.variables[curr+1].outcomes)
-		idx += indices[curr] * stride
-		curr--
+	stride := int(f.variables[len(f.variables)-1].outcomes)
+
+	for i := len(f.variables) - 2; i >= 0; i-- {
+		idx += indices[i] * stride
+		stride *= int(f.variables[i].outcomes)
 	}
+
 	return idx, int(f.variables[len(f.variables)-1].outcomes)
 }
 

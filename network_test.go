@@ -18,12 +18,12 @@ func TestFactorRow(t *testing.T) {
 		For:   "c",
 		Given: []string{"a", "b"},
 		Table: []float64{
-			0, 1, 2,
-			3, 4, 5,
-			6, 7, 8,
-			9, 10, 11,
-			12, 13, 14,
-			15, 16, 17,
+			0, 1, 2, // 0 0
+			3, 4, 5, // 0 1
+			6, 7, 8, // 1 0
+			9, 10, 11, // 1 1
+			12, 13, 14, // 2 0
+			15, 16, 17, // 2 1
 		},
 	}
 
@@ -35,6 +35,10 @@ func TestFactorRow(t *testing.T) {
 	s, ok := variable.Factor.rowIndex([]int{0, 0})
 	assert.True(t, ok)
 	assert.Equal(t, 0, s)
+
+	s, ok = variable.Factor.rowIndex([]int{1, 1})
+	assert.True(t, ok)
+	assert.Equal(t, 3, s)
 
 	s, ok = variable.Factor.rowIndex([]int{2, 0})
 	assert.True(t, ok)
