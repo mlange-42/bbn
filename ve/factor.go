@@ -52,7 +52,6 @@ func (f *Factor) RowIndex(indices []int) (int, int) {
 	if len(indices) != len(f.variables)-1 {
 		panic(fmt.Sprintf("factor with %d variables can't use %d row indices", len(f.variables), len(indices)))
 	}
-	cols := int(f.variables[len(f.variables)-1].outcomes)
 	idx := 0
 	stride := 1
 	curr := len(f.variables) - 2
@@ -61,7 +60,7 @@ func (f *Factor) RowIndex(indices []int) (int, int) {
 		idx += indices[curr] * stride
 		curr--
 	}
-	return idx, cols
+	return idx, int(f.variables[len(f.variables)-1].outcomes)
 }
 
 // Get the factor's value for the given variable outcome indices.
@@ -92,21 +91,14 @@ func (v factorVariables) Index(indices []int) int {
 	if len(indices) != len(v) {
 		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(v), len(indices)))
 	}
-	if len(v) == 0 {
-		return 0
+	index := 0
+	multiplier := 1
+	for i := len(indices) - 1; i >= 0; i-- {
+		index += indices[i] * multiplier
+		multiplier *= int(v[i].outcomes)
 	}
 
-	curr := len(v) - 1
-	idx := indices[curr]
-	stride := 1
-
-	curr--
-	for curr >= 0 {
-		stride *= int(v[curr+1].outcomes)
-		idx += indices[curr] * stride
-		curr--
-	}
-	return idx
+	return index
 }
 
 // Index creates a flat [Factor] index from a multi-dimensional index.
@@ -120,25 +112,18 @@ func (v factorVariables) IndexWithNoData(indices []int) (int, bool) {
 		return 0, true
 	}
 
-	curr := len(v) - 1
-	idx := indices[curr]
-	if idx < 0 {
-		return 0, false
-	}
+	index := 0
+	multiplier := 1
 
-	stride := 1
-
-	curr--
-	for curr >= 0 {
-		currIdx := indices[curr]
-		if currIdx < 0 {
+	for i := len(indices) - 1; i >= 0; i-- {
+		if indices[i] == -1 {
 			return 0, false
 		}
-		stride *= int(v[curr+1].outcomes)
-		idx += currIdx * stride
-		curr--
+		index += indices[i] * multiplier
+		multiplier *= int(v[i].outcomes)
 	}
-	return idx, true
+
+	return index, true
 }
 
 // Index creates multi-dimensional index from a flat [Factor] index.
@@ -150,29 +135,26 @@ func (v factorVariables) Outcomes(index int, indices []int) {
 		return
 	}
 
-	curr := len(v) - 1
-
-	n := int(v[curr].outcomes)
-	indices[curr] = index % n
-	index /= n
-	curr--
-	for curr >= 0 {
-		n := int(v[curr].outcomes)
-		indices[curr] = index % n
-		index /= n
-		curr--
+	for i := len(indices) - 1; i >= 0; i-- {
+		indices[i] = index % int(v[i].outcomes)
+		index /= int(v[i].outcomes)
 	}
 }
 
-func (v factorVariables) increment(indices []int) {
-	curr := len(v) - 1
-	for curr >= 0 {
-		indices[curr]++
-		if indices[curr] >= int(v[curr].outcomes) {
-			indices[curr] = 0
-			curr--
-		} else {
-			break
-		}
+// increment increments the multi-dimensional index by one.
+// Returns false if the index overflows.
+func (v factorVariables) increment(indices []int) bool {
+	if len(indices) != len(v) {
+		panic(fmt.Sprintf("factor with %d variables can't use %d indices", len(v), len(indices)))
 	}
+
+	for i := len(indices) - 1; i >= 0; i-- {
+		indices[i]++
+		if indices[i] < int(v[i].outcomes) {
+			return true
+		}
+		indices[i] = 0
+	}
+
+	return false
 }
