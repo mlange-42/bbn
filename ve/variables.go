@@ -221,24 +221,21 @@ func (v *Variables) Rearrange(f *Factor, variables []Variable) Factor {
 	if len(f.variables) != len(variables) {
 		panic("number of old and new variables doesn't match")
 	}
-	varsEqual := true
-	for i, vv := range variables {
-		if vv != f.variables[i] {
-			varsEqual = false
-			break
-		}
-	}
-	if varsEqual {
-		return v.CreateFactor(f.variables, append([]float64{}, f.data...))
-	}
 
+	varsEqual := true
 	indices := make([]int, len(variables))
 	for i, vv := range variables {
+		if vv.id != f.variables[i].id {
+			varsEqual = false
+		}
 		idx := slices.Index(f.variables, vv)
 		if idx < 0 {
 			panic(fmt.Sprintf("variable %d not in original factor", vv.id))
 		}
 		indices[i] = idx
+	}
+	if varsEqual {
+		return v.CreateFactor(f.variables, append([]float64{}, f.data...))
 	}
 
 	fNew := v.CreateFactor(variables, nil)
