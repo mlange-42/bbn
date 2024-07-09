@@ -41,6 +41,11 @@ variables:
   - [100] # Sunny, Leave
   - [ 70] # Rainy, Take
   - [  0] # Rainy, Leave
+
+- variable: Logic
+  outcomes: [yes, no]
+  given: [Weather]
+  logic: outcome-is 1 2
 `
 	n, err := FromYAML([]byte(yml))
 	assert.Nil(t, err)

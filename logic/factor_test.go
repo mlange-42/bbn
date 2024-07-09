@@ -2,9 +2,23 @@ package logic_test
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/mlange-42/bbn/logic"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestFactorGet(t *testing.T) {
+	f, ok := logic.Get("and")
+	assert.True(t, ok)
+
+	table, err := f.Table(2)
+	assert.Nil(t, err)
+	assert.Equal(t, 8, len(table))
+
+	_, ok = logic.Get("foobar")
+	assert.False(t, ok)
+}
 
 func Example() {
 	and := logic.And()

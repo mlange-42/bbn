@@ -16,6 +16,7 @@
 * Removes unused type `ConflictingEvidenceError` (#87)
 * Adds profiling for variable elimination (#89)
 * Adds benchmarks for the most crucial operations (#90, #92)
+* Adds more unit tests (#93)
 
 ## [[v0.6.0]](https://github.com/mlange-42/bbn/compare/v0.5.0...v0.6.0)
 
