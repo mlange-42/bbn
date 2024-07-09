@@ -35,6 +35,22 @@ func TestVariablesNormalize(t *testing.T) {
 	assert.Equal(t, []float64{0.5, 0.25, 0.25}, f2.Data())
 }
 
+func TestVariablesInvert(t *testing.T) {
+	v := NewVariables()
+	f := Factor{
+		variables: []Variable{
+			{id: 0, outcomes: 3},
+		},
+		data: []float64{
+			2, 0.25, 0,
+		},
+	}
+
+	f2 := v.Invert(&f)
+
+	assert.Equal(t, []float64{0.5, 4, math.Inf(1)}, f2.Data())
+}
+
 func TestVariablesNormalizeFor(t *testing.T) {
 	v := NewVariables()
 	f := Factor{

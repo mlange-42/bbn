@@ -48,6 +48,27 @@ func TestFactorRowIndex(t *testing.T) {
 	assert.Equal(t, 4, ln)
 }
 
+func TestFactorIndexWithNoData(t *testing.T) {
+	f := Factor{
+		variables: []Variable{
+			{id: 0, outcomes: 3},
+			{id: 1, outcomes: 2},
+		},
+		data: make([]float64, 6),
+	}
+
+	idx, ok := f.IndexWithNoData([]int{0, 0})
+	assert.True(t, ok)
+	assert.Equal(t, 0, idx)
+
+	idx, ok = f.IndexWithNoData([]int{2, 1})
+	assert.True(t, ok)
+	assert.Equal(t, 5, idx)
+
+	_, ok = f.IndexWithNoData([]int{2, -1})
+	assert.False(t, ok)
+}
+
 func TestFactorOutcomes(t *testing.T) {
 	f := Factor{
 		variables: []Variable{
